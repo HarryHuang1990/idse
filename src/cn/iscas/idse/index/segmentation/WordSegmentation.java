@@ -3,6 +3,7 @@ package cn.iscas.idse.index.segmentation;
 import java.io.UnsupportedEncodingException;
 import java.util.StringTokenizer;
 
+import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.PdfFileExtractor;
 import ICTCLAS.I3S.AC.ICTCLAS50;
@@ -17,7 +18,7 @@ import ICTCLAS.I3S.AC.ICTCLAS50;
  * 	<ol>
  * 		<li>invoke method .getInstance() to achieve the instance.</li>
  * 		<li>invoke method .initialize() to initialize the word-segmentation object.</li>
- * 		<li>invoke method .segmentString(String sInput) to execute segmentation.</li>
+ * 		<li>invoke method .segmentString(String text) to execute segmentation.</li>
  * 		<li>invoke method .exitICTCLAS() to release resource.</li>
  * 	</ol>
  * </p>
@@ -34,6 +35,15 @@ public class WordSegmentation {
 		if(instance == null)
 			instance = new WordSegmentation();
 		return instance;
+	}
+	
+	private WordSegmentation(){};
+	
+	/**
+	 * destroy the instance and release its memory.
+	 */
+	public void destoryInstance(){
+		instance = null;
 	}
 	
 	/**
@@ -60,29 +70,44 @@ public class WordSegmentation {
 	
 	/**
 	 * segment the specific input String with the APIs provided by ICTCLAS
-	 * @param sInput
+	 * @param docID
+	 * @param text
 	 */
-	public void segmentString(String sInput)
+	public void segmentString(int docID, String text)
 	{
 		try {
 			//achieve result of segmentation
-			byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(sInput.getBytes("GB2312"), 0, 0);//分词处理
+			byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(text.getBytes("GB2312"), 0, 0);//分词处理
 			String nativeStr = new String(nativeBytes, 0, nativeBytes.length, "GB2312");
 			//remove punctuation
 			nativeStr = PunctuationFilter.removePunctuation(nativeStr);
-			//split the result-string and localize the term in sInput.
+			//split the result-string and localize the term in text.
 			int offset = -1;
-			String currenctTerm = "";
+			String currentTerm = "";
 			StringTokenizer tokenizer = new StringTokenizer(nativeStr);
 			while(tokenizer.hasMoreTokens()){
-				
-				currenctTerm = tokenizer.nextToken();
-				offset = sInput.indexOf(currenctTerm, ++offset);
-				if(offset > 100)break;
-				
-				System.out.println(currenctTerm.toLowerCase() + "\t" + offset);
+				currentTerm = tokenizer.nextToken().trim();
+				//handle Camel Case style
+				String[] words = CamelCase.splitCamelCase(currentTerm);
+				if(words != null){
+					for(String word : words){
+						//localize and get the offset.
+						offset = text.indexOf(word, ++offset);
+						//lowercase the word
+						word = word.toLowerCase();
+						// handle Lemmatize
+						word = ((TermLemmatizer)InstanceManager.getInstance(InstanceManager.CLASS_TERMLEMMATIZER)).adornText(word);
+						if(word != null){
+							// handle stop word
+							if(!((StopWordFilter)InstanceManager.getInstance(InstanceManager.CLASS_STOPWORDFILTER)).isStopWord(word)){
+								//add into index
+								//TODO put the term info into the index.
+								System.out.println(word + "\t" + offset);
+							}
+						}
+					}
+				}
 			}
-//			System.out.println("未导入用户词典的分词结果： " + nativeStr);//打印结果
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -97,17 +122,17 @@ public class WordSegmentation {
 	
 	
 	public static void main(String[] args) {
-		PdfFileExtractor doc = new PdfFileExtractor();
-		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
-		String sInput = doc.getContent();
+//		PdfFileExtractor doc = new PdfFileExtractor();
+//		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
+//		String text = doc.getContent();
 		
-//		String sInput = "public File_Extractor get_File_Extractor(String fileSuffix){";
+		String text = "public File_Extractor gets_Files_Extracting(String fileSuffix){";
 		
 		WordSegmentation ws = WordSegmentation.getInstance();
 		ws.initialize();
 		//字符串分词   
 		for(int i=1; i<2; i++){
-			ws.segmentString(sInput);
+			ws.segmentString(1, text);
 			System.out.println(i+"/"+1000);
 		}
 		ws.exitICTCLAS();

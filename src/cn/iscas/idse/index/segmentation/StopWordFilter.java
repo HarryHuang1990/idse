@@ -17,7 +17,7 @@ import cn.iscas.idse.config.SystemConfiguration;
  */
 public class StopWordFilter {
 	
-	public static StopWordFilter instance = null;
+	private static StopWordFilter instance = null;
 	private Set<String>stopWordEnglish = new HashSet<String>();
 	private Set<String>stopWordChinese = new HashSet<String>();
 	
@@ -28,7 +28,7 @@ public class StopWordFilter {
 		return instance;
 	}
 	
-	StopWordFilter(){
+	private StopWordFilter(){
 		try {
 			String stopWord;
 			/*
@@ -55,6 +55,13 @@ public class StopWordFilter {
 	}
 	
 	/**
+	 * destroy the instance and release its memory.
+	 */
+	public void destoryInstance(){
+		instance = null;
+	}
+	
+	/**
 	 * the function runs the procedure of stop-word-remove
 	 * @param termSet
 	 */
@@ -74,7 +81,7 @@ public class StopWordFilter {
 	 * @param term
 	 * @return if term is a stop word, then return true; else return false.
 	 */
-	private boolean isStopWord(String term){
+	public boolean isStopWord(String term){
 		
 		if(this.stopWordChinese.contains(term) || this.stopWordEnglish.contains(term))
 			return true;
