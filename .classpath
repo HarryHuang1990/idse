@@ -37,5 +37,9 @@
 	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/relaxngDatatype.jar"/>
 	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/xsdlib.jar"/>
+	<classpathentry kind="lib" path="lib/berkeleydb-lib/je-5.0.84.jar"/>
+	<classpathentry kind="lib" path="lib/berkeleydb-lib/JEJConsole.jar"/>
+	<classpathentry kind="lib" path="lib/berkeleydb-lib/RepJEJConsole.jar"/>
+	<classpathentry kind="lib" path="lib/berkeleydb-lib/je-android-5.0.84.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
