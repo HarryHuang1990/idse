@@ -9,6 +9,11 @@ public class TermOffset {
 	private String term = "";
 	private int offset = 0;
 	
+	public TermOffset(String term, int offset){
+		this.term = term;
+		this.offset = offset;
+	}
+	
 	public String getTerm() {
 		return term;
 	}

@@ -1,6 +1,7 @@
 package cn.iscas.idse.index.segmentation;
 
 import java.io.UnsupportedEncodingException;
+import java.util.StringTokenizer;
 
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.PdfFileExtractor;
@@ -8,8 +9,19 @@ import ICTCLAS.I3S.AC.ICTCLAS50;
 
 
 /**
+ * <p>
  * segment word (Chinese and English) with ICTCLAS which is a powerful open source suite for word segmentation and POS.
- * @author Administrator
+ * </p>
+ * <p>
+ * usage:
+ * 	<ol>
+ * 		<li>invoke method .getInstance() to achieve the instance.</li>
+ * 		<li>invoke method .initialize() to initialize the word-segmentation object.</li>
+ * 		<li>invoke method .segmentString(String sInput) to execute segmentation.</li>
+ * 		<li>invoke method .exitICTCLAS() to release resource.</li>
+ * 	</ol>
+ * </p>
+ * @author HarryHuang
  *
  */
 public class WordSegmentation {
@@ -53,11 +65,25 @@ public class WordSegmentation {
 	public void segmentString(String sInput)
 	{
 		try {
+			//achieve result of segmentation
 			byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(sInput.getBytes("GB2312"), 0, 0);//分词处理
 			String nativeStr = new String(nativeBytes, 0, nativeBytes.length, "GB2312");
-			System.out.println("未导入用户词典的分词结果： " + nativeStr);//打印结果
+			//remove punctuation
+			nativeStr = PunctuationFilter.removePunctuation(nativeStr);
+			//split the result-string and localize the term in sInput.
+			int offset = -1;
+			String currenctTerm = "";
+			StringTokenizer tokenizer = new StringTokenizer(nativeStr);
+			while(tokenizer.hasMoreTokens()){
+				
+				currenctTerm = tokenizer.nextToken();
+				offset = sInput.indexOf(currenctTerm, ++offset);
+				if(offset > 100)break;
+				
+				System.out.println(currenctTerm.toLowerCase() + "\t" + offset);
+			}
+//			System.out.println("未导入用户词典的分词结果： " + nativeStr);//打印结果
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -69,20 +95,18 @@ public class WordSegmentation {
 		ICTCLAS50.ICTCLAS_Exit();
 	}
 	
-	/**
-	 * @param args
-	 */
+	
 	public static void main(String[] args) {
-//		PdfFileExtractor doc = new PdfFileExtractor();
-//		doc.setFilePath("F:\\lucene-test\\信息检索\\高效个性化PageRank算法综述.pdf");
-//		String sInput = doc.getContent();
+		PdfFileExtractor doc = new PdfFileExtractor();
+		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
+		String sInput = doc.getContent();
 		
-		String sInput = "public FileExtractor getFileExtractor(String fileSuffix){";
+//		String sInput = "public File_Extractor get_File_Extractor(String fileSuffix){";
 		
 		WordSegmentation ws = WordSegmentation.getInstance();
 		ws.initialize();
 		//字符串分词   
-		for(int i=1; i<1000; i++){
+		for(int i=1; i<2; i++){
 			ws.segmentString(sInput);
 			System.out.println(i+"/"+1000);
 		}

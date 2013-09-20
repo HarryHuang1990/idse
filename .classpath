@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/poi-excelant-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10-beta1-20130628.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

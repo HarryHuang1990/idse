@@ -33,7 +33,7 @@ public class PdfFileExtractor implements FileExtractor {
 	
 	public static void main(String[]args) throws IOException{
 		PdfFileExtractor doc = new PdfFileExtractor();
-		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient sentiment correlation for large-scale demographics.pdf");
+		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
 		System.out.println(doc.getContent());
 	}
 
