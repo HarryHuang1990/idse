@@ -18,5 +18,24 @@
 	<classpathentry kind="lib" path="lib/poi-excelant-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/morphadorner.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/gate.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/jasper-compiler-jdt.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/nekohtml-0.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/ontotext.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/PDFBox-0.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/serializer.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/gatelib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/icu4j_3_6_1.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/icu4j-charsets_3_6_1.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/isorelax-jaxp-bridge-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/isorelax.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/jaws-bin-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/msv.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/relaxngDatatype.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/morphadorner-lib/lib/xsdlib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
