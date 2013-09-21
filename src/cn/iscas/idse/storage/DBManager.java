@@ -32,6 +32,9 @@ public class DBManager {
 	
 	public DBManager() {}
 	
+	/**
+	 * open the environment and the stores(this is, databases)
+	 */
 	public void setup() {
 		boolean readOnly = true;
 		File environmentHome = new File(SystemConfiguration.rootPath + "/database");
@@ -68,15 +71,24 @@ public class DBManager {
 	public Environment getDbEnvironment() {
 		return dbEnvironment;
 	}
-
+	/**
+	 *  Getter methods: get FileLoacation Store
+	 * @return
+	 */
 	public EntityStore getFileLoacationStore() {
 		return fileLoacationStore;
 	}
-
+	/**
+	 *  Getter methods: get Dictionary Store
+	 * @return
+	 */
 	public EntityStore getDictionaryStore() {
 		return dictionaryStore;
 	}
-
+	/**
+	 *  Getter methods: get Index Store
+	 * @return
+	 */
 	public EntityStore getIndexStore() {
 		return indexStore;
 	}
@@ -86,6 +98,7 @@ public class DBManager {
 	 *  stores must be closed first, then environment.
 	 */
 	public void close() {
+		// close the stores.
 		if (this.fileLoacationStore != null) {
 			try {
 				this.fileLoacationStore.close();
@@ -113,7 +126,7 @@ public class DBManager {
 				System.exit(-1);
 			}
 		}
-		
+		// close the environment.
 		if (this.dbEnvironment != null) {
 			try {
 				this.dbEnvironment.close();
