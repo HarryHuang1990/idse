@@ -1,7 +1,13 @@
 package cn.iscas.idse.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import cn.iscas.idse.storage.DBManager;
+import cn.iscas.idse.storage.entity.TargetDirectory;
+import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
 
 /**
  * 管理系统的配置信息管理：
@@ -16,6 +22,10 @@ public class SystemConfiguration {
 	 */
 	public static Map<String, String> formatPluginMap = new HashMap<String, String>();
 	/**
+	 * 待索引的目标目录列表
+	 */
+	public static List<String> targetDirectories = new ArrayList<String>();
+	/**
 	 * 应用程序根目录路径。路径由反斜杠/间隔，路径末尾以反斜杠/结束
 	 */
 	public static String rootPath = "";
@@ -25,6 +35,8 @@ public class SystemConfiguration {
 		String formatSuffixSplits[] = null;
 		String formatClassValue = "";
 		String formatClassSplits[] = null;
+		String targetDirectoryValues = "";
+		String targetDirectorySplits[] = null;
 		/*
 		 * 加载文件类型后缀和插件（类名）
 		 */
@@ -34,6 +46,15 @@ public class SystemConfiguration {
 		formatClassSplits = formatClassValue.split(",");
 		for(int i=0; i<formatSuffixSplits.length; i++)
 			formatPluginMap.put(formatSuffixSplits[i], formatClassSplits[i]);
+		
+		/*
+		 * 加载待索引的目标目录列表 
+		 */
+		targetDirectoryValues = PropertiesManager.getApp("target.directory");
+		targetDirectorySplits = targetDirectoryValues.split(",");
+		for(int i=0; i<targetDirectorySplits.length; i++)
+			targetDirectories.add(targetDirectorySplits[i]);
+		
 		/*
 		 *获取应用程序根目录地址 
 		 */
@@ -42,5 +63,19 @@ public class SystemConfiguration {
 			rootPath = rootPath.replace( "\\", "/" );
 	    }
 		rootPath += "/";
+		
+		/*
+		 * 判断索引目标是否改变
+		 */
+		DBManager database = new DBManager();
+		TargetDirectoryAccessor accessor = new TargetDirectoryAccessor(database.getIndexStore());
+		for(String targetPath : targetDirectories){
+			if(!accessor.getSecondaryTargetPath().contains(targetPath)){
+				//put the target path into the Berkeley DB
+				TargetDirectory targetAccessor = new TargetDirectory(targetPath);
+				accessor.getPrimaryTargetID().putNoReturn(targetAccessor);
+			}
+		}
+		database.close();
 	}
 }

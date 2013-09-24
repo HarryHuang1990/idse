@@ -26,16 +26,16 @@ import cn.iscas.idse.config.SystemConfiguration;
 public class DBManager {
 	
 	private Environment dbEnvironment;
-	private EntityStore fileLoacationStore;
-	private EntityStore dictionaryStore;
 	private EntityStore indexStore;
 	
-	public DBManager() {}
+	public DBManager() {
+		setup();
+	}
 	
 	/**
-	 * open the environment and the stores(this is, databases)
+	 * open the environment and the stores(that is, databases)
 	 */
-	public void setup() {
+	private void setup() {
 		boolean readOnly = true;
 		File environmentHome = new File(SystemConfiguration.rootPath + "/database");
 		try{
@@ -51,11 +51,12 @@ public class DBManager {
 			// able to create the environment if it does not exist.
 			dbEnvConfig.setAllowCreate(readOnly);
 			storeConfig.setAllowCreate(readOnly);
+			
+			dbEnvConfig.setTransactional(readOnly);
+			storeConfig.setTransactional(readOnly);
 			// Instantiate the Environment and stores. This opens them and also possibly
 			// creates them.
 			this.dbEnvironment = new Environment(environmentHome, dbEnvConfig);
-			this.fileLoacationStore = new EntityStore(this.dbEnvironment, "FileLoacation", storeConfig);
-			this.dictionaryStore = new EntityStore(this.dbEnvironment, "Dictionary", storeConfig);
 			this.indexStore = new EntityStore(this.dbEnvironment, "Index", storeConfig);
 			
 		} catch(DatabaseException dbe) {
@@ -72,20 +73,6 @@ public class DBManager {
 		return dbEnvironment;
 	}
 	/**
-	 *  Getter methods: get FileLoacation Store
-	 * @return
-	 */
-	public EntityStore getFileLoacationStore() {
-		return fileLoacationStore;
-	}
-	/**
-	 *  Getter methods: get Dictionary Store
-	 * @return
-	 */
-	public EntityStore getDictionaryStore() {
-		return dictionaryStore;
-	}
-	/**
 	 *  Getter methods: get Index Store
 	 * @return
 	 */
@@ -99,24 +86,6 @@ public class DBManager {
 	 */
 	public void close() {
 		// close the stores.
-		if (this.fileLoacationStore != null) {
-			try {
-				this.fileLoacationStore.close();
-			} catch(DatabaseException dbe) {
-				System.err.println("Error closing store fileLoacationStore: " +
-						dbe.toString());
-				System.exit(-1);
-			}
-		}
-		if (this.dictionaryStore != null) {
-			try {
-				this.dictionaryStore.close();
-			} catch(DatabaseException dbe) {
-				System.err.println("Error closing store dictionaryStore: " +
-						dbe.toString());
-				System.exit(-1);
-			}
-		}
 		if (this.indexStore != null) {
 			try {
 				this.indexStore.close();

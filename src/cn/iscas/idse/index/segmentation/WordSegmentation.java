@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 
 import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.format.FileExtractor;
-import cn.iscas.idse.format.PdfFileExtractor;
+import cn.iscas.idse.format.implement.PdfFileExtractor;
 import ICTCLAS.I3S.AC.ICTCLAS50;
 
 
