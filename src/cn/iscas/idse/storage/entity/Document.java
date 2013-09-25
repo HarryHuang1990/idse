@@ -37,6 +37,11 @@ public class Document {
 		this.directoryID = directoryID;
 		this.documentName = documentName;
 	}
+	
+	public Document(int directoryID, String documentName){
+		this.directoryID = directoryID;
+		this.documentName = documentName;
+	}
 
 	public int getDocID() {
 		return docID;

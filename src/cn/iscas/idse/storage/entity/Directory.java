@@ -28,6 +28,7 @@ public class Directory {
 	@SecondaryKey(relate=MANY_TO_ONE, relatedEntity=TargetDirectory.class, onRelatedEntityDelete=CASCADE)
 	private short targetID;
 	
+	@SecondaryKey(relate=ONE_TO_ONE)
 	private String directoryPath;
 	
 	public Directory(int directoryID, short targetID, String directoryPath){
@@ -36,7 +37,12 @@ public class Directory {
 		this.directoryPath = directoryPath;
 	}
 	
-	public Directory(){}
+	public Directory(short targetID, String directoryPath){
+		this.targetID = targetID;
+		this.directoryPath = directoryPath;
+	}
+	
+	private Directory(){}
 
 	public int getDirectoryID() {
 		return directoryID;
@@ -61,4 +67,6 @@ public class Directory {
 	public void setDirectoryPath(String directoryPath) {
 		this.directoryPath = directoryPath;
 	}
+	
+	
 }

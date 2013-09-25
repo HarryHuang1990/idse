@@ -29,6 +29,7 @@ public class DirectoryAccessor {
 	 * Secondary key accessor
 	 */
 	private SecondaryIndex<Short, Integer, Directory> SecondaryTargetID;
+	private SecondaryIndex<String, Integer, Directory> SecondaryDirectoryPath;
 	
 	public DirectoryAccessor(EntityStore store){
 		/*
@@ -39,6 +40,7 @@ public class DirectoryAccessor {
 		 * create a secondary accessor.
 		 */
 		this.SecondaryTargetID = store.getSecondaryIndex(this.primaryDirectoryID, Short.class, "targetID");
+		this.SecondaryDirectoryPath = store.getSecondaryIndex(this.primaryDirectoryID, String.class, "directoryPath");
 	}
 
 	public PrimaryIndex<Integer, Directory> getPrimaryDirectoryID() {
@@ -48,4 +50,9 @@ public class DirectoryAccessor {
 	public SecondaryIndex<Short, Integer, Directory> getSecondaryTargetID() {
 		return SecondaryTargetID;
 	}
+
+	public SecondaryIndex<String, Integer, Directory> getSecondaryDirectoryPath() {
+		return SecondaryDirectoryPath;
+	}
+	
 }

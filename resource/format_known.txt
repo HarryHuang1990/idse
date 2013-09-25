@@ -1,0 +1,15 @@
+format.category=video,audio,image,executable,text,code,compress
+
+format.category.video=.wmv,.avi,.asf,.rm,.rmvb,.mp4,.m2ts,.mpg,.mpeg,.ts,.pva,.tp,.vob,.3gp,.m4v,.tps,.mpeg4,.m2p,.mp2v,.mts,.flv,.f4v,.swf,.mkv,.wma,.mov,.webm,.divx,.mod,.ass,.ssa,.srt,.bsed
+
+format.category.audio=.mp3
+
+format.category.image=.jpg,.jpeg,.tif,.tiff,.bmp,.gif,.png,.tga,.raw
+
+format.category.excutable=.exe,.msi,.jar
+
+format.category.text=.txt,.log,.ini,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf
+
+format.category.code=.h,.hpp,.hxx,.c,.cpp,.cxx,.cc,.m,.java,.cs,.pas,.inc,.html,.htm,.php,.phtml,.js,.jsp,.asp,.css,.xml,.sh,.bsh,.nsi,.nsh,.lua,.pl,.pm,.py,.rc,.as,.mx,.vb,.vbs,.f,.for,.f90,.f95,.f2k,.tex,.sql,.nfo,.mak
+
+format.category.compress=.7z,.zip,.rar
