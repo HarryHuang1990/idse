@@ -28,9 +28,6 @@ public class PostingTitle {
 	@SecondaryKey(relate=MANY_TO_ONE, relatedEntity=Document.class, onRelatedEntityDelete=CASCADE)
 	private int docID;
 	
-	@SecondaryKey(relate=MANY_TO_ONE, relatedEntity=Term.class, onRelatedEntityDelete=CASCADE)
-	private String term;
-	
 	/**
 	 * offsets of the term in the document docID.
 	 */
@@ -41,15 +38,24 @@ public class PostingTitle {
 	 */
 	private PostingTitle(){}
 	
-	public PostingTitle(int docID, String term){
+	public PostingTitle(int docID){
 		this.docID = docID;
-		this.term = term;
 	}
 	
-	public PostingTitle(int docID, String term, Set<Integer> offsets){
+	public PostingTitle(int docID, Set<Integer> offsets){
 		this.docID = docID;
-		this.term = term;
 		this.offsets = offsets;
+	}
+	
+	public PostingTitle(int postingID, int docID, Set<Integer> offsets){
+		this.postingID = postingID;
+		this.docID = docID;
+		this.offsets = offsets;
+	}
+	
+	public PostingTitle(int postingID, int docID){
+		this.postingID = postingID;
+		this.docID = docID;
 	}
 	
 	/**
@@ -76,19 +82,16 @@ public class PostingTitle {
 		this.docID = docID;
 	}
 
-	public String getTerm() {
-		return term;
-	}
-
-	public void setTerm(String term) {
-		this.term = term;
-	}
-
 	public Set<Integer> getOffsets() {
 		return offsets;
 	}
 
 	public void setOffsets(Set<Integer> offsets) {
 		this.offsets = offsets;
+	}
+	
+	@Override
+	public String toString(){
+		return "{" + postingID + ", " + docID + "," + offsets.toString() + "}";
 	}
 }

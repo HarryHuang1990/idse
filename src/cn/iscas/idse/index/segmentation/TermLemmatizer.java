@@ -97,7 +97,7 @@ public class TermLemmatizer
 
 	private String lemmaSeparator	= "|";
 	
-	private PartOfSpeechTagger partOfSpeechTagger = null;
+	private static PartOfSpeechTagger partOfSpeechTagger = null;
 	private Lexicon wordLexicon = null;
 	private PartOfSpeechTags partOfSpeechTags = null;
 	private WordTokenizer wordTokenizer = null;
@@ -122,7 +122,8 @@ public class TermLemmatizer
 
 	public static void main( String[] args )
 	{
-		String[] textToAdorns = {"Files","Extracting","Has", "Been", "successfully", "applied", "to", "various", "applications"};
+//		String[] textToAdorns = {"Files","Extracting","Has", "Been", "successfully", "applied", "to", "various", "applications"};
+		String[] textToAdorns = {"clustering"};
 		TermLemmatizer obj = TermLemmatizer.getInstance();
 		for(String textToAdorn : textToAdorns)
 			System.out.println(obj.adornText( textToAdorn ));
@@ -134,8 +135,9 @@ public class TermLemmatizer
 	private TermLemmatizer(){
 		
 		try {
-			//Get default part of speech tagger.
-			partOfSpeechTagger = new DefaultPartOfSpeechTagger();
+			//Get default part of speech tagger. // this step takes a very long time.
+			if(TermLemmatizer.partOfSpeechTagger == null)
+				TermLemmatizer.partOfSpeechTagger = new DefaultPartOfSpeechTagger();
 			
 			//	Get default word lexicon from
 			//	part of speech tagger.
@@ -187,86 +189,92 @@ public class TermLemmatizer
 	 *	<p>
 	 *	term is the text to adorn.  
 	 *	</p>
+	 *	
+	 *	@return if successful to adorn, return the adorned result;
+	 *	else return original one.
 	 */
 
-	public String adornText( String textToAdorn )
+	public synchronized String adornText( String textToAdorn )
 	{
-		String lemma = null;
-								//	Get text to adorn.  Report error
-								//	and quit if none.
+		String lemma = textToAdorn;
+		try{
+			//	Get text to adorn.  Report error
+			//	and quit if none.
 
-		if ( textToAdorn == null )
-		{
-			System.out.println( "No text to adorn." );
-			System.exit( 1 );
-		}
-								//	Split text into sentences
-								//	and words.  Here "sentences"
-								//	contains a list of sentences.
-								//	Each sentence is itself a list of words.
-
-		List<List<String>> sentences	=
-			sentenceSplitter.extractSentences(
-				textToAdorn , wordTokenizer );
-
-								//	Assign part of speech tags to
-								//	each word in each sentence.
-								//	Here "taggedSentences" contains
-								//	a list of List<AdornedWord> entries,
-								//	one for each sentence.
-
-		List<List<AdornedWord>> taggedSentences	=
-			partOfSpeechTagger.tagSentences( sentences );
-
-								//	Loop over sentences and
-								//	display adornments.
-
-		for ( int i = 0 ; i < sentences.size() ; i++ )
-		{
-								//	Get the next adorned sentence.
-								//	This contains a list of adorned
-								//	words.  Only the spellings
-								//	and part of speech tags are
-								//	guaranteed to be defined at
-								//	this point.
-
-			List<AdornedWord> sentence	= taggedSentences.get( i );
-			
-								//	Print out the spelling and part(s)
-								//	of speech for each word in the
-								//	sentence.  Punctuation is treated
-								//	as a word too.
-
-			for ( int j = 0 ; j < sentence.size() ; j++ )
+			if ( textToAdorn == null )
 			{
-				AdornedWord adornedWord	= sentence.get( j );
-
-								//	Get the standard spelling
-								//	given the original spelling
-								//	and part of speech.
-
-				setStandardSpelling
-				(
-					adornedWord ,
-					standardizer ,
-					partOfSpeechTags
-				);
-								//	Set the lemma.
-
-				setLemma
-				(
-					adornedWord ,
-					wordLexicon ,
-					lemmatizer ,
-					partOfSpeechTags ,
-					spellingTokenizer
-				);
-
-				//	obtain the adornment.
-				lemma = adornedWord.getLemmata();
+				System.out.println( "No text to adorn." );
+				System.exit( 1 );
 			}
+			//	Split text into sentences
+			//	and words.  Here "sentences"
+			//	contains a list of sentences.
+			//	Each sentence is itself a list of words.
+
+			List<List<String>> sentences	=
+					sentenceSplitter.extractSentences(
+							textToAdorn , wordTokenizer );
+
+			//	Assign part of speech tags to
+			//	each word in each sentence.
+			//	Here "taggedSentences" contains
+			//	a list of List<AdornedWord> entries,
+			//	one for each sentence.
+
+			List<List<AdornedWord>> taggedSentences	=
+					partOfSpeechTagger.tagSentences( sentences );
+
+			//	Loop over sentences and
+			//	display adornments.
+
+			for ( int i = 0 ; i < sentences.size() ; i++ )
+			{
+			//	Get the next adorned sentence.
+			//	This contains a list of adorned
+			//	words.  Only the spellings
+			//	and part of speech tags are
+			//	guaranteed to be defined at
+			//	this point.
+
+				List<AdornedWord> sentence	= taggedSentences.get( i );
+
+			//	Print out the spelling and part(s)
+			//	of speech for each word in the
+			//	sentence.  Punctuation is treated
+			//	as a word too.
+
+				for ( int j = 0 ; j < sentence.size() ; j++ )
+				{
+					AdornedWord adornedWord	= sentence.get( j );
+
+			//	Get the standard spelling
+			//	given the original spelling
+			//	and part of speech.
+
+					setStandardSpelling
+					(
+							adornedWord ,
+							standardizer ,
+							partOfSpeechTags
+							);
+			//	Set the lemma.
+
+					setLemma
+					(
+							adornedWord ,
+							wordLexicon ,
+							lemmatizer ,
+							partOfSpeechTags ,
+							spellingTokenizer
+							);
+
+					//	obtain the adornment.
+					lemma = adornedWord.getLemmata();
+				}
+			}
+		}catch(Exception e){
+			lemma = textToAdorn;
 		}
-		
 		return lemma;
 	}
 

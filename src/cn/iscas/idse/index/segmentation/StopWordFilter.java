@@ -28,7 +28,7 @@ public class StopWordFilter {
 		return instance;
 	}
 	
-	private StopWordFilter(){
+	public StopWordFilter(){
 		try {
 			String stopWord;
 			/*
@@ -65,7 +65,7 @@ public class StopWordFilter {
 	 * the function runs the procedure of stop-word-remove
 	 * @param termSet
 	 */
-	public void execute(Set<TermOffset> termSet){
+	public synchronized void execute(Set<TermOffset> termSet){
 		if(termSet != null){
 			Set<TermOffset> wordToRemoveSet = new HashSet<TermOffset>();
 			for(TermOffset termOffset : termSet){
@@ -81,7 +81,7 @@ public class StopWordFilter {
 	 * @param term
 	 * @return if term is a stop word, then return true; else return false.
 	 */
-	public boolean isStopWord(String term){
+	public synchronized boolean isStopWord(String term){
 		
 		if(this.stopWordChinese.contains(term) || this.stopWordEnglish.contains(term))
 			return true;

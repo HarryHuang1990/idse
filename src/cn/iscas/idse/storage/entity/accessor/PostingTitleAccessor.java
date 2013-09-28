@@ -29,10 +29,6 @@ public class PostingTitleAccessor {
 	 * Secondary key accessor
 	 */
 	private SecondaryIndex<Integer, Integer, PostingTitle> SecondaryDocID;
-	/**
-	 * Secondary key accessor
-	 */
-	private SecondaryIndex<String, Integer, PostingTitle> SecondaryTerm;
 	
 	public PostingTitleAccessor(EntityStore store){
 		/*
@@ -43,7 +39,6 @@ public class PostingTitleAccessor {
 		 * create secondary accessors.
 		 */
 		this.SecondaryDocID = store.getSecondaryIndex(this.primaryPostingID, Integer.class, "docID");
-		this.SecondaryTerm = store.getSecondaryIndex(this.primaryPostingID, String.class, "term");
 	}
 
 	public PrimaryIndex<Integer, PostingTitle> getPrimaryPostingID() {
@@ -53,11 +48,6 @@ public class PostingTitleAccessor {
 	public SecondaryIndex<Integer, Integer, PostingTitle> getSecondaryDocID() {
 		return SecondaryDocID;
 	}
-
-	public SecondaryIndex<String, Integer, PostingTitle> getSecondaryTerm() {
-		return SecondaryTerm;
-	}
-
 }
 
 

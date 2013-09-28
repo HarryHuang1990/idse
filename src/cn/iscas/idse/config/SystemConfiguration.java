@@ -35,6 +35,19 @@ public class SystemConfiguration {
 	 * Berkeley DB manager
 	 */
 	public static DBManager database = null;
+	/**
+	 * 文件类型索引缓存
+	 */
+	public static Map<String, FileType> fileTypeBuff = new HashMap<String, FileType>();
+	/**
+	 * 分隔符列表
+	 */
+	public static String seperatorRegx = "[-_:]"; 
+	
+	/**
+	 * 允许分析的文本大小上限（M）
+	 */
+	public static short maxSizeAllowed = 5;
 	
 	/**
 	 * 待索引的目标目录列表
@@ -79,8 +92,10 @@ public class SystemConfiguration {
 		 */
 		targetDirectoryValues = PropertiesManager.getApp("target.directory");
 		targetDirectorySplits = targetDirectoryValues.split(",");
-		for(int i=0; i<targetDirectorySplits.length; i++)
+		for(int i=0; i<targetDirectorySplits.length; i++){
 			targetDirectories.add(targetDirectorySplits[i]);
+			System.out.println(targetDirectorySplits[i]);
+		}
 		
 		/*
 		 *获取应用程序根目录地址 
@@ -118,8 +133,7 @@ public class SystemConfiguration {
 				type = PropertiesManager.getApp("format.category." + formatCategorySplits[i]);
 				typeSplits = type.split(",");
 				for(int j=0; j<typeSplits.length; j++){
-					if(!fileTypeAccessor.getPrimaryType().contains(typeSplits[j]))
-						fileTypeAccessor.getPrimaryType().putNoReturn(new FileType(typeSplits[j], (byte)(i+1)));
+					fileTypeBuff.put(typeSplits[j], new FileType(typeSplits[j], (byte)(i+1)));
 				}
 			}
 		}

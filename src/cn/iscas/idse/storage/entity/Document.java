@@ -22,7 +22,7 @@ import static com.sleepycat.persist.model.DeleteAction.*;
 @Entity
 public class Document {
 	
-	@PrimaryKey
+	@PrimaryKey(sequence="DocID")
 	private int docID;
 	
 	@SecondaryKey(relate=MANY_TO_ONE, relatedEntity=Directory.class, onRelatedEntityDelete=CASCADE)

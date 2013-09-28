@@ -16,7 +16,8 @@ import static com.sleepycat.persist.model.DeleteAction.*;
  * <p>structure:</p> 
  * <ol>
  * 	<li>term</li>
- * 	<li>posting list</li>
+ * 	<li>title posting list</li>
+ * 	<li>content posting list</li>
  * </ol>
  * @author Harry Huang
  *
@@ -26,24 +27,16 @@ public class Term {
 	@PrimaryKey
 	private String term = null;
 	
-	private int documentFrequence = 0;
+	@SecondaryKey(relate=ONE_TO_MANY, relatedEntity=PostingTitle.class, onRelatedEntityDelete=NULLIFY)
+	private Set<Integer> postingTitle = new HashSet<Integer>();
+	
+	@SecondaryKey(relate=ONE_TO_MANY, relatedEntity=PostingContent.class, onRelatedEntityDelete=NULLIFY)
+	private Set<Integer> postingContent = new HashSet<Integer>();
 
 	public Term(){}
 	
 	public Term(String term){
 		this.term = term;
-	}
-	
-	/**
-	 * get DF.
-	 * @return
-	 */
-	public int getDocumentFrequence(){
-		return documentFrequence;
-	}
-	
-	public void setDocumentFrequence(int documentFrequence){
-		this.documentFrequence = documentFrequence;
 	}
 
 	public String getTerm() {
@@ -52,5 +45,35 @@ public class Term {
 
 	public void setTerm(String term) {
 		this.term = term;
+	}
+
+	public Set<Integer> getPostingTitle() {
+		return postingTitle;
+	}
+
+	public void setPostingTitle(Set<Integer> postingTitle) {
+		this.postingTitle = postingTitle;
+	}
+
+	public Set<Integer> getPostingContent() {
+		return postingContent;
+	}
+
+	public void setPostingConteng(Set<Integer> postingConteng) {
+		this.postingContent = postingConteng;
+	}
+	/**
+	 * get DF. for title
+	 * @return
+	 */
+	public int getDocumentFrequenceForTitle() {
+		return this.postingTitle.size();
+	}
+	/**
+	 * get DF. for content
+	 * @return
+	 */
+	public int getDocumentFrequenceForContent() {
+		return this.postingContent.size();
 	}
 }

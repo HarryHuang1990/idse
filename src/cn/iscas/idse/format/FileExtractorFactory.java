@@ -39,8 +39,11 @@ public class FileExtractorFactory {
 //            fileExtractor.getContent();
 
         	//non-plugin
-        	Class c = Class. forName(SystemConfiguration.formatPluginMap.get(fileSuffix));
-			fileExtractor = (FileExtractor)c.newInstance();
+        	if(SystemConfiguration.formatPluginMap.containsKey(fileSuffix)){
+        		Class c = Class. forName(SystemConfiguration.formatPluginMap.get(fileSuffix));
+    			fileExtractor = (FileExtractor)c.newInstance();
+        	}
+        	
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {

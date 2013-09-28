@@ -24,21 +24,32 @@ public class OfficeXlsFileExtractor implements FileExtractor{
 		    HSSFWorkbook workbook = new HSSFWorkbook(new POIFSFileSystem(inputStream));
 			extractor = new ExcelExtractor(workbook);
 			inputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
 		}
 	}
 	
 	@Override
 	public String getContent() {
 		String content = null;
-		if(this.extractor != null){
-			//filter formulas from the results
-			this.extractor.setFormulasNotResults(true);
-			//filter Sheet name from the results
-		    this.extractor.setIncludeSheetNames(false);
-		    content = this.extractor.getText();
-	    }
+		try{
+			if(this.extractor != null){
+				//filter formulas from the results
+				this.extractor.setFormulasNotResults(true);
+				//filter Sheet name from the results
+			    this.extractor.setIncludeSheetNames(false);
+			    content = this.extractor.getText();
+		    }
+		}
+		catch(Exception e){
+			content = null;
+		}
+		catch(Error e){
+			content = null;
+		}
+		
 		return content;
 	}
 

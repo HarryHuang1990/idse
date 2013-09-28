@@ -1,6 +1,9 @@
 package cn.iscas.idse.storage.entity.accessor;
 
+import java.util.Set;
+
 import cn.iscas.idse.storage.entity.Directory;
+import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.TargetDirectory;
 import cn.iscas.idse.storage.entity.Term;
 
@@ -26,6 +29,7 @@ public class TermAccessor {
 	 * primary key accessor
 	 */
 	private PrimaryIndex<String, Term> primaryTerm;
+	
 	
 	public TermAccessor(EntityStore store){
 		/*

@@ -97,7 +97,6 @@ public class FileSystemScanner {
 	}
 	
 	
-	
 	public static void main(String args[]){
 		scanDisk();
 	}

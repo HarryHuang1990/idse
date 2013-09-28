@@ -22,10 +22,10 @@ public class OfficeDocxFileExtractor implements FileExtractor {
 			InputStream inputStream = new FileInputStream(this.filePath);
 			extractor = new XWPFWordExtractor(new XWPFDocument(inputStream));
 			inputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
 		}
 			
 	}
@@ -33,9 +33,18 @@ public class OfficeDocxFileExtractor implements FileExtractor {
 	@Override
 	public String getContent() {
 		String content = null;
-		if(this.extractor != null){
-			content = this.extractor.getText();
+		try{
+			if(this.extractor != null){
+				content = this.extractor.getText();
+			}
 		}
+		catch(Exception e){
+			content = null;
+		}
+		catch(Error e){
+			content = null;
+		}
+		
 		return content;
 	}
 
@@ -47,7 +56,7 @@ public class OfficeDocxFileExtractor implements FileExtractor {
 	
 	public static void main(String args[]){
 		OfficeDocxFileExtractor doc = new OfficeDocxFileExtractor();
-		doc.setFilePath("D:\\My DBank\\研究生文档\\Important Date on SE.docx");
+		doc.setFilePath("D:\\My DBank\\博客\\20130817用PersonalRank实现基于图的推荐算法\\~$ersonalRank实现基于图的推荐算法.docx");
 		System.out.println(doc.getContent());
 	}
 }

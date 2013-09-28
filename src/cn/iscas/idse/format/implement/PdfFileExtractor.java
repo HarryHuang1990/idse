@@ -1,5 +1,6 @@
 package cn.iscas.idse.format.implement;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.util.PDFTextStripper;
 
+import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.format.FileExtractor;
 
 
@@ -25,17 +27,17 @@ public class PdfFileExtractor implements FileExtractor {
 		    this.parser = new  PDFParser(inputStream); 
 		    this.parser.parse();
 		    inputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
+		}
 	    
 	}
 	
 	public static void main(String[]args) throws IOException{
 		PdfFileExtractor doc = new PdfFileExtractor();
-		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
+		doc.setFilePath("D:\\My DBank\\互联网实验室\\工作\\代码分析\\AST.pdf");
 		System.out.println(doc.getContent());
 	}
 
@@ -43,11 +45,22 @@ public class PdfFileExtractor implements FileExtractor {
 	public String getContent() {
 		String content = null;
 		try {
-			PDFTextStripper extractor = new PDFTextStripper();
-			content = extractor.getText(this.parser.getPDDocument());
-			content = this.wordRecovery(content);
-		} catch (IOException e) {
-			e.printStackTrace();
+			File file = new File(this.filePath);
+			/*
+			 * calc the size(M) of file. 
+			 * file.length() returns the number of bytes of this file.
+			 */
+			double size = (file.length()*1.0/1024/1024);
+			
+			if(size < SystemConfiguration.maxSizeAllowed){
+				PDFTextStripper extractor = new PDFTextStripper();
+				content = extractor.getText(this.parser.getPDDocument());
+				content = this.wordRecovery(content);
+			}
+		} catch (Error e) {
+			content = null;
+		} catch (Exception e) {
+			content = null;
 		} 
 		return content;
 	}
@@ -64,7 +77,7 @@ public class PdfFileExtractor implements FileExtractor {
 	 * @return
 	 */
 	private String wordRecovery(String pdfContent){
-		pdfContent = pdfContent.replaceAll("-\r\n", "");
+		pdfContent = pdfContent.replaceAll("-[ ]*[\r]*[\n]*", "");
 		return pdfContent;
 	}
 }

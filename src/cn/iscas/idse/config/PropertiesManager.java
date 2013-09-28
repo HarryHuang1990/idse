@@ -35,9 +35,10 @@ public class PropertiesManager {
 		
 		try {
 			isr = new InputStreamReader(is, CHAR_SET);
-/*The load method just overwrites existing key-value pairs, 
-so clear is necessary for refreshing.
-*/
+			/*
+			 * The load method just overwrites existing key-value pairs, 
+			 * so clear is necessary for refreshing.
+			 */
 			p.clear();
 			p.load(isr);
 		} catch(Exception e) {
@@ -45,7 +46,7 @@ so clear is necessary for refreshing.
 			e.printStackTrace();
 			return false;
 		} finally {
-//The InputStream used by InputStreamReader will be closed too.
+			//The InputStream used by InputStreamReader will be closed too.
 			if(isr != null)
 				try {
 					isr.close();

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.StringTokenizer;
 
 import cn.iscas.idse.config.InstanceManager;
+import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.implement.PdfFileExtractor;
 import ICTCLAS.I3S.AC.ICTCLAS50;
@@ -73,44 +74,23 @@ public class WordSegmentation {
 	 * @param docID
 	 * @param text
 	 */
-	public void segmentString(int docID, String text)
+	public synchronized String segmentString(String text)
 	{
+		String nativeStr = null;
 		try {
-			//achieve result of segmentation
-			byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(text.getBytes("GB2312"), 0, 0);//分词处理
-			String nativeStr = new String(nativeBytes, 0, nativeBytes.length, "GB2312");
-			//remove punctuation
-			nativeStr = PunctuationFilter.removePunctuation(nativeStr);
-			//split the result-string and localize the term in text.
-			int offset = -1;
-			String currentTerm = "";
-			StringTokenizer tokenizer = new StringTokenizer(nativeStr);
-			while(tokenizer.hasMoreTokens()){
-				currentTerm = tokenizer.nextToken().trim();
-				//handle Camel Case style
-				String[] words = CamelCase.splitCamelCase(currentTerm);
-				if(words != null){
-					for(String word : words){
-						//localize and get the offset.
-						offset = text.indexOf(word, ++offset);
-						//lowercase the word
-						word = word.toLowerCase();
-						// handle Lemmatize
-						word = ((TermLemmatizer)InstanceManager.getInstance(InstanceManager.CLASS_TERMLEMMATIZER)).adornText(word);
-						if(word != null){
-							// handle stop word
-							if(!((StopWordFilter)InstanceManager.getInstance(InstanceManager.CLASS_STOPWORDFILTER)).isStopWord(word)){
-								//add into index
-								//TODO put the term info into the index.
-								System.out.println(word + "\t" + offset);
-							}
-						}
-					}
-				}
+			if(text != null){
+				//achieve result of segmentation
+				byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(text.getBytes("GB2312"), 0, 0);//分词处理
+				nativeStr = new String(nativeBytes, 0, nativeBytes.length, "GB2312");
+				//remove seperator
+				nativeStr = nativeStr.replaceAll(SystemConfiguration.seperatorRegx, " ");
+				//remove punctuation
+				nativeStr = PunctuationFilter.removePunctuation(nativeStr);
 			}
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			return null;
 		}
+		return  nativeStr;
 	}
 	
 	/**
@@ -132,7 +112,7 @@ public class WordSegmentation {
 		ws.initialize();
 		//字符串分词   
 		for(int i=1; i<2; i++){
-			ws.segmentString(1, text);
+			ws.segmentString(text);
 			System.out.println(i+"/"+1000);
 		}
 		ws.exitICTCLAS();

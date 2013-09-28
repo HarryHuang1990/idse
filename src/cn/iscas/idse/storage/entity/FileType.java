@@ -1,11 +1,12 @@
 package cn.iscas.idse.storage.entity;
 
 import static com.sleepycat.persist.model.DeleteAction.CASCADE;
-import static com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
+import static com.sleepycat.persist.model.Relationship.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sleepycat.persist.model.DeleteAction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
@@ -33,6 +34,7 @@ public class FileType {
 	/**
 	 * the set of document which belongs to type.
 	 */
+	@SecondaryKey(relate=ONE_TO_MANY, relatedEntity=Document.class, onRelatedEntityDelete=DeleteAction.NULLIFY)
 	private Set<Integer> documentIDs = new HashSet<Integer>(); 
 	
 	private FileType(){};
@@ -48,6 +50,14 @@ public class FileType {
 
 	public byte getCategoryID() {
 		return categoryID;
+	}
+
+	public Set<Integer> getDocumentIDs() {
+		return documentIDs;
+	}
+
+	public void setDocumentIDs(Set<Integer> documentIDs) {
+		this.documentIDs = documentIDs;
 	}
 	
 	

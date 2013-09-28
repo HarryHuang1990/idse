@@ -25,43 +25,25 @@ public class OfficeDocFileExtractor implements FileExtractor {
 			inputStream = new FileInputStream(this.filePath);
 			extractor = (WordExtractor) ExtractorFactory.createExtractor(inputStream);
 			inputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (InvalidFormatException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (OpenXML4JException e) {
-			e.printStackTrace();
-		} catch (XmlException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
 		}
 	}
 	
 	@Override
 	public String getContent() {
 		String content = null;
-		content = this.extractor.getTextFromPieces();
-//			POIFSFileSystem fileSystem = new POIFSFileSystem(fis);
-//			// Firstly, get an extractor for the Workbook
-//			POIOLE2TextExtractor oleTextExtractor = ExtractorFactory.createExtractor(fileSystem);
-//			// Then a List of extractors for any embedded Word objects embedded into it.
-//			POITextExtractor[] embeddedExtractors;
-//			embeddedExtractors = ExtractorFactory.getEmbededDocsTextExtractors(oleTextExtractor);
-//			for (POITextExtractor textExtractor : embeddedExtractors) {
-//				  // A Word Document
-//				 if (textExtractor instanceof WordExtractor) {
-//				      WordExtractor wordExtractor = (WordExtractor) textExtractor;
-//				      String[] paragraphText = wordExtractor.getParagraphText();
-//				      for (String paragraph : paragraphText) {
-//				         System.out.println(paragraph);
-//				      }
-//				      // Display the document's header and footer text
-//				      System.out.println("Footer text: " + wordExtractor.getFooterText());
-//				      System.out.println("Header text: " + wordExtractor.getHeaderText());
-//				   }
-//			}
-
+		try{
+			content = this.extractor.getTextFromPieces();
+		}
+		catch(Exception e){
+			content = null;
+		}
+		catch(Error e){
+			content = null;
+		}
 		return content;
 	}
 

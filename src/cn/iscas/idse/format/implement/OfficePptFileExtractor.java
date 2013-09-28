@@ -19,16 +19,26 @@ public class OfficePptFileExtractor  implements FileExtractor {
 			FileInputStream inputStream = new FileInputStream(this.filePath);
 			extractor = new PowerPointExtractor(inputStream);
 			inputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
 		}
 	}
 	
 	@Override
 	public String getContent() {
 		String content = null;
-		if(this.extractor != null){
-			content = this.extractor.getText();
+		try{
+			if(this.extractor != null){
+				content = this.extractor.getText();
+			}
+		}
+		catch(Exception e){
+			content = null;
+		}
+		catch(Error e){
+			content = null;
 		}
 		return content;
 	}

@@ -3,12 +3,14 @@ package cn.iscas.idse.index;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sleepycat.persist.EntityCursor;
 
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
+import cn.iscas.idse.storage.entity.FileType;
 import cn.iscas.idse.storage.entity.TargetDirectory;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.DirectoryAccessor;
@@ -33,9 +35,6 @@ import cn.iscas.idse.utilities.Converter;
 public class DiskScanner {
 	
 	private TargetDirectoryAccessor targetDirectoryAccessor = null;
-	private DirectoryAccessor directoryAccessor = null;
-	private DocumentAccessor documentAccessor = null;
-	private FileTypeAccessor fileTypeAccessor = null;
 	
 	private int fileNumber = 0;
 	private int directoryNumber = 0;
@@ -43,13 +42,8 @@ public class DiskScanner {
 //	private int averageDepth = 0;
 	private Map<String, Integer> fileTypeDistribution = new HashMap<String, Integer>();
 	
-	public DiskScanner(
-			TargetDirectoryAccessor targetDirectoryAccessor, 
-			DirectoryAccessor directoryAccessor, 
-			DocumentAccessor documentAccessor){
+	public DiskScanner(	TargetDirectoryAccessor targetDirectoryAccessor){
 		this.targetDirectoryAccessor = targetDirectoryAccessor;
-		this.documentAccessor = documentAccessor;
-		this.fileTypeAccessor = AccessorFactory.getFileTypeAccessor(SystemConfiguration.database.getIndexStore());
 	}
 	
 	/**
@@ -58,15 +52,19 @@ public class DiskScanner {
 	public void scanDisk(){
 		//scan the target directories.
 		System.out.println("scanning the disk...");
+		long start = System.currentTimeMillis();
 		EntityCursor<TargetDirectory> targets = targetDirectoryAccessor.getPrimaryTargetID().entities();
 		for(TargetDirectory target : targets){
 			this.scanDirectory(new File(target.getTargetPath()), target.getTargetID());
 		}
-		System.out.println("scanning done.");
+		long end = System.currentTimeMillis();
+		System.out.println("scanning done. time = " + ((end-start)/1000/60.0) + " min");
 		System.out.println("directory : " + this.directoryNumber);
 		System.out.println("file : " + this.fileNumber);
 		System.out.println("file type distribution : \n" + this.fileTypeDistribution.toString());
 	}
+	
+
 	
 	/**
 	 * scan directory
@@ -74,10 +72,11 @@ public class DiskScanner {
 	 */
 	private void scanDirectory(File directory, short targetID){
 		// directory number increases by 1
-		this.directoryNumber ++;
-		// write the directory info into db.
-		this.directoryAccessor.getPrimaryDirectoryID().putNoReturn(
-				new Directory(targetID, Converter.convertBackSlashToSlash(directory.getAbsolutePath())));
+		int directoryID = ++this.directoryNumber;
+//		// write the directory info into db.
+//		if(!this.directoryAccessor.getSecondaryDirectoryPath().contains(Converter.convertBackSlashToSlash(directory.getAbsolutePath())))
+//			this.directoryAccessor.getPrimaryDirectoryID().putNoReturn(
+//					new Directory(directoryID, targetID, Converter.convertBackSlashToSlash(directory.getAbsolutePath())));
 		
 		// get list of file and directory obj.
 		File[]files = directory.listFiles();
@@ -91,11 +90,13 @@ public class DiskScanner {
 				else{
 					// file number increases by 1
 					this.fileNumber ++;
-					//write the file info into db
-					this.documentAccessor.getPrimaryDocumentID().putNoReturn(
-							new Document(
-									this.directoryAccessor.getSecondaryDirectoryPath().get(directory.getAbsolutePath()).getDirectoryID(), 
-									object.getName()));
+//					//write the file info into db
+//					if(!this.documentAccessor.getPrimaryDocumentID().contains(this.fileNumber))
+//						this.documentAccessor.getPrimaryDocumentID().putNoReturn(
+//								new Document(
+//										this.fileNumber,
+//										directoryID, 
+//										object.getName()));
 					
 					// get the file type
 					int suffixIndexStart = object.getName().lastIndexOf(".");
@@ -107,9 +108,10 @@ public class DiskScanner {
 						suffix = ".";
 					}
 					
-					// TODO generate type index
-					
-					
+//					// add the documentID to the type index
+//					if(SystemConfiguration.fileTypeBuff.containsKey(suffix)){
+//						SystemConfiguration.fileTypeBuff.get(suffix).getDocumentIDs().add(this.fileNumber);
+//					}
 					
 					// update the file type distribution
 					if(this.fileTypeDistribution.containsKey(suffix)){

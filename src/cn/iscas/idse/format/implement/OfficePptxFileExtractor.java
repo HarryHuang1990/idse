@@ -24,18 +24,26 @@ public class OfficePptxFileExtractor  implements FileExtractor {
 			XMLSlideShow slideShow = new XMLSlideShow(inputStream);
 			this.extractor = new XSLFPowerPointExtractor(slideShow);
 			inputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			return;
+		} catch (Error e) {
+			return;
 		}
 	}
 	
 	@Override
 	public String getContent() {
 		String content = null;
-		if(this.extractor != null){
-			content = this.extractor.getText();
+		try{
+			if(this.extractor != null){
+				content = this.extractor.getText();
+			}
+		}
+		catch(Exception e){
+			content = null;
+		}
+		catch(Error e){
+			content = null;
 		}
 		return content;
 	}
