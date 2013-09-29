@@ -189,9 +189,16 @@ public class BerkelyDBDemo {
 		}
 	}
 	
+	public void getNumberDocuments(){
+		DocumentAccessor documentAccessor = AccessorFactory.getDocumentAccessor(SystemConfiguration.database.getIndexStore());
+		System.out.println(documentAccessor.getPrimaryDocumentID().count());
+	}
+	
 	public static void main(String[] args){
 		
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showPostingContent();
+		for(int i=0 ;i< 1000; i++){
+		demo.getNumberDocuments();
+		}
 	}
 }

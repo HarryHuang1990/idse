@@ -44,6 +44,10 @@ public class IndexReader {
 	private PostingContentAccessor postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
 	
 	
+	public long getNumberDocuments(){
+		return documentAccessor.getPrimaryDocumentID().count();
+	}
+	
 	/**
 	 * Get the postings of specific term in the dictionary.
 	 * the postings includes title-part (denoted as Set[0]) and content-part (denoted as Set[1]).
