@@ -173,9 +173,25 @@ public class BerkelyDBDemo {
 		}
 	}
 	
+	public void showPostingTitle(){
+		PostingTitleAccessor pta = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<PostingTitle> cursor = pta.getPrimaryPostingID().entities();
+		for(PostingTitle title : cursor){
+			System.out.println(title.toString());
+		}
+	}
+	
+	public void showPostingContent(){
+		PostingContentAccessor pta = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<PostingContent> cursor = pta.getPrimaryPostingID().entities();
+		for(PostingContent Content : cursor){
+			System.out.println(Content.toString());
+		}
+	}
+	
 	public static void main(String[] args){
 		
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showDictionary();
+		demo.showPostingContent();
 	}
 }

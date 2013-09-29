@@ -3,7 +3,9 @@ package cn.iscas.idse.storage.entity;
 import static com.sleepycat.persist.model.DeleteAction.CASCADE;
 import static com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.sleepycat.persist.model.Entity;
@@ -31,7 +33,7 @@ public class PostingContent {
 	/**
 	 * offsets of the term in the document docID.
 	 */
-	private Set<Integer> offsets = new HashSet<Integer>();
+	private List<Integer> offsets = new ArrayList<Integer>();
 	
 	/**
 	 * for binding
@@ -40,17 +42,6 @@ public class PostingContent {
 	
 	public PostingContent(int docID){
 		this.docID = docID;
-	}
-	
-	public PostingContent(int docID, Set<Integer> offsets){
-		this.docID = docID;
-		this.offsets = offsets;
-	}
-	
-	public PostingContent(int postingID, int docID, Set<Integer> offsets){
-		this.postingID = postingID;
-		this.docID = docID;
-		this.offsets = offsets;
 	}
 	
 	public PostingContent(int postingID, int docID){
@@ -82,11 +73,11 @@ public class PostingContent {
 		this.docID = docID;
 	}
 
-	public Set<Integer> getOffsets() {
+	public List<Integer> getOffsets() {
 		return offsets;
 	}
 
-	public void setOffsets(Set<Integer> offsets) {
+	public void setOffsets(List<Integer> offsets) {
 		this.offsets = offsets;
 	}
 	

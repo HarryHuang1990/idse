@@ -131,11 +131,6 @@ public class IndexWriter {
 	 * start indexing the target directories.
 	 */
 	public void executeIndexing(){
-		
-		
-		
-		
-        
 		try {
 			//scan the target directory, then
 			//we can know how many files and directory will be indexed.
@@ -158,7 +153,6 @@ public class IndexWriter {
 			 */
 			this.threadPool.shutdown();
 			this.threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-			
 			System.out.println("threads...finished...");
 			
 			this.writeTypeIndexIntoDB();
@@ -171,7 +165,7 @@ public class IndexWriter {
 			// destroy the segmentor
 			this.wordSegmentor.exitICTCLAS();
 			this.wordSegmentor.destoryInstance();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -251,7 +245,8 @@ public class IndexWriter {
 					}
 					
 					// index file
-					this.threadPool.execute(new IndexFileThread(this.wordSegmentor, this.numberOfFile, object, suffix));
+					(new IndexFileThread(this.wordSegmentor, this.numberOfFile, object, suffix)).run();
+//					this.threadPool.execute(new IndexFileThread(this.wordSegmentor, this.numberOfFile, object, suffix));
 //					this.indexFile(IndexFileThread.numberOfFinishedFile, object, suffix);
 				}
 			}

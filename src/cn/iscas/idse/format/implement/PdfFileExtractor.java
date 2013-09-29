@@ -50,9 +50,9 @@ public class PdfFileExtractor implements FileExtractor {
 			 * calc the size(M) of file. 
 			 * file.length() returns the number of bytes of this file.
 			 */
-			double size = (file.length()*1.0/1024/1024);
+			double size = (file.length()*1.0/1024);
 			
-			if(size < SystemConfiguration.maxSizeAllowed){
+			if(size < SystemConfiguration.maxSizeAllowed_PDF){
 				PDFTextStripper extractor = new PDFTextStripper();
 				content = extractor.getText(this.parser.getPDDocument());
 				content = this.wordRecovery(content);

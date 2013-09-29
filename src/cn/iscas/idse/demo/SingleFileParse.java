@@ -31,7 +31,7 @@ public class SingleFileParse {
 			/*
 			 * D:\\My DBank\\工具&工具包\\morphadorner-2009-04-30\\data\\gate\\ANNIE\\resources\\tokeniser\\chinesetokeniser\\bothlexu8.txt
 			 */
-			indexFile(new File("D:\\My DBank\\文献\\经验软工\\icse2013\\icse13\\icse13-vol1.pdf"), ".pdf");
+			indexFile(new File("D:\\My DBank\\工具&工具包\\morphadorner-2009-04-30\\data\\gate\\ANNIE\\resources\\tokeniser\\chinesetokeniser\\tradlexu8.txt"), ".txt");
 			long end = System.currentTimeMillis();
 			System.out.println("总时间:"+((end-start)*1.0/1000) + "s");
 		}

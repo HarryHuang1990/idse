@@ -23,7 +23,7 @@ import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
 
-public class IndexFileThread implements Runnable {
+public class IndexFileThread{
 	
 	public static DiskScanner scanner = null;
 	
@@ -71,6 +71,20 @@ public class IndexFileThread implements Runnable {
 		this.indexFile(this.docID, this.file, this.suffix);
 	}
 	
+	/**
+	 * return current posting title id and increase the id by 1 for the next at once
+	 * @return
+	 */
+	private static synchronized int getPostingTitleID(){
+		return postingTitleID++;
+	}
+	/**
+	 * return current posting content id and increase the id by 1 for the next at once
+	 * @return
+	 */
+	private static synchronized int getPostingContentID(){
+		return postingContentID++;
+	}
 	
 	/**
 	 * index file. Extract the text from files of specific types. 
@@ -169,19 +183,19 @@ public class IndexFileThread implements Runnable {
 										this.postingTitles.get(word).getOffsets().add(offset);
 									}
 									else{
-										PostingTitle posting = new PostingTitle(IndexFileThread.postingTitleID, docID);
+										int postingID = IndexFileThread.getPostingTitleID();
+										PostingTitle posting = new PostingTitle(postingID, docID);
 										posting.getOffsets().add(offset);
 										this.postingTitles.put(word, posting);
 										// add new posting to posting list of the corresponding term 
 										if(IndexFileThread.dictionary.containsKey(word)){
-											IndexFileThread.dictionary.get(word).getPostingTitle().add(IndexFileThread.postingTitleID);
+											IndexFileThread.dictionary.get(word).getPostingTitle().add(postingID);
 										}
 										else{
 											Term term = new Term(word);
-											term.getPostingTitle().add(IndexFileThread.postingTitleID);
+											term.getPostingTitle().add(postingID);
 											IndexFileThread.dictionary.put(word, term);
 										}
-										IndexFileThread.postingTitleID++;
 									}
 								}
 								else{
@@ -189,19 +203,19 @@ public class IndexFileThread implements Runnable {
 										this.postingContents.get(word).getOffsets().add(offset);
 									}
 									else{
-										PostingContent posting = new PostingContent(IndexFileThread.postingContentID, docID);
+										int postingID = IndexFileThread.getPostingContentID();
+										PostingContent posting = new PostingContent(postingID, docID);
 										posting.getOffsets().add(offset);
 										this.postingContents.put(word, posting);
 										// add new posting to posting list of the corresponding term 
 										if(IndexFileThread.dictionary.containsKey(word)){
-											IndexFileThread.dictionary.get(word).getPostingContent().add(IndexFileThread.postingContentID);
+											IndexFileThread.dictionary.get(word).getPostingContent().add(postingID);
 										}
 										else{
 											Term term = new Term(word);
-											term.getPostingContent().add(IndexFileThread.postingContentID);
+											term.getPostingContent().add(postingID);
 											IndexFileThread.dictionary.put(word, term);
 										}
-										IndexFileThread.postingContentID++;
 									}
 								}
 							}

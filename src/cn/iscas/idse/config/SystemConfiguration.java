@@ -45,9 +45,14 @@ public class SystemConfiguration {
 	public static String seperatorRegx = "[-_:]"; 
 	
 	/**
-	 * 允许分析的文本大小上限（M）
+	 * 允许分析的PDF文本大小上限（K）
 	 */
-	public static short maxSizeAllowed = 5;
+	public static short maxSizeAllowed_PDF = 5000;
+	
+	/**
+	 * 允许分析的text文本大小上限（K）
+	 */
+	public static short maxSizeAllowed_TXT = 500;
 	
 	/**
 	 * 待索引的目标目录列表
