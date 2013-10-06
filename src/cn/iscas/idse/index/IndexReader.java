@@ -43,11 +43,6 @@ public class IndexReader {
 	private PostingTitleAccessor postingTitleAccessor = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
 	private PostingContentAccessor postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
 	
-	
-	public long getNumberDocuments(){
-		return documentAccessor.getPrimaryDocumentID().count();
-	}
-	
 	/**
 	 * Get the postings of specific term in the dictionary.
 	 * the postings includes title-part (denoted as Set[0]) and content-part (denoted as Set[1]).
@@ -183,6 +178,14 @@ public class IndexReader {
 		Document document = this.getDocumentByDocID(docID);
 		Directory directory = this.getDirectoryByDirectoryID(document.getDirectoryID());
 		return directory.getDirectoryPath() + "/" + document.getDocumentName();
+	}
+	
+	/**
+	 * return the document number
+	 * @return
+	 */
+	public int getNumberDocuments(){
+		return (int) this.documentAccessor.getPrimaryDocumentID().count();
 	}
 }
 

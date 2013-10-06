@@ -8,6 +8,6 @@ package cn.iscas.idse.search;
  * @author Harry Huang
  *
  */
-public class TFIDFSimilarity {
+public class TFIDFSimilarity extends Similarity {
 	
 }

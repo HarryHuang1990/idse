@@ -54,19 +54,25 @@ public class QueryResult {
 	}
 	
 	/**
+	 * put the document result into the priority queue.
+	 * @param score
+	 */
+	public void put(Score score){
+		this.scoreQueue.add(score);
+	}
+	
+	
+	/**
 	 * return the K document with the highest score ordered by score descently.
 	 * @param K
 	 * @return
 	 */
 	public List<Document> getTopK(int K){
 		List<Document> topKList = new ArrayList<Document>();
-		
 		Iterator<Score> iterator = this.scoreQueue.iterator();
-		
 		for(int i=0; iterator.hasNext() && i < K; i++){
 			topKList.add(this.indexReader.getDocumentByDocID(iterator.next().getDocID()));
 		}
-		
 		return topKList;
 	}
 	
@@ -78,17 +84,26 @@ public class QueryResult {
 	 */
 	public List<Document> getPageN(int pageNo, int pageCount){
 		List<Document> pageList = new ArrayList<Document>();
-		
 		Iterator<Score> iterator = this.scoreQueue.iterator();
 		int pageStart = 1 + (pageNo - 1) * pageCount;
 		int pageEnd = pageNo * pageCount;
-		
-		
 		for(int i=1; iterator.hasNext() && (i >= pageStart && i <= pageEnd); i++){
 			pageList.add(this.indexReader.getDocumentByDocID(iterator.next().getDocID()));
 		}
-		
 		return pageList;
 	}
+	/**
+	 * output the query result on the console. 
+	 */
+	public void showResult(){
+		for(Iterator<Score>it = this.scoreQueue.iterator(); it.hasNext();){
+			Score score = it.next();
+			System.out.println(score.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(score.getDocID()));
+		}
+	}
+	/**
+	 * output the top K query result on the console. 
+	 */
+	public void showTopKResult(int k){}
 	
 }

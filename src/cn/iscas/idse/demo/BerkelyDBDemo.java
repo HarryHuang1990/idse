@@ -197,8 +197,9 @@ public class BerkelyDBDemo {
 	public static void main(String[] args){
 		
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		for(int i=0 ;i< 1000; i++){
-		demo.getNumberDocuments();
-		}
+		demo.showDictionary();
+//		for(int i=0 ;i< 1000; i++){
+//		demo.getNumberDocuments();
+//		}
 	}
 }

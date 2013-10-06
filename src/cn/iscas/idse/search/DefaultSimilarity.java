@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import cn.iscas.idse.search.entity.Document;
 import cn.iscas.idse.search.entity.Query;
+import cn.iscas.idse.search.entity.Score;
 
 /**
  * An implementation of the classic VSM based on the {@link TFIDFSimilarity}
@@ -15,8 +16,6 @@ import cn.iscas.idse.search.entity.Query;
  */
 public class DefaultSimilarity extends TFIDFSimilarity {
 	
-	private Query query;
-	private Document document;
 	/**
 	 * <term, df> maps for title and content
 	 * dfMap[0] : the map for title;
@@ -25,9 +24,9 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	private Map<String, Integer>[] dfMap;
 	private int documentNumber = 0;
 	
-	public DefaultSimilarity(Query query, Document document){
-		this.query = query;
-		this.document = document;
+	public DefaultSimilarity(Map<String, Integer>[] dfMap, int documentNumber){
+		this.dfMap = dfMap;
+		this.documentNumber = documentNumber;
 	}
 
 	/**
@@ -69,7 +68,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param document
 	 * @return
 	 */
-	public float score(Query query, Document document){
+	public Score score(Query query, Document document){
 		/*
 		 * get the tuning factors according to the hits of different fields of document.
 		 */
@@ -82,7 +81,11 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 		float scoreTitle = this.fieldSimilarity(query, document, true);
 		float scoreContent = this.fieldSimilarity(query, document, false);
 		
-		return factors[0] * scoreTitle + factors[1] * scoreContent;
+		Score score = new Score(
+				document.getDocID(), 
+				factors[0] * scoreTitle + factors[1] * scoreContent);
+		
+		return score;
 	}
 	
 	/**
@@ -105,7 +108,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @return
 	 */
 	private float vectorsProduct(Query query, Document document, boolean isTitle){
-		float result = 1.0f;
+		float result = 0.0f;
 		Map<String, List<Integer>> queryVector = query.getQueryPosting();
 		Map<String, List<Integer>> documentVector = isTitle ? document.getTitlePostings() : document.getContentPostings();
 		
@@ -177,7 +180,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 			sumOfSquare += Math.pow(this.TFIDF(entry.getKey(), entry.getValue().size(), isTitle), 2);
 		}
 		
-		return (float) Math.sqrt(sumOfSquare);
+		return sumOfSquare == 0 ? 0 : 1.0f / (float) Math.sqrt(sumOfSquare);
 	}
 	
 	/**
@@ -200,6 +203,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	private int[] getHits(Query query, Document document){
 		return new int[]{document.getTitlePostings().size(), document.getContentPostings().size()};
 	}
+	
 	/**
 	 * return the tuning factors for score integration between title-part and content-part 
 	 * @param coordTitle

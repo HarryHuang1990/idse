@@ -13,7 +13,7 @@ import cn.iscas.idse.search.entity.Query;
 
 /**
  * parse the query given by user and generate a 
- * Query Entity for subsequent search.
+ * Query Entity for subsequent search. this is mainly used for key word search.
  * @author Harry Huang
  *
  */
@@ -43,7 +43,11 @@ public class QueryParser {
 	 */
 	public void parse(){
 		this.queryEntity = new Query(this.query);
-		String segmentResult = ((WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION)).segmentString(this.query);
+		WordSegmentation segmentation = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
+		segmentation.initialize();
+		String segmentResult = segmentation.segmentString(this.query);
+		segmentation.exitICTCLAS();
+		segmentation.destoryInstance();
 		if(segmentResult != null){
 			StringTokenizer tokenizer = new StringTokenizer(segmentResult);
 			String currentTerm = "";

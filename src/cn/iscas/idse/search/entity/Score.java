@@ -8,7 +8,7 @@ package cn.iscas.idse.search.entity;
 public class Score{
 
 	private int docID;
-	private float score;
+	private float score = 0f;
 	
 	public Score(int docID, float score){
 		this.docID = docID;
