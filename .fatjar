@@ -1,12 +1,12 @@
 #Fat Jar Configuration File
-#Tue Sep 17 21:09:37 CST 2013
+#Sat Oct 12 15:12:12 CST 2013
 onejar.license.required=true
 manifest.classpath=
 manifest.removesigners=false
 onejar.checkbox=false
-jarname=F\:\\idse\\20130916_DesktopSearchEngine_fat.jar
+jarname=F\:\\JGibbLDA\\lda.jar
 manifest.mergeall=false
-manifest.mainclass=cn.iscas.idse.format.FileExtractorFactory
+manifest.mainclass=jgibblda.LDA
 manifest.file=<createnew>
 jarname.isextern=true
 onejar.expand=

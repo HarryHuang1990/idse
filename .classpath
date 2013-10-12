@@ -41,5 +41,6 @@
 	<classpathentry kind="lib" path="lib/berkeleydb-lib/JEJConsole.jar"/>
 	<classpathentry kind="lib" path="lib/berkeleydb-lib/RepJEJConsole.jar"/>
 	<classpathentry kind="lib" path="lib/berkeleydb-lib/je-android-5.0.84.jar"/>
+	<classpathentry kind="lib" path="lib/jgibblda/args4j-2.0.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -40,7 +40,8 @@ public class Search {
 		this.queryParser.parse();
 		
 		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity());
-		queryResult.showResult();
+		if(queryResult != null)
+			queryResult.showResult();
 	}
 	
 	/**
@@ -69,6 +70,7 @@ public class Search {
 		for(String term : queryEntity.getQueryPosting().keySet()){
 			// extract the inverted index from database.
 			Term termEntity = this.indexReader.getTermByTerm(term);
+			if(termEntity == null)continue;
 			//df
 			dfMap[0].put(term, termEntity.getDocumentFrequenceForTitle());
 			dfMap[1].put(term, termEntity.getDocumentFrequenceForContent());
@@ -99,10 +101,13 @@ public class Search {
 		}
 		
 		// calculate similarity
-		QueryResult queryResult = new QueryResult(documents.size());
-		DefaultSimilarity similarity = new DefaultSimilarity(dfMap, documentNumber);
-		for(Entry<Integer, Document>entry : documents.entrySet()){
-			queryResult.put(similarity.score(queryEntity, entry.getValue()));
+		QueryResult queryResult = null;
+		if(documents.size() != 0){
+			queryResult = new QueryResult(documents.size());
+			DefaultSimilarity similarity = new DefaultSimilarity(dfMap, documentNumber);
+			for(Entry<Integer, Document>entry : documents.entrySet()){
+				queryResult.put(similarity.score(queryEntity, entry.getValue()));
+			}
 		}
 		
 		return queryResult;
