@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import cn.iscas.idse.rank.topic.TopicFile;
+
 public class Model {	
 	
 	//---------------------------------------------------------------
@@ -361,6 +363,42 @@ public class Model {
 	}
 	
 	/**
+	 * return the topic words
+	 * @return
+	 * @author Harry Huang
+	 */
+	public TopicFile getModelTwords(){
+		
+		TopicFile topic = new TopicFile();
+		
+		if (twords > V){
+			twords = V;
+		}
+		
+		for (int k = 0; k < K; k++){
+			List<Pair> wordsProbsList = new ArrayList<Pair>(); 
+			for (int w = 0; w < V; w++){
+				Pair p = new Pair(w, phi[k][w], false);
+				
+				wordsProbsList.add(p);
+			}//end foreach word
+			
+			//print topic				
+			Collections.sort(wordsProbsList);
+			
+			for (int i = 0; i < twords; i++){
+				if (data.localDict.contains((Integer)wordsProbsList.get(i).first)){
+					String word = data.localDict.getWord((Integer)wordsProbsList.get(i).first);
+					topic.getTopicWords().put(word, (Double) wordsProbsList.get(i).second);
+//					System.out.print("\t" + word + " " + wordsProbsList.get(i).second + "\n");
+				}
+			}
+		} //end foreach topic	
+		return topic;
+	}
+	
+	
+	/**
 	 * Save model the most likely words for each topic
 	 */
 	public boolean saveModelTwords(String filename){
@@ -389,6 +427,7 @@ public class Model {
 						String word = data.localDict.getWord((Integer)wordsProbsList.get(i).first);
 						
 						writer.write("\t" + word + " " + wordsProbsList.get(i).second + "\n");
+						System.out.print("\t" + word + " " + wordsProbsList.get(i).second + "\n");
 					}
 				}
 			} //end foreach topic			

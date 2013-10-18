@@ -11,21 +11,29 @@ import cn.iscas.idse.storage.entity.Category;
 import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.FileType;
+import cn.iscas.idse.storage.entity.LocationRelation;
 import cn.iscas.idse.storage.entity.PostingContent;
 import cn.iscas.idse.storage.entity.PostingTitle;
 import cn.iscas.idse.storage.entity.TargetDirectory;
+import cn.iscas.idse.storage.entity.TaskRelation;
 import cn.iscas.idse.storage.entity.Term;
+import cn.iscas.idse.storage.entity.TopicRelation;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.CategoryAccessor;
 import cn.iscas.idse.storage.entity.accessor.DirectoryAccessor;
 import cn.iscas.idse.storage.entity.accessor.DocumentAccessor;
 import cn.iscas.idse.storage.entity.accessor.FileTypeAccessor;
+import cn.iscas.idse.storage.entity.accessor.LocationRelationAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
 import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
+import cn.iscas.idse.storage.entity.accessor.TaskRelationAccessor;
 import cn.iscas.idse.storage.entity.accessor.TermAccessor;
+import cn.iscas.idse.storage.entity.accessor.TopicRelationAccessor;
 
 import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.evolve.Deleter;
+import com.sleepycat.persist.evolve.Mutations;
 
 /**
  * all demo about usage BerkeleyDB
@@ -194,12 +202,29 @@ public class BerkelyDBDemo {
 		System.out.println(documentAccessor.getPrimaryDocumentID().count());
 	}
 	
+	public void showTopicRelationMatrix(){
+		TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<TopicRelation> cursor = topicRelationAccessor.getPrimaryDocumentID().entities();
+		for(TopicRelation entity : cursor)
+			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+	}
+	
+	public void showTaskRelationMatrix(){
+		TaskRelationAccessor topicRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<TaskRelation> cursor = topicRelationAccessor.getPrimaryDocumentID().entities();
+		for(TaskRelation entity : cursor)
+			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+	}
+	
+	public void showLocationRelationMatrix(){
+		LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<LocationRelation> cursor = locationRelationAccessor.getPrimaryDocumentID().entities();
+		for(LocationRelation entity : cursor)
+			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+	}
+	
 	public static void main(String[] args){
-		
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showDictionary();
-//		for(int i=0 ;i< 1000; i++){
-//		demo.getNumberDocuments();
-//		}
+		demo.showLocationRelationMatrix();
 	}
 }

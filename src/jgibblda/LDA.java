@@ -30,50 +30,48 @@ package jgibblda;
 
 import org.kohsuke.args4j.*;
 
+import cn.iscas.idse.rank.topic.TopicFile;
+
 public class LDA {
 	
-	public static void main(String args[]){
-		LDACmdOption option = new LDACmdOption();
-		CmdLineParser parser = new CmdLineParser(option);
+	private LDACmdOption option = null;
+	private Estimator estimator = null;
+	
+	public LDA(){
+		option = new LDACmdOption();
+		estimator = new Estimator();
+		option.est = true;
+		option.inf = false;
+		option.alpha = 0.01;
+		option.beta = 0.01;
+		option.K = 100;
+		option.niters = 100;
+		option.savestep = 500;
+		option.twords = 30;
+		option.dir = "F:\\JGibbLDA\\models\\casestudy\\";
 		
-		try {
-			if (args.length == 0){
-				showHelp(parser);
-				return;
-			}
-			
-			parser.parseArgument(args);
-			
-			if (option.est || option.estc){
-				Estimator estimator = new Estimator();
-				estimator.init(option);
-				estimator.estimate();
-			}
-			else if (option.inf){
-				Inferencer inferencer = new Inferencer();
-				inferencer.init(option);
-				
-				Model newModel = inferencer.inference();
-			
-				for (int i = 0; i < newModel.phi.length; ++i){
-					//phi: K * V
-					System.out.println("-----------------------\ntopic" + i  + " : ");
-					for (int j = 0; j < 10; ++j){
-						System.out.println(inferencer.globalDict.id2word.get(j) + "\t" + newModel.phi[i][j]);
-					}
-				}
-			}
-		}
-		catch (CmdLineException cle){
-			System.out.println("Command line error: " + cle.getMessage());
-			showHelp(parser);
-			return;
-		}
-		catch (Exception e){
-			System.out.println("Error in main: " + e.getMessage());
-			e.printStackTrace();
-			return;
-		}
+	}
+	
+	public static void main(String args[]){
+		
+		LDA lda = new LDA();
+		
+		lda.generateTopicFile("00000000");
+		
+	}
+	
+	public TopicFile getTopicFile(String datafile){
+		option.dfile = datafile;
+		estimator.init(option);
+		TopicFile topic = estimator.estimateTopic();
+		System.out.println(topic.toString());
+		return topic;
+	}
+	
+	public void generateTopicFile(String datafile){
+		option.dfile = datafile;
+		estimator.init(option);
+		estimator.estimate();
 	}
 	
 	public static void showHelp(CmdLineParser parser){

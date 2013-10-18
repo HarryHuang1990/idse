@@ -96,8 +96,8 @@ public class QueryResult {
 	 * output the query result on the console. 
 	 */
 	public void showResult(){
-		for(Iterator<Score>it = this.scoreQueue.iterator(); it.hasNext();){
-			Score score = it.next();
+		while(this.scoreQueue.size() != 0){
+			Score score = this.scoreQueue.poll();
 			System.out.println(score.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(score.getDocID()));
 		}
 	}

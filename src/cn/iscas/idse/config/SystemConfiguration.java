@@ -55,6 +55,11 @@ public class SystemConfiguration {
 	public static short maxSizeAllowed_TXT = 500;
 	
 	/**
+	 * 如果文件夹中的文件数超过150个，则不对这个文件夹下的这些文件进行分析。如果有子文件夹，需要继续判断。
+	 */
+	public static int maxFileCountPreDirectory = 150;
+	
+	/**
 	 * 待索引的目标目录列表
 	 */
 	public static List<String> targetDirectories = new ArrayList<String>();

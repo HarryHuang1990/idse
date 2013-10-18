@@ -35,5 +35,13 @@ public class AccessorFactory {
 	public static FileTypeAccessor getFileTypeAccessor(EntityStore store){
 		return new FileTypeAccessor(store);
 	}
-	
+	public static LocationRelationAccessor getLocationAccessor(EntityStore store){
+		return new LocationRelationAccessor(store);
+	}
+	public static TaskRelationAccessor getTaskAccessor(EntityStore store){
+		return new TaskRelationAccessor(store);
+	}
+	public static TopicRelationAccessor getTopicAccessor(EntityStore store){
+		return new TopicRelationAccessor(store);
+	}
 }

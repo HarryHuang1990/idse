@@ -152,6 +152,23 @@ public class IndexReader {
 	public EntityIndex<Integer, Document> getDocumentsByDirectoryID(int directoryID){
 		return this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID);
 	}
+	
+	/**
+	 * extract the directory entity list
+	 * @return
+	 */
+	public EntityCursor<Directory> getDirectorys(){
+		return this.directoryAccessor.getPrimaryDirectoryID().entities();
+	}
+	
+	/**
+	 * extract the directory entity list
+	 * @return
+	 */
+	public EntityCursor<Integer> getDirectoryIDs(){
+		return this.directoryAccessor.getPrimaryDirectoryID().keys();
+	}
+	
 	/**
 	 * extract the directory entity by the given directory id
 	 * @param directoryID
@@ -181,11 +198,32 @@ public class IndexReader {
 	}
 	
 	/**
+	 * return the documents list
+	 * @return
+	 */
+	public EntityCursor<Document> getDocuments(){
+		return this.documentAccessor.getPrimaryDocumentID().entities();
+	}
+	
+	/**
 	 * return the document number
 	 * @return
 	 */
 	public int getNumberDocuments(){
 		return (int) this.documentAccessor.getPrimaryDocumentID().count();
+	}
+
+	/**
+	 * return the directory number
+	 * @return
+	 */
+	public int getNumberDirectorys(){
+		return (int) this.directoryAccessor.getPrimaryDirectoryID().count();
+	}
+	
+	public static void main(String args[]){
+		IndexReader indexReader = new IndexReader();
+		System.out.println(indexReader.getAbsolutePathOfDocument(4497));
 	}
 }
 

@@ -13,6 +13,9 @@ import com.sleepycat.je.SecondaryConfig;
 import com.sleepycat.je.SecondaryDatabase;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
+import com.sleepycat.persist.evolve.Deleter;
+import com.sleepycat.persist.evolve.EvolveConfig;
+import com.sleepycat.persist.evolve.Mutations;
 
 import cn.iscas.idse.config.SystemConfiguration;
 
@@ -54,10 +57,18 @@ public class DBManager {
 			
 			dbEnvConfig.setTransactional(readOnly);
 			storeConfig.setTransactional(readOnly);
+			
+			// add mutations...
+			Mutations mutations = new Mutations();
+//			mutations.addDeleter(new Deleter("cn.iscas.idse.storage.entity.TaskRelation", 0));
+			storeConfig.setMutations(mutations);
+			
+			
 			// Instantiate the Environment and stores. This opens them and also possibly
 			// creates them.
 			this.dbEnvironment = new Environment(environmentHome, dbEnvConfig);
 			this.indexStore = new EntityStore(this.dbEnvironment, "Index", storeConfig);
+
 			
 		} catch(DatabaseException dbe) {
 			System.err.println("Error opening environment and store: " + dbe.toString());
@@ -98,6 +109,7 @@ public class DBManager {
 		// close the environment.
 		if (this.dbEnvironment != null) {
 			try {
+				this.dbEnvironment.cleanLog();
 				this.dbEnvironment.close();
 			} catch(DatabaseException dbe) {
 				System.err.println("Error closing environment" + dbe.toString());

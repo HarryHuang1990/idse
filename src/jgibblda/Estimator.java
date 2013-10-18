@@ -31,6 +31,8 @@ package jgibblda;
 import java.io.File;
 import java.util.Vector;
 
+import cn.iscas.idse.rank.topic.TopicFile;
+
 public class Estimator {
 	
 	// output model
@@ -87,6 +89,36 @@ public class Estimator {
 		computePhi();
 		trnModel.liter--;
 		trnModel.saveModel("model-final");
+	}
+	
+	/**
+	 * Estimate the documents and return the topic words of given file.
+	 * @return
+	 */
+	public TopicFile estimateTopic(){
+		System.out.println("Sampling " + trnModel.niters + " iteration!");
+		
+		int lastIter = trnModel.liter;
+		for (trnModel.liter = lastIter + 1; trnModel.liter < trnModel.niters + lastIter; trnModel.liter++){
+			System.out.println("Iteration " + trnModel.liter + " ...");
+			
+			// for all z_i
+			for (int m = 0; m < trnModel.M; m++){				
+				for (int n = 0; n < trnModel.data.docs[m].length; n++){
+					// z_i = z[m][n]
+					// sample from p(z_i|z_-i, w)
+					int topic = sampling(m, n);
+					trnModel.z[m].set(n, topic);
+				}// end for each word
+			}// end for each document
+		}// end iterations		
+		
+		System.out.println("Gibbs sampling completed!\n");
+		System.out.println("Saving the final model!\n");
+		computeTheta();
+		computePhi();
+		trnModel.liter--;
+		return trnModel.getModelTwords();
 	}
 	
 	/**
