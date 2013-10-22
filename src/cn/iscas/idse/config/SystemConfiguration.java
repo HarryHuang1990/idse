@@ -68,6 +68,23 @@ public class SystemConfiguration {
 	 */
 	public static String rootPath = "";
 	
+	
+	
+	/**
+	 * 过滤时间间隔-用于界定有效打开文件，对于那些打开之后再很短的时间内就关闭的文件，
+	 * 我们不认为他们具有很强的目的性。比如说我们在浏览网页的时候，对于我们感兴趣的，
+	 * 或者说重要的页面我们会关注很长的时间，但是对于一些无用的页面的俩说我们可能扫
+	 * 一眼就关闭了，前后打开的时间可能就几秒种。这个有效的文件打开时间下限用该参数来
+	 * 定义（单位为s）
+	 */
+	public static int validViewPeriod = 10; 
+	
+	/**
+	 * 用于task合并的相似度阈值
+	 */
+	public static float taskSimilarityThreshold = 0.5f;
+	
+	
 	static{
 		String formatSuffixValue = "";
 		String formatSuffixSplits[] = null;
