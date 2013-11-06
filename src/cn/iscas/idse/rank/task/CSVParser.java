@@ -18,6 +18,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 /**
  * parser the csv format get the necessary data from the data set.
+ * 
  * @author Harry Huang
  *
  */
@@ -34,6 +35,12 @@ public class CSVParser {
 	 * @param csvFile
 	 */
 	public void execute(String csvFile, String outputFile){
+		this.execute(csvFile);
+		this.outputTasks(outputFile + "_merge");
+		
+	}
+	
+	public List<List<Log>> execute(String csvFile){
 		try {
 			this.lastLog = null;
 			File file = new File(csvFile);
@@ -67,21 +74,18 @@ public class CSVParser {
 			}
 			reader.close();
 			this.filterLog();
-			this.outputTasks(outputFile);
 			this.intergateTheSimilarityTask();
-			this.outputTasks(outputFile + "_merge");
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		return this.tasks;
 	}
-	
 	
 	/**
 	 * cluster the log record and get the task.
+	 * step1 : split by VALID_VIEW_PERIOD (default 10s)
 	 */
-	public void filterLog(){
+	private void filterLog(){
 		System.out.println("filtering...");
 		List<Log>taskList = new ArrayList<Log>();
 		for(Log log : this.logs){
@@ -90,21 +94,51 @@ public class CSVParser {
 			}
 			else{
 				if(taskList.size() != 0){
-					this.tasks.add(taskList);
+					this.addSplitsAndAddRawTask(taskList);
 					taskList = new ArrayList<Log>();
 				}
 			}
 		}
 		if(taskList.size() != 0){
-			this.tasks.add(taskList);
+			this.addSplitsAndAddRawTask(taskList);
 			taskList = new ArrayList<Log>();
 		}
 	}
 	
 	/**
-	 * intergate the similar task 
+	 * cluster the log record and get the task.
+	 * step2 : split by INTERVAL_TASK_PERIOD (default 60s)
 	 */
-	public void intergateTheSimilarityTask(){
+	private void addSplitsAndAddRawTask(List<Log> rawTask){
+		List<Log>task = new ArrayList<Log>();
+		for(int i=0; i < rawTask.size()-1; i++){
+			task.add(rawTask.get(i));
+			if(this.getTimeInterval(rawTask.get(i), rawTask.get(i+1)) >= SystemConfiguration.intervalTaskPeriod){
+				if(task.size() != 0){
+					this.tasks.add(task);
+					task = new ArrayList<Log>();
+				}
+			}
+		}
+		task.add(rawTask.get(rawTask.size()-1));
+		this.tasks.add(task);
+	}
+	
+	/**
+	 * calculate the interval between the two adjacent record. 
+	 * @param formerLog
+	 * @param laterLog
+	 * @return
+	 */
+	private int getTimeInterval(Log formerLog, Log laterLog){
+		int interval = (int)((laterLog.getStart().getTime() - formerLog.getEnd().getTime()) / 1000);
+		return interval;
+	}
+	
+	/**
+	 * intergrate the similar task 
+	 */
+	private void intergateTheSimilarityTask(){
 		if(this.tasks.size() > 1){
 			List<Log> last = this.tasks.get(0);
 			List<List<Log>> newTasks = new ArrayList<List<Log>>();
@@ -204,7 +238,6 @@ public class CSVParser {
 					writer.write(log.toString() + "\n");
 				writer.write("\n");
 			}
-			
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
@@ -217,9 +250,8 @@ public class CSVParser {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		CSVParser parser = new CSVParser();
-		parser.execute("F:\\user_activity_log\\ManicTimeData_doc.csv", "F:\\user_activity_log\\tasks");
+		parser.execute("F:\\user_activity_log\\ManicTimeData_doc.csv", "F:\\user_activity_log\\tasks_v2");
 	}
 
 }

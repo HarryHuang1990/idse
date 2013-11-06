@@ -38,6 +38,7 @@ public class Search {
 		 */
 		this.queryParser.setQuery(query);
 		this.queryParser.parse();
+		System.out.println(this.queryParser.getQueryEntity().toString());
 		
 		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity());
 		if(queryResult != null)

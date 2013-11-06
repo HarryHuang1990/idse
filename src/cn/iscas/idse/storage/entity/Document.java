@@ -28,6 +28,7 @@ public class Document {
 	@SecondaryKey(relate=MANY_TO_ONE, relatedEntity=Directory.class, onRelatedEntityDelete=CASCADE)
 	private int directoryID;
 	
+	@SecondaryKey(relate=MANY_TO_ONE)
 	private String documentName;
 	
 	private Document(){}

@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 import cn.iscas.idse.config.InstanceManager;
+import cn.iscas.idse.config.PropertiesManager;
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.FileExtractorFactory;
@@ -65,6 +66,24 @@ public class IndexFileThread{
 		this.docID = docID;
 		this.file = file;
 		this.suffix = suffix;
+	}
+	
+	/**
+	 * initialize the parameter including the posting_content_id, posting_title_id
+	 */
+	public static void initParameter(){
+		postingTitleID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_title_id"));
+		postingContentID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_content_id"));
+	}
+	
+	/**
+	 * save the parameters
+	 */
+	public static void saveParameter(){
+		// save posting_title_id
+		PropertiesManager.writeProperties("berkeley.posting_title_id", "" + postingTitleID);
+		// save posting_content_id
+		PropertiesManager.writeProperties("berkeley.posting_content_id", "" + postingContentID);
 	}
 	
 	public void run(){

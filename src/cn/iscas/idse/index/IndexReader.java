@@ -1,6 +1,9 @@
 package cn.iscas.idse.index;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.sleepycat.persist.EntityCursor;
@@ -43,6 +46,51 @@ public class IndexReader {
 	private PostingTitleAccessor postingTitleAccessor = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
 	private PostingContentAccessor postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
 	
+	
+	public CategoryAccessor getCategoryAccessor() {
+		return categoryAccessor;
+	}
+
+	public DirectoryAccessor getDirectoryAccessor() {
+		return directoryAccessor;
+	}
+
+	public DocumentAccessor getDocumentAccessor() {
+		return documentAccessor;
+	}
+
+	public FileTypeAccessor getFileTypeAccessor() {
+		return fileTypeAccessor;
+	}
+
+	public TargetDirectoryAccessor getTargetDirectoryAccessor() {
+		return targetDirectoryAccessor;
+	}
+
+	public TermAccessor getTermAccessor() {
+		return termAccessor;
+	}
+
+	public PostingTitleAccessor getPostingTitleAccessor() {
+		return postingTitleAccessor;
+	}
+
+	public PostingContentAccessor getPostingContentAccessor() {
+		return postingContentAccessor;
+	}
+	
+	/**
+	 * get the documents by the given documen name
+	 * @param documentName
+	 * @return
+	 */
+	public List<Document> getDocumentsByName(String documentName){
+		EntityIndex<Integer, Document> entityIndex = this.documentAccessor.getSecondaryDocumentName().subIndex(documentName);
+		if(entityIndex != null)
+			return new ArrayList<Document>(entityIndex.map().values());
+		return null;
+	}
+
 	/**
 	 * Get the postings of specific term in the dictionary.
 	 * the postings includes title-part (denoted as Set[0]) and content-part (denoted as Set[1]).
@@ -149,16 +197,24 @@ public class IndexReader {
 	 * @param directoryID
 	 * @return
 	 */
-	public EntityIndex<Integer, Document> getDocumentsByDirectoryID(int directoryID){
+	public EntityIndex<Integer, Document> getDocumentsByDirectoryIDCursor(int directoryID){
 		return this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID);
+	}
+	
+	public Collection<Document> getDocumentsByDirectoryID(int directoryID){
+		return this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID).map().values();
 	}
 	
 	/**
 	 * extract the directory entity list
 	 * @return
 	 */
-	public EntityCursor<Directory> getDirectorys(){
+	public EntityCursor<Directory> getDirectorysCursor(){
 		return this.directoryAccessor.getPrimaryDirectoryID().entities();
+	}
+	
+	public Collection<Directory> getDirectorys(){
+		return this.directoryAccessor.getPrimaryDirectoryID().map().values();
 	}
 	
 	/**
@@ -201,8 +257,41 @@ public class IndexReader {
 	 * return the documents list
 	 * @return
 	 */
-	public EntityCursor<Document> getDocuments(){
+	public EntityCursor<Document> getDocumentsCursor(){
 		return this.documentAccessor.getPrimaryDocumentID().entities();
+	}
+	
+	public Collection<Document> getDocuments(){
+		return this.documentAccessor.getPrimaryDocumentID().map().values();
+	}
+	
+	/**
+	 * get the documentID by the directory and document name
+	 * @param directoryID
+	 * @param documentName
+	 * @return
+	 */
+	public int getDocumentIDByDirectory(int directoryID, String documentName){
+		int documentID = -1;
+		EntityCursor<Document> cursor = this.documentAccessor.getSecondaryDirectoryID().entities();
+		for(Document document : cursor){
+			if(documentName.equals(document.getDocumentName())){
+				documentID = document.getDocID();
+			}
+		}
+		return documentID;
+	}
+	
+	/**
+	 * return the target directory list
+	 * @return
+	 */
+	public EntityCursor<TargetDirectory> getTargetDirectoriesCursor(){
+		return this.targetDirectoryAccessor.getPrimaryTargetID().entities();
+	}
+	
+	public Collection<TargetDirectory> getTargetDirectories(){
+		return this.targetDirectoryAccessor.getPrimaryTargetID().map().values();
 	}
 	
 	/**
@@ -220,6 +309,77 @@ public class IndexReader {
 	public int getNumberDirectorys(){
 		return (int) this.directoryAccessor.getPrimaryDirectoryID().count();
 	}
+	
+	public Directory getDirectoryByPath(String path){
+		return this.directoryAccessor.getSecondaryDirectoryPath().get(path);
+	}
+	
+	public EntityCursor<FileType> getFileTypesCursor(){
+		return this.fileTypeAccessor.getPrimaryType().entities();
+	}
+	
+	public Collection<FileType> getFileTypes(){
+		return this.fileTypeAccessor.getPrimaryType().map().values();
+	}
+	
+
+	
+	
+	
+	/**
+	 * remove the targetDirectory entity of given ID
+	 * @param ID
+	 */
+	public void removeTargetDirectoryByID(short ID){
+		this.targetDirectoryAccessor.getPrimaryTargetID().delete(ID);
+	}
+	
+	public void removeDirectoryByID(int ID){
+		this.directoryAccessor.getPrimaryDirectoryID().delete(ID);
+	}
+	
+	public void removeDocumentByID(int ID){
+		this.documentAccessor.getPrimaryDocumentID().delete(ID);
+	}
+	
+	public void removeTerm(String term){
+		this.termAccessor.getPrimaryTerm().delete(term);
+	}
+	
+	
+	
+	
+	
+	
+	public void addAndUpdateTargetDirectory(TargetDirectory entity){
+		this.targetDirectoryAccessor.getPrimaryTargetID().put(entity);
+	}
+	
+	public void addAndUpdateDirectory(Directory entity){
+		this.directoryAccessor.getPrimaryDirectoryID().put(entity);
+	}
+	
+	public void addAndUpdateDocument(Document entity){
+		this.documentAccessor.getPrimaryDocumentID().put(entity);
+	}
+	
+	public void addAndUpdateFileType(FileType entity){
+		this.fileTypeAccessor.getPrimaryType().put(entity);
+	}
+	
+	public void addAndUpdateTerm(Term entity){
+		this.termAccessor.getPrimaryTerm().put(entity);
+	}
+	
+	
+	public boolean isExistDirectoryByPath(String path){
+		return this.directoryAccessor.getSecondaryDirectoryPath().contains(path);
+	}
+	
+	public boolean isExistDocumentByDocID(int docID){
+		return this.documentAccessor.getPrimaryDocumentID().contains(docID);
+	}
+
 	
 	public static void main(String args[]){
 		IndexReader indexReader = new IndexReader();

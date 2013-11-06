@@ -3,7 +3,9 @@ package cn.iscas.idse.storage.entity;
 import static com.sleepycat.persist.model.DeleteAction.NULLIFY;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.persist.model.Entity;
@@ -27,7 +29,11 @@ public class TaskRelation {
 	@PrimaryKey
 	private int documentID;
 
-	private Set<Integer> relatedDocumentIDs = new HashSet<Integer>();
+	/**
+	 * IDs of documents interacting with the current document, 
+	 * and the corresponding frequency of interacting.
+	 */
+	private Map<Integer, Integer> relatedDocumentIDs = new HashMap<Integer, Integer>();
 
 	private TaskRelation(){}
 	
@@ -43,12 +49,25 @@ public class TaskRelation {
 		this.documentID = documentID;
 	}
 
-	public Set<Integer> getRelatedDocumentIDs() {
+	public Map<Integer, Integer> getRelatedDocumentIDs() {
 		return relatedDocumentIDs;
 	}
 
-	public void setRelatedDocumentIDs(Set<Integer> relatedDocumentIDs) {
+	public void setRelatedDocumentIDs(Map<Integer, Integer> relatedDocumentIDs) {
 		this.relatedDocumentIDs = relatedDocumentIDs;
 	}
+
+	/**
+	 * put the id of document interacting with the one, 
+	 * and increase the frequency by 1 
+	 * @param docID
+	 */
+	public void putInteractionRecord(int docID){
+		if(this.relatedDocumentIDs.containsKey(docID))
+			this.relatedDocumentIDs.put(docID, this.relatedDocumentIDs.get(docID) + 1);
+		else 
+			this.relatedDocumentIDs.put(docID, 1);
+	}
+	
 	
 }

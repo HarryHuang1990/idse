@@ -41,4 +41,8 @@ public class Query {
 		this.queryPosting = queryPosting;
 	}
 	
+	public String toString(){
+		return this.queryPosting.keySet().toString();
+	}
+	
 }

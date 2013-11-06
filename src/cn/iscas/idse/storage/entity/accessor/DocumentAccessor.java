@@ -28,6 +28,7 @@ public class DocumentAccessor {
 	 * Secondary key accessor
 	 */
 	private SecondaryIndex<Integer, Integer, Document> SecondaryDirectoryID;
+	private SecondaryIndex<String, Integer, Document> SecondaryDocumentName;
 	
 	public DocumentAccessor(EntityStore store){
 		/*
@@ -38,6 +39,7 @@ public class DocumentAccessor {
 		 * create a secondary accessor.
 		 */
 		this.SecondaryDirectoryID = store.getSecondaryIndex(this.primaryDocumentID, Integer.class, "directoryID");
+		this.SecondaryDocumentName = store.getSecondaryIndex(this.primaryDocumentID, String.class, "documentName");
 	}
 
 	public PrimaryIndex<Integer, Document> getPrimaryDocumentID() {
@@ -46,6 +48,10 @@ public class DocumentAccessor {
 
 	public SecondaryIndex<Integer, Integer, Document> getSecondaryDirectoryID() {
 		return SecondaryDirectoryID;
+	}
+
+	public SecondaryIndex<String, Integer, Document> getSecondaryDocumentName() {
+		return SecondaryDocumentName;
 	}
 }
 

@@ -1,7 +1,9 @@
 package cn.iscas.idse.index;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,7 +42,15 @@ public class DiskScanner {
 	private int directoryNumber = 0;
 //	private int maxDepth = 0;
 //	private int averageDepth = 0;
+	/**
+	 * the statistics of the file type distribution. 
+	 */
 	private Map<String, Integer> fileTypeDistribution = new HashMap<String, Integer>();
+	/**
+	 * set of directory in the given target directories, including the themselves.
+	 */
+	private List<String> directorySet = new ArrayList<String>();
+	
 	
 	public DiskScanner(	TargetDirectoryAccessor targetDirectoryAccessor){
 		this.targetDirectoryAccessor = targetDirectoryAccessor;
@@ -64,19 +74,17 @@ public class DiskScanner {
 		System.out.println("file type distribution : \n" + this.fileTypeDistribution.toString());
 	}
 	
-
-	
 	/**
 	 * scan directory
 	 * @param directory
 	 */
 	private void scanDirectory(File directory, short targetID){
+		
+		// save the directory into the buffer.
+		this.directorySet.add(Converter.convertBackSlashToSlash(directory.getAbsolutePath()));
+		
 		// directory number increases by 1
-		int directoryID = ++this.directoryNumber;
-//		// write the directory info into db.
-//		if(!this.directoryAccessor.getSecondaryDirectoryPath().contains(Converter.convertBackSlashToSlash(directory.getAbsolutePath())))
-//			this.directoryAccessor.getPrimaryDirectoryID().putNoReturn(
-//					new Directory(directoryID, targetID, Converter.convertBackSlashToSlash(directory.getAbsolutePath())));
+		++this.directoryNumber;
 		
 		// get list of file and directory obj.
 		File[]files = directory.listFiles();
@@ -90,13 +98,6 @@ public class DiskScanner {
 				else{
 					// file number increases by 1
 					this.fileNumber ++;
-//					//write the file info into db
-//					if(!this.documentAccessor.getPrimaryDocumentID().contains(this.fileNumber))
-//						this.documentAccessor.getPrimaryDocumentID().putNoReturn(
-//								new Document(
-//										this.fileNumber,
-//										directoryID, 
-//										object.getName()));
 					
 					// get the file type
 					int suffixIndexStart = object.getName().lastIndexOf(".");
@@ -107,12 +108,7 @@ public class DiskScanner {
 					else{
 						suffix = ".";
 					}
-					
-//					// add the documentID to the type index
-//					if(SystemConfiguration.fileTypeBuff.containsKey(suffix)){
-//						SystemConfiguration.fileTypeBuff.get(suffix).getDocumentIDs().add(this.fileNumber);
-//					}
-					
+										
 					// update the file type distribution
 					if(this.fileTypeDistribution.containsKey(suffix)){
 						this.fileTypeDistribution.put(suffix, this.fileTypeDistribution.get(suffix) + 1);
@@ -132,4 +128,9 @@ public class DiskScanner {
 	public int getDirectoryNumber() {
 		return directoryNumber;
 	}
+
+	public List<String> getDirectorySet() {
+		return directorySet;
+	}
+	
 }

@@ -265,7 +265,7 @@ public class InputDataForLDA {
 		System.out.println("formating...");
 		long start = System.currentTimeMillis();
 		
-		EntityCursor<Document> cursor = indexReader.getDocuments();
+		EntityCursor<Document> cursor = indexReader.getDocumentsCursor();
 		int total_size = indexReader.getNumberDocuments();
 		int point = 0;
 		for(Document doc : cursor){
@@ -273,6 +273,7 @@ public class InputDataForLDA {
 			this.generatorInputData(new File(indexReader.getAbsolutePathOfDocument(doc.getDocID())), doc.getDocID());
 			System.out.println("=======½ø¶È£º" + point + " / " + total_size + " ========");
 		}
+		cursor.close();
 		
 		long end = System.currentTimeMillis();
 		System.out.println("formating done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");

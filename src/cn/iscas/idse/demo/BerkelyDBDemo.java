@@ -152,10 +152,10 @@ public class BerkelyDBDemo {
 		TermAccessor ca = AccessorFactory.getTermAccessor(SystemConfiguration.database.getIndexStore());
 		EntityCursor<Term> cursor = ca.getPrimaryTerm().entities();
 		for(Term c : cursor){
-			if(c.getTerm().contains("亚")||c.getTerm().contains("在")||c.getTerm().contains("笔")){
+			//if(c.getTerm().contains("亚")||c.getTerm().contains("在")||c.getTerm().contains("笔")){
 				System.out.println(c.getTerm() + "\t" + c.getPostingTitle().toString() + "\t" + c.getPostingContent().toString());
 				showPosting(c.getTerm());
-			}
+			//}
 		}
 		cursor.close();
 	}
@@ -225,6 +225,12 @@ public class BerkelyDBDemo {
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showLocationRelationMatrix();
+		demo.showEntityDirectory();
+//		demo.showEntityDocument();
+//		demo.showEntityFileType();
+//		demo.showDictionary();
+//		demo.showPostingTitle();
+//		demo.showPostingContent();
+		
 	}
 }

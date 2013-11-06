@@ -78,6 +78,11 @@ public class SystemConfiguration {
 	 * 定义（单位为s）
 	 */
 	public static int validViewPeriod = 10; 
+	/**
+	 * task时间间隔-用于度量task之间的时间跨度，如果相邻两个文件之间间隔时间超过10分钟，
+	 * 则认为启动了一个新的task。
+	 */
+	public static int intervalTaskPeriod = 600;
 	
 	/**
 	 * 用于task合并的相似度阈值
@@ -102,13 +107,13 @@ public class SystemConfiguration {
 		/*
 		 * 加载文件类型后缀和插件（类名）
 		 */
-		formatSuffixValue = PropertiesManager.getApp("format.suffix");
+		formatSuffixValue = PropertiesManager.getKeyValue("format.suffix");
 		formatSuffixSplits = formatSuffixValue.split(",");
 		
-		classValue = PropertiesManager.getApp("format.classpath");
+		classValue = PropertiesManager.getKeyValue("format.classpath");
 		classSplits = classValue.split(",");
 		
-		formatClassValue = PropertiesManager.getApp("format.suffix_classpath_map");
+		formatClassValue = PropertiesManager.getKeyValue("format.suffix_classpath_map");
 		formatClassSplits = formatClassValue.split(",");
 		
 		for(int i=0; i<formatSuffixSplits.length; i++)
@@ -117,7 +122,7 @@ public class SystemConfiguration {
 		/*
 		 * 加载待索引的目标目录列表 
 		 */
-		targetDirectoryValues = PropertiesManager.getApp("target.directory");
+		targetDirectoryValues = PropertiesManager.getKeyValue("target.directory");
 		targetDirectorySplits = targetDirectoryValues.split(",");
 		for(int i=0; i<targetDirectorySplits.length; i++){
 			targetDirectories.add(targetDirectorySplits[i]);
@@ -134,19 +139,19 @@ public class SystemConfiguration {
 		 * 判断索引目标是否改变
 		 */
 		database = new DBManager();
-		TargetDirectoryAccessor accessor = new TargetDirectoryAccessor(database.getIndexStore());
-		for(String targetPath : targetDirectories){
-			if(!accessor.getSecondaryTargetPath().contains(targetPath)){
-				//put the target path into the Berkeley DB
-				TargetDirectory targetAccessor = new TargetDirectory(targetPath);
-				accessor.getPrimaryTargetID().putNoReturn(targetAccessor);
-			}
-		}
+//		TargetDirectoryAccessor accessor = new TargetDirectoryAccessor(database.getIndexStore());
+//		for(String targetPath : targetDirectories){
+//			if(!accessor.getSecondaryTargetPath().contains(targetPath)){
+//				//put the target path into the Berkeley DB
+//				TargetDirectory targetAccessor = new TargetDirectory(targetPath);
+//				accessor.getPrimaryTargetID().putNoReturn(targetAccessor);
+//			}
+//		}
 		
 		/*
 		 * 加载文件格式类别和文件格式列表
 		 */
-		formatCategory = PropertiesManager.getApp("format.category");
+		formatCategory = PropertiesManager.getKeyValue("format.category");
 		formatCategorySplits = formatCategory.split(",");
 		
 		String type = "";
@@ -157,12 +162,14 @@ public class SystemConfiguration {
 		for(int i=0; i<formatCategorySplits.length; i++){
 			if(!categoryAccessor.getPrimaryCategoryID().contains((byte)(i+1))){
 				categoryAccessor.getPrimaryCategoryID().putNoReturn(new Category((byte)(i+1), formatCategorySplits[i]));
-				type = PropertiesManager.getApp("format.category." + formatCategorySplits[i]);
-				typeSplits = type.split(",");
-				for(int j=0; j<typeSplits.length; j++){
-					fileTypeBuff.put(typeSplits[j], new FileType(typeSplits[j], (byte)(i+1)));
-				}
+			}
+			type = PropertiesManager.getKeyValue("format.category." + formatCategorySplits[i]);
+			typeSplits = type.split(",");
+			for(int j=0; j<typeSplits.length; j++){
+				fileTypeBuff.put(typeSplits[j], new FileType(typeSplits[j], (byte)(i+1)));
 			}
 		}
+		
+		
 	}
 }

@@ -74,7 +74,7 @@ public class MatrixWriter {
 		// loop and get the documentIDs in the same directory
 		for(int dirID : cursor){
 			count++;
-			Set<Integer> documentIDs = reader.getDocumentsByDirectoryID(dirID).sortedMap().keySet();
+			Set<Integer> documentIDs = reader.getDocumentsByDirectoryIDCursor(dirID).sortedMap().keySet();
 			if(documentIDs.size() > 1 && documentIDs.size() < SystemConfiguration.maxFileCountPreDirectory){
 				for(int documentID : documentIDs){
 					LocationRelation locationRelation = new LocationRelation(documentID);
@@ -85,6 +85,7 @@ public class MatrixWriter {
 			}
 			System.out.println("finished " + count + "/" + total + "...");
 		}
+		cursor.close();
 	}
 	
 	/**
@@ -102,17 +103,11 @@ public class MatrixWriter {
 	/**
 	 * write task location matrix into the Berkeley DB
 	 */
-	public void writeTaskRelationMatrix(){
-		TaskRelation taskRelation = new TaskRelation(1);
-		taskRelation.getRelatedDocumentIDs().add(1);
-		taskRelation.getRelatedDocumentIDs().add(2);
-		
-		TaskRelation taskRelation2 = new TaskRelation(2);
-		taskRelation2.getRelatedDocumentIDs().add(1);
-		taskRelation2.getRelatedDocumentIDs().add(2);
-		
-		this.taskRelationAccessor.getPrimaryDocumentID().putNoReturn(taskRelation);
-		this.taskRelationAccessor.getPrimaryDocumentID().putNoReturn(taskRelation2);
+	public void writeTaskRelationMatrix(Map<Integer, TaskRelation> taskRelationGraph){
+		this.deleteTaskRelationMatrix();
+		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
+			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
+		}
 	}
 	
 	/**
@@ -120,6 +115,7 @@ public class MatrixWriter {
 	 * @return
 	 */
 	private void deleteTaskRelationMatrix(){
+		System.out.println("removing task matrix...");
 		Set<Integer> keys = this.taskRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
 		if(keys != null)
 			for(int key : keys)
