@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.config.PropertiesManager;
 import cn.iscas.idse.config.SystemConfiguration;
@@ -25,9 +27,9 @@ import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
 
 public class IndexFileThread{
+	private static final Logger log = Logger.getLogger(Index.class);
 	
 	public static DiskScanner scanner = null;
-	
 	public static int numberOfFinishedFile = 0;
 	
 	/**
@@ -159,7 +161,7 @@ public class IndexFileThread{
 		}
 
 		IndexFileThread.numberOfFinishedFile ++;
-		System.out.println("finished : " + IndexFileThread.numberOfFinishedFile + "/" + IndexFileThread.scanner.getFileNumber() + "(" + (IndexFileThread.numberOfFinishedFile*100.0/IndexFileThread.scanner.getFileNumber()) + "%)");
+		//System.out.println("finished : " + IndexFileThread.numberOfFinishedFile + "/" + IndexFileThread.scanner.getFileNumber() + "(" + (IndexFileThread.numberOfFinishedFile*100.0/IndexFileThread.scanner.getFileNumber()) + "%)");
 	}
 	
 	/**
@@ -195,7 +197,7 @@ public class IndexFileThread{
 							if(!((StopWordFilter)InstanceManager.getInstance(InstanceManager.CLASS_STOPWORDFILTER)).isStopWord(word)){
 								//add into index
 								//put the term info into the index.
-								//System.out.println(word + "\t" + offset);
+								////System.out.println(word + "\t" + offset);
 								if(isTitle){
 									//add offset
 									if(this.postingTitles.containsKey(word)){

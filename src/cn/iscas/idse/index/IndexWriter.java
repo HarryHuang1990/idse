@@ -45,28 +45,9 @@ import cn.iscas.idse.utilities.Converter;
  */
 public class IndexWriter {
 	
-//	private DiskScanner scanner = null;
 	
 	public int directoryID = 1;
 	public int documentID = 1;
-//	/**
-//	 * dictionary for index. store the term list temporarily in the memory.
-//	 */
-//	private Map<String, Term> dictionary = new HashMap<String, Term>();
-//	/**
-//	 * posting list for title of a document who is being indexed.
-//	 * once index for this document is finished, the list writes into the database 
-//	 * and the memory is released.
-//	 */
-//	private Map<String, PostingTitle> postingTitles = new HashMap<String, PostingTitle>();
-//	private int postingTitleID = 1;
-//	/**
-//	 * posting list for title of a document who is being indexed.
-//	 * once index for this document is finished, the list writes into the database 
-//	 * and the memory is released.
-//	 */
-//	private Map<String, PostingContent> postingContents = new HashMap<String, PostingContent>();
-//	private int postingContentID = 1;
 	/**
 	 * Accessor
 	 */
@@ -74,8 +55,6 @@ public class IndexWriter {
 	private DirectoryAccessor directoryAccessor = null;
 	private DocumentAccessor documentAccessor = null;
 	private TermAccessor termAccessor = null;
-//	private PostingTitleAccessor postingTitleAccessor = null;
-//	private PostingContentAccessor postingContentAccessor = null;
 	private FileTypeAccessor fileTypeAccessor = null;
 	
 	private WordSegmentation wordSegmentor = null;
@@ -91,7 +70,7 @@ public class IndexWriter {
 //	private ThreadPool threadPool = null;
 	private ExecutorService threadPool = null;
 	
-	public IndexWriter(){
+	public IndexWriter(WordSegmentation wordSegmentor){
 		/*
 		 * initialize the accessors
 		 */
@@ -104,17 +83,14 @@ public class IndexWriter {
 		/*
 		 * get the instance of wordSegmentation
 		 */
-		this.wordSegmentor = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
+		this.wordSegmentor = wordSegmentor;
 		/*
 		 * initialize the thread pool
 		 */
 //		this.threadPool = new ThreadPool(this.THREAD_SIZE);
 		this.threadPool = Executors.newFixedThreadPool(this.THREAD_SIZE);
-		
-		this.initParameter();
-		
 	}
-	
+
 	
 	private void initParameter(){
 		this.directoryID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.directory_id"));
@@ -127,9 +103,55 @@ public class IndexWriter {
 	}
 	
 	/**
+	 * index specific directory
+	 *  
+	 * @param targetPath
+	 */
+	public void executeIndexing(String targetPath){
+		this.initParameter();
+		try {
+			//put the target path into the Berkeley DB
+			if(!this.targetDirectoryAccessor.getSecondaryTargetPath().contains(targetPath)){
+				TargetDirectory targetAccessor = new TargetDirectory(targetPath);
+				this.targetDirectoryAccessor.getPrimaryTargetID().putNoReturn(targetAccessor);
+			}
+			
+			//initialize the parameter
+			IndexFileThread.initParameter();
+			
+			//scan the target directory, then
+			//we can know how many files and directory will be indexed.
+			//the directory and file info (includes name and type) will be write into the db.
+			IndexFileThread.scanner = new DiskScanner();
+			IndexFileThread.scanner.initAndClear();
+			IndexFileThread.scanner.scanDirectory(new File(targetPath));
+			
+			//get target directories
+			long start = System.currentTimeMillis();
+			//index each directory.
+			TargetDirectory targetDirectory = this.targetDirectoryAccessor.getSecondaryTargetPath().get(targetPath);
+			this.indexDirectory(new File(targetPath), targetDirectory.getTargetID());
+			//wait until the thread pool is empty.
+			this.threadPool.shutdown();
+			this.threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+			
+			this.writeTypeIndexIntoDB();
+			//write dictionary into db.
+			this.writeDictionaryIntoDB();
+			
+			long end = System.currentTimeMillis();
+			//System.out.println("index done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
 	 * start indexing the target directories.
 	 */
 	public void executeIndexing(){
+		this.initParameter();
 		try {
 			//put the target path into the Berkeley DB
 			for(String targetPath : SystemConfiguration.targetDirectories){
@@ -148,33 +170,23 @@ public class IndexWriter {
 			IndexFileThread.scanner = new DiskScanner(this.targetDirectoryAccessor);
 			IndexFileThread.scanner.scanDisk();
 			
-			//initialize the segmentor
-			this.wordSegmentor.initialize();
 			//get target directories
-			System.out.println("Indexing...");
 			long start = System.currentTimeMillis();
 			EntityCursor<TargetDirectory> targets = targetDirectoryAccessor.getPrimaryTargetID().entities();
 			//index each directory.
 			for(TargetDirectory target : targets){
 				this.indexDirectory(new File(target.getTargetPath()), target.getTargetID());
 			}
-			/**
-			 * wait until the thread pool is empty.
-			 */
+			//wait until the thread pool is empty.
 			this.threadPool.shutdown();
 			this.threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-			System.out.println("threads...finished...");
 			
 			this.writeTypeIndexIntoDB();
 			//write dictionary into db.
 			this.writeDictionaryIntoDB();
 			
-			
 			long end = System.currentTimeMillis();
-			System.out.println("index done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
-			// destroy the segmentor
-			this.wordSegmentor.exitICTCLAS();
-			this.wordSegmentor.destoryInstance();
+			//System.out.println("index done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -210,7 +222,6 @@ public class IndexWriter {
 			this.termAccessor.getPrimaryTerm().put(entry.getValue());
 		}
 		//release the memory
-		
 		IndexFileThread.dictionary.clear();
 		IndexFileThread.saveParameter();
 		this.saveParameter();
@@ -264,11 +275,14 @@ public class IndexWriter {
 				}
 			}
 		}
-//		this.numberOfDirectory++;
 	}
 
 	public static void main(String[] args){
-		IndexWriter indexer = new IndexWriter();
+		WordSegmentation wordSegmentor = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
+		wordSegmentor.initialize();
+		IndexWriter indexer = new IndexWriter(wordSegmentor);
 		indexer.executeIndexing();
+		wordSegmentor.exitICTCLAS();
+		wordSegmentor.destoryInstance();
 	}
 }

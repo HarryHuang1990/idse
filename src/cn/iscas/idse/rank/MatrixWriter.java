@@ -7,13 +7,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.log4j.Logger;
+
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityIndex;
 import com.sleepycat.persist.evolve.Deleter;
 import com.sleepycat.persist.evolve.Mutations;
 
 import cn.iscas.idse.config.SystemConfiguration;
+import cn.iscas.idse.index.Index;
 import cn.iscas.idse.index.IndexReader;
+import cn.iscas.idse.rank.task.mining.DefaultTaskMining;
+import cn.iscas.idse.rank.topic.TopicSimilarity;
 import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.LocationRelation;
 import cn.iscas.idse.storage.entity.TaskRelation;
@@ -26,28 +31,41 @@ import cn.iscas.idse.storage.entity.accessor.TaskRelationAccessor;
 
 public class MatrixWriter {
 	
+	private static final Logger log = Logger.getLogger(MatrixWriter.class);
+	private String userActivityLogFile = "";
+	private String LDAdocIDListFileName = "";
+	private String LDADataFileName = "";
+	
 	TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
 	LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
 	TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 	DocumentAccessor documentAccessor = AccessorFactory.getDocumentAccessor(SystemConfiguration.database.getIndexStore());
+
+	
+	public MatrixWriter(){}
+	public MatrixWriter(
+			String userActivityLogFile,
+			String LDAdocIDListFileName,
+			String LDADataFileName
+			){
+		this.userActivityLogFile = userActivityLogFile;
+		this.LDAdocIDListFileName = LDAdocIDListFileName;
+		this.LDADataFileName = LDADataFileName;
+	}
 	
 	/**
 	 * write topic relation matrix into the Berkeley DB
-	 * @param topicDocsMap	topicID-docID
 	 */
-	public void writeTopicRelationMatrix(Map<Integer, List<Integer>>topicDocsMap){
+	public void writeTopicRelationMatrix(){
 		this.deleteTopicRelationMatrix();
-		for(Entry<Integer, List<Integer>>entry : topicDocsMap.entrySet()){
-			if(entry.getValue().size() > 1){
-				for(int docID : entry.getValue()){
-					TopicRelation topicRelation = new TopicRelation(docID);
-					topicRelation.getRelatedDocumentIDs().addAll(entry.getValue());
-					topicRelation.getRelatedDocumentIDs().remove(docID);
-					this.topicRelationAccessor.getPrimaryDocumentID().putNoReturn(topicRelation);
-				}
-			}
-			
+		log.info("generating the topic relation graph...");
+		TopicSimilarity ts = new TopicSimilarity(this.LDAdocIDListFileName, this.LDADataFileName);
+		ts.run();
+		Map<Integer, TopicRelation> topicRelationGraph = ts.getTopicRelationGraph();
+		for(Entry<Integer, TopicRelation>entry : topicRelationGraph.entrySet()){
+			this.topicRelationAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
 		}
+		log.info("topic relation graph DONE.");
 	}
 	
 	/**
@@ -55,6 +73,7 @@ public class MatrixWriter {
 	 * @return
 	 */
 	private void deleteTopicRelationMatrix(){
+		log.info("removing the topic relation graph...");
 		Set<Integer> keys = this.topicRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
 		if(keys != null)
 			for(int key : keys)
@@ -103,11 +122,16 @@ public class MatrixWriter {
 	/**
 	 * write task location matrix into the Berkeley DB
 	 */
-	public void writeTaskRelationMatrix(Map<Integer, TaskRelation> taskRelationGraph){
+	public void writeTaskRelationMatrix(){
 		this.deleteTaskRelationMatrix();
+		log.info("generating the task relation graph...");
+		DefaultTaskMining dtm = new DefaultTaskMining();
+		dtm.generateTaskRelationGraph(this.userActivityLogFile);
+		Map<Integer, TaskRelation> taskRelationGraph = dtm.getTaskRelationGraph();
 		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
 			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
 		}
+		log.info("task relation graph DONE.");
 	}
 	
 	/**
@@ -115,7 +139,7 @@ public class MatrixWriter {
 	 * @return
 	 */
 	private void deleteTaskRelationMatrix(){
-		System.out.println("removing task matrix...");
+		log.info("removing the task relation graph...");
 		Set<Integer> keys = this.taskRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
 		if(keys != null)
 			for(int key : keys)
@@ -128,8 +152,11 @@ public class MatrixWriter {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		MatrixWriter w = new MatrixWriter();
-		w.writeLocationRelationMatrix();
+		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
+//		w.writeLocationRelationMatrix();
+//		w.writeTaskRelationMatrix();
+		w.writeTopicRelationMatrix();
+		
 	}
 
 }

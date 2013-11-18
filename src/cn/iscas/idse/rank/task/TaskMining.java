@@ -24,12 +24,10 @@ import cn.iscas.idse.storage.entity.TaskRelation;
 public class TaskMining {
 	
 	protected IndexReader indexReader = new IndexReader();
-	protected MatrixWriter matrixWriter = new MatrixWriter();
-	
 	protected Map<Integer, TaskRelation> taskRelationGraph = new HashMap<Integer, TaskRelation>();
 	
-	public void saveTaskRelationGraph(){
-		this.matrixWriter.writeTaskRelationMatrix(this.taskRelationGraph);
+	public Map<Integer, TaskRelation> getTaskRelationGraph() {
+		return taskRelationGraph;
 	}
 	
 	/**
@@ -59,6 +57,7 @@ public class TaskMining {
 		return this.identityFile(prefixInfo, docNameInLog);
 	}
 	
+
 	/**
 	 * identity the doc name in log from the Berkeley DB.
 	 * Return the docID if the given doc exists in the 
@@ -76,11 +75,12 @@ public class TaskMining {
 		List<Document> documents = this.indexReader.getDocumentsByName(docNameInLog);
 		
 		if(prefixInfo == null || "".equals(prefixInfo)){
-			if(documents != null)
+			if(documents != null && documents.size() != 0){
 				documentID = documents.get(0).getDocID();
+			}
 		}
 		else{
-			if(documents != null){
+			if(documents != null && documents.size() != 0){
 				// index中目录是没有/结尾的，所以这里做一个校验
 				if("/".equals(prefixInfo) || "\\".equals(prefixInfo)){
 					prefixInfo = prefixInfo.substring(0, prefixInfo.length()-1);

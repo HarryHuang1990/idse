@@ -60,7 +60,7 @@ public class DBManager {
 			
 			// add mutations...
 			Mutations mutations = new Mutations();
-//			mutations.addDeleter(new Deleter("cn.iscas.idse.storage.entity.TaskRelation", 0));
+//			mutations.addDeleter(new Deleter("cn.iscas.idse.storage.entity.TopicRelation", 0));
 			storeConfig.setMutations(mutations);
 			
 			

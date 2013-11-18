@@ -315,6 +315,15 @@ public class Model {
 	}
 	
 	/**
+	 * get theta (topic distribution) for this model
+	 * @author Harry Huang
+	 * @date 2013.11.17
+	 */
+	public double[][] getModelTheta(){
+		return theta;
+	}
+	
+	/**
 	 * Save word-topic distribution
 	 */
 	

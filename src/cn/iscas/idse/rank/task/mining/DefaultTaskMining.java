@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import cn.iscas.idse.rank.task.CSVParser;
 import cn.iscas.idse.rank.task.Log;
@@ -18,6 +19,16 @@ import cn.iscas.idse.storage.entity.TaskRelation;
 public class DefaultTaskMining extends TaskMining{
 	
 	private List<List<Log>> rawtasks = new ArrayList<List<Log>>();
+	
+	public void outputGraph(){
+		for(Entry<Integer, TaskRelation>entry : this.taskRelationGraph.entrySet()){
+			System.out.print(entry.getKey() + " \t : \t");
+			for(Entry<Integer, Integer> record : entry.getValue().getRelatedDocumentIDs().entrySet()){
+				System.out.print("<" + record.getKey() + ", " + record.getValue() + ">");
+			}
+			System.out.println();
+		}
+	}
 	
 	
 	/**
@@ -51,6 +62,7 @@ public class DefaultTaskMining extends TaskMining{
 	}
 	
 	private void addToGraph(int docID1, int docID2){
+		if(docID1 == docID2)return;
 		if(this.taskRelationGraph.containsKey(docID1)){
 			this.taskRelationGraph.get(docID1).putInteractionRecord(docID2);
 		}
@@ -71,7 +83,9 @@ public class DefaultTaskMining extends TaskMining{
 	}
 	
 	public static void main(String[] args) {
-		
+		DefaultTaskMining dtm = new DefaultTaskMining();
+		dtm.generateTaskRelationGraph("F:/user_activity_log/ManicTimeData_doc.csv");
+		dtm.outputGraph();
 	}
 
 }

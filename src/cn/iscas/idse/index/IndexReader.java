@@ -218,6 +218,21 @@ public class IndexReader {
 	}
 	
 	/**
+	 * return the direcory entity list of specific rootDir
+	 * @param rootDir
+	 * @return
+	 */
+	public Collection<Directory> getDirectorys(String rootDir){
+		Collection<Directory> dirs = new ArrayList<Directory>();
+		for(Directory directory : this.directoryAccessor.getPrimaryDirectoryID().map().values()){
+			if(directory.getDirectoryPath().startsWith(rootDir)){
+				dirs.add(directory);
+			}
+		}
+		return dirs;
+	}
+	
+	/**
 	 * extract the directory entity list
 	 * @return
 	 */
@@ -371,7 +386,6 @@ public class IndexReader {
 		this.termAccessor.getPrimaryTerm().put(entity);
 	}
 	
-	
 	public boolean isExistDirectoryByPath(String path){
 		return this.directoryAccessor.getSecondaryDirectoryPath().contains(path);
 	}
@@ -383,7 +397,13 @@ public class IndexReader {
 	
 	public static void main(String args[]){
 		IndexReader indexReader = new IndexReader();
-		System.out.println(indexReader.getAbsolutePathOfDocument(4497));
+		int[] documents = new int[]{81840, 82259};
+		for(int i=0; i<documents.length; i++)
+			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
+		
+//		System.out.println(indexReader.getDocumentsByName("ÇîÓÎ½õÄÒ-¼ÃÖÝµº.pdf").get(0).getDocID());
+		
+		
 	}
 }
 

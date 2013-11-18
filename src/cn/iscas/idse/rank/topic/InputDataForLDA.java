@@ -8,28 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.sleepycat.persist.EntityCursor;
+import org.apache.log4j.Logger;
 
 import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.FileExtractorFactory;
-import cn.iscas.idse.index.DiskScanner;
-import cn.iscas.idse.index.IndexFileThread;
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.index.segmentation.CamelCase;
 import cn.iscas.idse.index.segmentation.StopWordFilter;
 import cn.iscas.idse.index.segmentation.TermLemmatizer;
 import cn.iscas.idse.index.segmentation.WordSegmentation;
-import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
-import cn.iscas.idse.storage.entity.PostingContent;
-import cn.iscas.idse.storage.entity.PostingTitle;
-import cn.iscas.idse.storage.entity.TargetDirectory;
-import cn.iscas.idse.storage.entity.Term;
-import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
-import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
-import cn.iscas.idse.utilities.Converter;
+
+import com.sleepycat.persist.EntityCursor;
 
 /**
  * Implements the input data generation of LDA.
@@ -53,10 +45,12 @@ import cn.iscas.idse.utilities.Converter;
  */
 public class InputDataForLDA {
 	
+	private static final Logger log = Logger.getLogger(InputDataForLDA.class);
+	
 	/**
 	 * directory to save data 
 	 */
-	private String dir = "F:/JGibbLDA/models/casestudy/";
+	private String dir = SystemConfiguration.LDAPath;
 	/**
 	 * name of data file
 	 */
@@ -77,6 +71,7 @@ public class InputDataForLDA {
 	private List<Integer> idIndexMap = new ArrayList<Integer>(); 
 	/**
 	 * the threshold of wordListBuffer. the max count of wordList in a single data file.  
+	 * a wordList is corresponding to a document.
 	 */
 	private int bufferUpBound = 10;
 	
@@ -86,7 +81,6 @@ public class InputDataForLDA {
 		this.wordSegmentor = (WordSegmentation) InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
 		this.wordSegmentor.initialize();
 	}
-	
 	
 	public InputDataForLDA(int bufferUpBound){
 		this();
@@ -100,6 +94,7 @@ public class InputDataForLDA {
 	 * @param wordList
 	 */
 	private void saveData(String wordList, int documentID){
+		if("".equals(wordList.trim())) return;
 		if(this.wordListBuffer.size() < bufferUpBound){
 			this.wordListBuffer.add(wordList);
 			this.idIndexMap.add(documentID);
@@ -247,9 +242,8 @@ public class InputDataForLDA {
 		}
 		
 		String wordListStr = wordList.toString();
-		wordListStr = wordListStr.substring(1, wordListStr.length() - 1);
+		wordListStr = wordListStr.substring(1, wordListStr.length() - 1);	//remove '[' and ']'
 		wordListStr = wordListStr.replaceAll(",", "");
-//		System.out.println(wordListStr);
 		return wordListStr;
 	}
 	

@@ -92,10 +92,12 @@ public class Estimator {
 	}
 	
 	/**
-	 * Estimate the documents and return the topic words of given file.
-	 * @return
+	 * Estimate the documents and return the topic distribution of given file.
+	 * @return return the topic distribution of documents
+	 * @author Harry Huang
+	 * @date	2013.11.17
 	 */
-	public TopicFile estimateTopic(){
+	public double[][] estimateTopic(){
 		System.out.println("Sampling " + trnModel.niters + " iteration!");
 		
 		int lastIter = trnModel.liter;
@@ -118,7 +120,7 @@ public class Estimator {
 		computeTheta();
 		computePhi();
 		trnModel.liter--;
-		return trnModel.getModelTwords();
+		return trnModel.getModelTheta();
 	}
 	
 	/**

@@ -60,6 +60,11 @@ public class SystemConfiguration {
 	public static int maxFileCountPreDirectory = 150;
 	
 	/**
+	 * 有效KL值上限，凡是kl值大于上限的两个document,不建立topic语义关联
+	 */
+	public static double klUpbound = 0.3;
+	
+	/**
 	 * 待索引的目标目录列表
 	 */
 	public static List<String> targetDirectories = new ArrayList<String>();
@@ -67,6 +72,10 @@ public class SystemConfiguration {
 	 * 应用程序根目录路径。路径由反斜杠/间隔，路径末尾以反斜杠/结束
 	 */
 	public static String rootPath = "";
+	/**
+	 * LDA目录
+	 */
+	public static String LDAPath = "";
 	
 	
 	
@@ -134,6 +143,11 @@ public class SystemConfiguration {
 		 */
 		rootPath = Converter.convertBackSlashToSlash(System. getProperty("user.dir"));
 		rootPath += "/";
+		
+		/*
+		 * 加载LDA目录的
+		 */
+		LDAPath = PropertiesManager.getKeyValue("LDA.dir");
 		
 		/*
 		 * 判断索引目标是否改变

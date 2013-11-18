@@ -159,7 +159,7 @@ public class UpdateFileThread{
 		}
 
 		UpdateFileThread.numberOfFinishedFile ++;
-		System.out.println("finished : " + UpdateFileThread.numberOfFinishedFile + "/" + UpdateFileThread.scanner.getFileNumber() + "(" + (UpdateFileThread.numberOfFinishedFile*100.0/UpdateFileThread.scanner.getFileNumber()) + "%)");
+		//System.out.println("finished : " + UpdateFileThread.numberOfFinishedFile + "/" + UpdateFileThread.scanner.getFileNumber() + "(" + (UpdateFileThread.numberOfFinishedFile*100.0/UpdateFileThread.scanner.getFileNumber()) + "%)");
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class UpdateFileThread{
 							if(!((StopWordFilter)InstanceManager.getInstance(InstanceManager.CLASS_STOPWORDFILTER)).isStopWord(word)){
 								//add into index
 								//put the term info into the index.
-								//System.out.println(word + "\t" + offset);
+								////System.out.println(word + "\t" + offset);
 								if(isTitle){
 									//add offset
 									if(this.postingTitles.containsKey(word)){

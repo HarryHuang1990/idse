@@ -140,13 +140,12 @@ public class TopicDistribution {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	public static void main(String args[]){
 		MatrixWriter writer = new MatrixWriter();
 		TopicDistribution td = new TopicDistribution("F:/JGibbLDA/models/casestudy/00000000.txt");
-		writer.writeTopicRelationMatrix(td.execute("F:/JGibbLDA/models/casestudy/model-final.theta"));
+//		writer.writeTopicRelationMatrix(td.execute("F:/JGibbLDA/models/casestudy/model-final.theta"));
 //		td.outputDistribution("F:/JGibbLDA/models/casestudy/00000000_topic_distribution");
 	}
 }

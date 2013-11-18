@@ -22,7 +22,7 @@ import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
 import cn.iscas.idse.utilities.Converter;
 
 /**
- * This class is responsible for scan the disk and collect the information for indexing.
+ * This class is responsible for scanning the disk and collect the information for indexing.
  * includes : 
  * 		the amount of the files to index.
  * 		the amount of the directories.
@@ -56,29 +56,43 @@ public class DiskScanner {
 		this.targetDirectoryAccessor = targetDirectoryAccessor;
 	}
 	
+	public DiskScanner(){
+		//D\:/My DBank/,D\:/workspace/20130916_IDSE/src/,D\:/workspace/GPSPathIdentify/src/,D\:/workspace/ShardFilter/src/,D\:/\u8FC5\u96F7\u4E0B\u8F7D/,F\:/
+	}
+	
+	/**
+	 * initialize and clear the object.
+	 */
+	public void initAndClear(){
+		this.fileNumber = 0;
+		this.directoryNumber = 0;
+		this.fileTypeDistribution.clear();
+		this.directorySet.clear();
+	}
+	
 	/**
 	 * scan target directory in disk.
 	 */
 	public void scanDisk(){
 		//scan the target directories.
-		System.out.println("scanning the disk...");
+		//System.out.println("scanning the disk...");
 		long start = System.currentTimeMillis();
 		EntityCursor<TargetDirectory> targets = targetDirectoryAccessor.getPrimaryTargetID().entities();
 		for(TargetDirectory target : targets){
-			this.scanDirectory(new File(target.getTargetPath()), target.getTargetID());
+			this.scanDirectory(new File(target.getTargetPath()));
 		}
 		long end = System.currentTimeMillis();
-		System.out.println("scanning done. time = " + ((end-start)/1000/60.0) + " min");
-		System.out.println("directory : " + this.directoryNumber);
-		System.out.println("file : " + this.fileNumber);
-		System.out.println("file type distribution : \n" + this.fileTypeDistribution.toString());
+		//System.out.println("scanning done. time = " + ((end-start)/1000/60.0) + " min");
+		//System.out.println("directory : " + this.directoryNumber);
+		//System.out.println("file : " + this.fileNumber);
+		//System.out.println("file type distribution : \n" + this.fileTypeDistribution.toString());
 	}
 	
 	/**
 	 * scan directory
 	 * @param directory
 	 */
-	private void scanDirectory(File directory, short targetID){
+	public void scanDirectory(File directory){
 		
 		// save the directory into the buffer.
 		this.directorySet.add(Converter.convertBackSlashToSlash(directory.getAbsolutePath()));
@@ -93,7 +107,7 @@ public class DiskScanner {
 			for(File object : files){
 				if(object.isDirectory()){
 					// scan directory
-					this.scanDirectory(object, targetID);
+					this.scanDirectory(object);
 				}
 				else{
 					// file number increases by 1

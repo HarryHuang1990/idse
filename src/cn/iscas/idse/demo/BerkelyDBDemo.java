@@ -231,6 +231,5 @@ public class BerkelyDBDemo {
 //		demo.showDictionary();
 //		demo.showPostingTitle();
 //		demo.showPostingContent();
-		
 	}
 }

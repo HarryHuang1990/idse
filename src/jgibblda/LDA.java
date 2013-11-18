@@ -30,6 +30,7 @@ package jgibblda;
 
 import org.kohsuke.args4j.*;
 
+import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.rank.topic.TopicFile;
 
 public class LDA {
@@ -48,27 +49,27 @@ public class LDA {
 		option.niters = 100;
 		option.savestep = 500;
 		option.twords = 30;
-		option.dir = "F:\\JGibbLDA\\models\\casestudy\\";
+		option.dir = SystemConfiguration.LDAPath;
 		
 	}
 	
 	public static void main(String args[]){
 		
 		LDA lda = new LDA();
+//		lda.getTopicDistribuiton("00000000");
+		lda.generateTopicModel("00000000");
 		
-		lda.generateTopicFile("00000000");
 		
 	}
 	
-	public TopicFile getTopicFile(String datafile){
+	public double[][] getTopicDistribuiton(String datafile){
 		option.dfile = datafile;
 		estimator.init(option);
-		TopicFile topic = estimator.estimateTopic();
-		System.out.println(topic.toString());
+		double[][] topic = estimator.estimateTopic();
 		return topic;
 	}
 	
-	public void generateTopicFile(String datafile){
+	public void generateTopicModel(String datafile){
 		option.dfile = datafile;
 		estimator.init(option);
 		estimator.estimate();

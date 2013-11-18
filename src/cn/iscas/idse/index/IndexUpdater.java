@@ -45,14 +45,14 @@ public class IndexUpdater {
 	private IndexReader reader = null;
 	private WordSegmentation wordSegmentor = null;
 	
-	
-	public IndexUpdater(){
+	public IndexUpdater(WordSegmentation wordSegmentor){
 		this.reader = new IndexReader();
 		/*
 		 * get the instance of wordSegmentation
 		 */
-		this.wordSegmentor = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
-		this.initParameter();
+		this.wordSegmentor = wordSegmentor;
+//		this.wordSegmentor = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
+		
 	}
 	
 	private void initParameter(){
@@ -72,9 +72,45 @@ public class IndexUpdater {
 	
 	/**
 	 * update index
+	 * @param targetDir
+	 * @param targetID
 	 */
-	public void executeIndexUpdate(){
+	public void executeIndexUpdate(String targetPath){
+		this.initParameter();
 
+		//put the target path into the Berkeley DB
+		if(!this.reader.getTargetDirectoryAccessor().getSecondaryTargetPath().contains(targetPath)){
+			TargetDirectory targetAccessor = new TargetDirectory(targetPath);
+			this.reader.getTargetDirectoryAccessor().getPrimaryTargetID().putNoReturn(targetAccessor);
+		}
+		
+		UpdateFileThread.initParameter();
+		UpdateFileThread.scanner = new DiskScanner();
+		UpdateFileThread.scanner.scanDirectory(new File(targetPath));
+		
+		//get target directories
+		//System.out.println("Updating...");
+		long start = System.currentTimeMillis();
+		
+		// update directory
+		TargetDirectory targetDirectory = this.reader.getTargetDirectoryAccessor().getSecondaryTargetPath().get(targetPath);
+		this.updateDirectory(new File(targetPath), targetDirectory.getTargetID());
+		
+		//update type index into db.
+		this.updateTypeIndexIntoDB();
+		//update dictionary into db.
+		this.updateDictionaryIntoDB();
+		
+		long end = System.currentTimeMillis();
+		//System.out.println("update done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
+	}
+	
+	/**
+	 * update index
+	 */
+	private void executeIndexUpdate(){
+
+		this.initParameter();
 		this.updateTargetDirectories();
 		
 		UpdateFileThread.initParameter();
@@ -83,9 +119,9 @@ public class IndexUpdater {
 		UpdateFileThread.scanner.scanDisk();
 		
 		//initialize the segmentor
-		this.wordSegmentor.initialize();
+//		this.wordSegmentor.initialize();
 		//get target directories
-		System.out.println("Updating...");
+		//System.out.println("Updating...");
 		long start = System.currentTimeMillis();
 		// update directory
 		this.updateDirectory();
@@ -96,16 +132,14 @@ public class IndexUpdater {
 		this.updateDictionaryIntoDB();
 		
 		long end = System.currentTimeMillis();
-		System.out.println("update done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
+		//System.out.println("update done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
 		// destroy the segmentor
-		this.wordSegmentor.exitICTCLAS();
-		this.wordSegmentor.destoryInstance();
+//		this.wordSegmentor.exitICTCLAS();
+//		this.wordSegmentor.destoryInstance();
 	}
 	
 	/**
 	 * update the directory recursively
-	 * @param directory
-	 * @param targetID
 	 */
 	private void updateDirectory(){
 		/*
@@ -257,6 +291,7 @@ public class IndexUpdater {
 				documentIDs.addAll(entry.getValue().getDocumentIDs());
 				fileType.setDocumentIDs(documentIDs);
 				this.reader.addAndUpdateFileType(fileType);
+				SystemConfiguration.fileTypeBuff.get(entry.getKey()).getDocumentIDs().clear();
 			}
 		}
 		
@@ -314,7 +349,11 @@ public class IndexUpdater {
 	}
 	
 	public static void main(String args[]){
-		IndexUpdater iu = new IndexUpdater();
+		WordSegmentation wordSegmentor = (WordSegmentation)InstanceManager.getInstance(InstanceManager.CLASS_WORDSEGMENTATION);
+		wordSegmentor.initialize();
+		IndexUpdater iu = new IndexUpdater(wordSegmentor);
 		iu.execute();
+		wordSegmentor.exitICTCLAS();
+		wordSegmentor.destoryInstance();
 	}
 }
