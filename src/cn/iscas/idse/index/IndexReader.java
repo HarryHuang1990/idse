@@ -201,8 +201,10 @@ public class IndexReader {
 		return this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID);
 	}
 	
-	public Collection<Document> getDocumentsByDirectoryID(int directoryID){
-		return this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID).map().values();
+	public List<Document> getDocumentsByDirectoryID(int directoryID){
+		List<Document> documents = new ArrayList<Document>(
+				this.documentAccessor.getSecondaryDirectoryID().subIndex(directoryID).map().values());
+		return documents;
 	}
 	
 	/**

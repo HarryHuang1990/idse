@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -44,10 +45,10 @@ public class LocationMining {
 	
 	/**
 	 * the relation between two files is actually the relation between the directories the two files in.
-	 * key : "dirID1,dirID2"
+	 * key : the directory id;;
 	 * value : score 
 	 */
-	private Map<String, Double> directoryRelatedScoreMap = new HashMap<String, Double>();
+	private Map<Integer, PathRelation> pathRelationGraph = new HashMap<Integer, PathRelation>();
 	private IndexReader indexReader = new IndexReader();
 	
 
@@ -66,18 +67,35 @@ public class LocationMining {
 	 * generate the location relation graph from directoryRelatedScoreMap
 	 */
 	private void generateLocationRelationGraph(){
-		List<Document> docs = indexReader.getDocuments();
-		for(int i=0; i<docs.size()-1; i++)
-			for(int j=i+1; j<docs.size(); j++)
-			{
-				Document doc1 = docs.get(i);
-				Document doc2 = docs.get(j);
-				String key = doc1.getDirectoryID() + "," + doc2.getDirectoryID();
-				Double score = this.directoryRelatedScoreMap.get(key); 
-				if(score != null){
-					this.addToLocationRelationGraph(doc1.getDocID(), doc2.getDocID(), score);
-				}
+		for(PathRelation pathRelation : this.pathRelationGraph.values()){
+			List<Document> dir1Docs = indexReader.getDocumentsByDirectoryID(pathRelation.getDirectoryID());
+			for(Entry<Integer, Double>relatedDir : pathRelation.getRelatedDirectories().entrySet()){
+				List<Document> dir2Docs = indexReader.getDocumentsByDirectoryID(relatedDir.getKey());
+				for(int i=0; i<dir1Docs.size(); i++)
+					for(int j=0; j<dir2Docs.size(); j++)
+						this.addToLocationRelationGraph(dir1Docs.get(i).getDocID(), dir2Docs.get(j).getDocID(), relatedDir.getValue());
 			}
+		}
+	}
+	
+	private void addToPathRelationGraph(int dirID1, int dirID2, double score){
+		if(this.pathRelationGraph.containsKey(dirID1)){
+			this.pathRelationGraph.get(dirID1).putNewRelatedDirectory(dirID2, score);
+		}
+		else{
+			PathRelation pathRelation = new PathRelation(dirID1);
+			pathRelation.putNewRelatedDirectory(dirID2, score);
+			this.pathRelationGraph.put(dirID1, pathRelation);
+		}
+		
+		if(this.pathRelationGraph.containsKey(dirID2)){
+			this.pathRelationGraph.get(dirID2).putNewRelatedDirectory(dirID1, score);
+		}
+		else{
+			PathRelation pathRelation = new PathRelation(dirID2);
+			pathRelation.putNewRelatedDirectory(dirID1, score);
+			this.pathRelationGraph.put(dirID2, pathRelation);
+		}
 	}
 	
 	private void addToLocationRelationGraph(int docID1, int docID2, double score){
@@ -90,14 +108,14 @@ public class LocationMining {
 			this.locationRelationGraph.put(docID1, locationRelation);
 		}
 		
-		if(this.locationRelationGraph.containsKey(docID2)){
-			this.locationRelationGraph.get(docID2).putNewRelatedDocument(docID1, score);
-		}
-		else{
-			LocationRelation locationRelation = new LocationRelation(docID2);
-			locationRelation.putNewRelatedDocument(docID1, score);
-			this.locationRelationGraph.put(docID2, locationRelation);
-		}
+//		if(this.locationRelationGraph.containsKey(docID2)){
+//			this.locationRelationGraph.get(docID2).putNewRelatedDocument(docID1, score);
+//		}
+//		else{
+//			LocationRelation locationRelation = new LocationRelation(docID2);
+//			locationRelation.putNewRelatedDocument(docID1, score);
+//			this.locationRelationGraph.put(docID2, locationRelation);
+//		}
 	}
 	
 	/**
@@ -113,8 +131,7 @@ public class LocationMining {
 				double[]metrics = this.parsePaths(dir1.getDirectoryPath(), dir2.getDirectoryPath());
 				if(metrics != null){
 					double score = this.calculateTheMatrics(metrics);
-					this.directoryRelatedScoreMap.put(dir1.getDirectoryID() + "," + dir2.getDirectoryID(), score);
-					this.directoryRelatedScoreMap.put(dir2.getDirectoryID() + "," + dir1.getDirectoryID(), score);
+					this.addToPathRelationGraph(dir1.getDirectoryID(), dir2.getDirectoryID(), score);
 				}
 			}
 		}
