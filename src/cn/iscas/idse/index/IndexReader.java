@@ -213,8 +213,9 @@ public class IndexReader {
 		return this.directoryAccessor.getPrimaryDirectoryID().entities();
 	}
 	
-	public Collection<Directory> getDirectorys(){
-		return this.directoryAccessor.getPrimaryDirectoryID().map().values();
+	public List<Directory> getDirectorys(){
+		List<Directory>directorys = new ArrayList<Directory>(this.directoryAccessor.getPrimaryDirectoryID().map().values());
+		return directorys;
 	}
 	
 	/**
@@ -276,8 +277,9 @@ public class IndexReader {
 		return this.documentAccessor.getPrimaryDocumentID().entities();
 	}
 	
-	public Collection<Document> getDocuments(){
-		return this.documentAccessor.getPrimaryDocumentID().map().values();
+	public List<Document> getDocuments(){
+		List<Document> documents = new ArrayList<Document>(this.documentAccessor.getPrimaryDocumentID().map().values());
+		return documents;
 	}
 	
 	/**

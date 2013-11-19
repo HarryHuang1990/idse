@@ -3,7 +3,9 @@ package cn.iscas.idse.storage.entity;
 import static com.sleepycat.persist.model.DeleteAction.NULLIFY;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.persist.model.Entity;
@@ -26,8 +28,11 @@ import com.sleepycat.persist.model.SecondaryKey;
 public class LocationRelation {
 	@PrimaryKey
 	private int documentID;
-	
-	private Set<Integer> relatedDocumentIDs = new HashSet<Integer>();
+	/**
+	 * key : id of the related document
+	 * value : the location relation score between the two documents.
+	 */
+	private Map<Integer, Double> relatedDocumentIDs = new HashMap<Integer, Double>();
 
 	private LocationRelation(){}
 	
@@ -43,11 +48,19 @@ public class LocationRelation {
 		this.documentID = documentID;
 	}
 
-	public Set<Integer> getRelatedDocumentIDs() {
+	public Map<Integer, Double> getRelatedDocumentIDs() {
 		return relatedDocumentIDs;
 	}
 
-	public void setRelatedDocumentIDs(Set<Integer> relatedDocumentIDs) {
+	public void setRelatedDocumentIDs(Map<Integer, Double> relatedDocumentIDs) {
 		this.relatedDocumentIDs = relatedDocumentIDs;
+	}
+	/**
+	 * add a new related document and the relation score to the graph.
+	 * @param docID
+	 * @param score
+	 */
+	public void putNewRelatedDocument(int docID, double score){
+		this.relatedDocumentIDs.put(docID, score);
 	}
 }

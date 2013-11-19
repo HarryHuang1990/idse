@@ -17,6 +17,7 @@ import com.sleepycat.persist.evolve.Mutations;
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.index.Index;
 import cn.iscas.idse.index.IndexReader;
+import cn.iscas.idse.rank.location.LocationMining;
 import cn.iscas.idse.rank.task.mining.DefaultTaskMining;
 import cn.iscas.idse.rank.topic.TopicSimilarity;
 import cn.iscas.idse.storage.entity.Document;
@@ -61,6 +62,7 @@ public class MatrixWriter {
 		log.info("generating the topic relation graph...");
 		TopicSimilarity ts = new TopicSimilarity(this.LDAdocIDListFileName, this.LDADataFileName);
 		ts.run();
+		log.info("saving...");
 		Map<Integer, TopicRelation> topicRelationGraph = ts.getTopicRelationGraph();
 		for(Entry<Integer, TopicRelation>entry : topicRelationGraph.entrySet()){
 			this.topicRelationAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
@@ -85,26 +87,15 @@ public class MatrixWriter {
 	 */
 	public void writeLocationRelationMatrix(){
 		this.deleteLocationRelationMatrix();
-		IndexReader reader = new IndexReader();
-		// get directory list
-		EntityCursor<Integer> cursor = reader.getDirectoryIDs();
-		int total = reader.getNumberDirectorys();
-		int count = 0;
-		// loop and get the documentIDs in the same directory
-		for(int dirID : cursor){
-			count++;
-			Set<Integer> documentIDs = reader.getDocumentsByDirectoryIDCursor(dirID).sortedMap().keySet();
-			if(documentIDs.size() > 1 && documentIDs.size() < SystemConfiguration.maxFileCountPreDirectory){
-				for(int documentID : documentIDs){
-					LocationRelation locationRelation = new LocationRelation(documentID);
-					locationRelation.getRelatedDocumentIDs().addAll(documentIDs);
-					locationRelation.getRelatedDocumentIDs().remove(documentID);
-					this.locationRelationAccessor.getPrimaryDocumentID().put(locationRelation);
-				}
-			}
-			System.out.println("finished " + count + "/" + total + "...");
+		log.info("start generating the topic relation graph...");
+		LocationMining locationMining = new LocationMining();
+		locationMining.run();
+		log.info("saving...");
+		Map<Integer, LocationRelation> locationRelationGraph = locationMining.getLocationRelationGraph();
+		for(Entry<Integer, LocationRelation>entry : locationRelationGraph.entrySet()){
+			this.locationRelationAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
 		}
-		cursor.close();
+		log.info("location relation graph DONE.");
 	}
 	
 	/**
@@ -112,7 +103,7 @@ public class MatrixWriter {
 	 * @return
 	 */
 	private void deleteLocationRelationMatrix(){
-		System.out.println("removing location matrix...");
+		log.info("removing location matrix...");
 		Set<Integer> keys = this.locationRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
 		if(keys != null)
 			for(int key : keys)
@@ -127,6 +118,7 @@ public class MatrixWriter {
 		log.info("generating the task relation graph...");
 		DefaultTaskMining dtm = new DefaultTaskMining();
 		dtm.generateTaskRelationGraph(this.userActivityLogFile);
+		log.info("saving...");
 		Map<Integer, TaskRelation> taskRelationGraph = dtm.getTaskRelationGraph();
 		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
 			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
@@ -155,7 +147,8 @@ public class MatrixWriter {
 		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
 //		w.writeLocationRelationMatrix();
 //		w.writeTaskRelationMatrix();
-		w.writeTopicRelationMatrix();
+//		w.writeTopicRelationMatrix();
+		w.writeLocationRelationMatrix();
 		
 	}
 

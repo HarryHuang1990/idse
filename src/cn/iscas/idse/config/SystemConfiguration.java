@@ -65,6 +65,11 @@ public class SystemConfiguration {
 	public static double klUpbound = 0.3;
 	
 	/**
+	 * 文件之间的切换距离上限，凡是切换距离D(a,b)大于上限的两个document，不建立location语义关联
+	 */
+	public static int dMAX_GAMA = 3;
+	
+	/**
 	 * 待索引的目标目录列表
 	 */
 	public static List<String> targetDirectories = new ArrayList<String>();
