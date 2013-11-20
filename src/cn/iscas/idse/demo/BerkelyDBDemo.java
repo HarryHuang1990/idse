@@ -213,7 +213,7 @@ public class BerkelyDBDemo {
 		TaskRelationAccessor topicRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 		EntityCursor<TaskRelation> cursor = topicRelationAccessor.getPrimaryDocumentID().entities();
 		for(TaskRelation entity : cursor)
-			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+			System.out.println(entity.getDocumentID() + "\t" + entity.geteValue() + "\t" + entity.getRelatedDocumentIDs().toString());
 	}
 	
 	public void showLocationRelationMatrix(){
@@ -225,11 +225,14 @@ public class BerkelyDBDemo {
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showEntityDirectory();
+//		demo.showEntityDirectory();
 //		demo.showEntityDocument();
 //		demo.showEntityFileType();
 //		demo.showDictionary();
 //		demo.showPostingTitle();
 //		demo.showPostingContent();
+//		demo.showLocationRelationMatrix();
+		demo.showTaskRelationMatrix();
+//		demo.showTopicRelationMatrix();
 	}
 }

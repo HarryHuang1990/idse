@@ -28,6 +28,12 @@ import com.sleepycat.persist.model.SecondaryKey;
 public class TaskRelation {
 	@PrimaryKey
 	private int documentID;
+	
+	/**
+	 * this is the value of specific document in the personalization vector E 
+	 * eValue  =  occurrence of documentID / total occurrence of log.
+	 */
+	private double eValue = 0;
 
 	/**
 	 * IDs of documents interacting with the current document, 
@@ -55,6 +61,14 @@ public class TaskRelation {
 
 	public void setRelatedDocumentIDs(Map<Integer, Integer> relatedDocumentIDs) {
 		this.relatedDocumentIDs = relatedDocumentIDs;
+	}
+	
+	public double geteValue() {
+		return eValue;
+	}
+
+	public void seteValue(double eValue) {
+		this.eValue = eValue;
 	}
 
 	/**

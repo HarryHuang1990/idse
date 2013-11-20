@@ -22,6 +22,7 @@ import cn.iscas.idse.rank.task.mining.DefaultTaskMining;
 import cn.iscas.idse.rank.topic.TopicSimilarity;
 import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.LocationRelation;
+import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.TaskRelation;
 import cn.iscas.idse.storage.entity.TopicRelation;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
@@ -36,6 +37,11 @@ public class MatrixWriter {
 	private String userActivityLogFile = "";
 	private String LDAdocIDListFileName = "";
 	private String LDADataFileName = "";
+	
+	private Map<Integer, TopicRelation> topicRelationGraph;
+	private Map<Integer, LocationRelation> locationRelationGraph;
+	private Map<Integer, TaskRelation> taskRelationGraph;
+	private Map<Integer, PageRankGraph> pageRankGraph;
 	
 	TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
 	LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
@@ -54,16 +60,50 @@ public class MatrixWriter {
 		this.LDADataFileName = LDADataFileName;
 	}
 	
+	public void run(){
+		this.writeTaskRelationMatrix();
+		this.writeTopicRelationMatrix();
+		this.writeLocationRelationMatrix();
+	}
+	
+	/**
+	 * integrate the 3 relation graph
+	 */
+	public void getPageRankGraph(){
+		// TODO 
+	}
+	
+	public double getTaskRelationScore(int freq){
+		return (Math.log(freq + 1)/Math.log(2)) / (1 + Math.log(freq + 1)/Math.log(2));
+	}
+	
+	public double getTopicRelationScore(int jsValue){
+		return 1 / Math.pow(Math.E, jsValue);
+	}
+	
+	public double getIntegratedScore(double taskScore, double locationScore, double topicScore){
+		return taskScore * SystemConfiguration.taskFactor + 
+				locationScore * SystemConfiguration.locationFactor + 
+				topicScore * SystemConfiguration.topicFactor;
+	}
+	
+	
+	
+	
+	public void getTopicRelationMatrix(){
+		log.info("generating the topic relation graph...");
+		TopicSimilarity ts = new TopicSimilarity(this.LDAdocIDListFileName, this.LDADataFileName);
+		ts.run();
+		topicRelationGraph = ts.getTopicRelationGraph();
+	}
+	
 	/**
 	 * write topic relation matrix into the Berkeley DB
 	 */
 	public void writeTopicRelationMatrix(){
 		this.deleteTopicRelationMatrix();
-		log.info("generating the topic relation graph...");
-		TopicSimilarity ts = new TopicSimilarity(this.LDAdocIDListFileName, this.LDADataFileName);
-		ts.run();
+		this.getTopicRelationMatrix();
 		log.info("saving...");
-		Map<Integer, TopicRelation> topicRelationGraph = ts.getTopicRelationGraph();
 		for(Entry<Integer, TopicRelation>entry : topicRelationGraph.entrySet()){
 			this.topicRelationAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
 		}
@@ -82,16 +122,19 @@ public class MatrixWriter {
 				this.topicRelationAccessor.getPrimaryDocumentID().delete(key);
 	}
 	
+	private void getLocationRelationMatrix(){
+		log.info("start generating the topic relation graph...");
+		LocationMining locationMining = new LocationMining();
+		locationMining.run();
+		locationRelationGraph = locationMining.getLocationRelationGraph();
+	}
 	/**
 	 * write location relation matrix into the Berkeley DB
 	 */
 	public void writeLocationRelationMatrix(){
 		this.deleteLocationRelationMatrix();
-		log.info("start generating the topic relation graph...");
-		LocationMining locationMining = new LocationMining();
-		locationMining.run();
+		this.getLocationRelationMatrix();
 		log.info("saving...");
-		Map<Integer, LocationRelation> locationRelationGraph = locationMining.getLocationRelationGraph();
 		for(Entry<Integer, LocationRelation>entry : locationRelationGraph.entrySet()){
 			this.locationRelationAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
 		}
@@ -110,16 +153,21 @@ public class MatrixWriter {
 				this.locationRelationAccessor.getPrimaryDocumentID().delete(key);
 	}
 	
+	
+	private void getTaskRelationMatrix(){
+		log.info("generating the task relation graph...");
+		DefaultTaskMining dtm = new DefaultTaskMining();
+		dtm.generateTaskRelationGraph(this.userActivityLogFile);
+		taskRelationGraph = dtm.getTaskRelationGraph();
+	}
+	
 	/**
 	 * write task location matrix into the Berkeley DB
 	 */
 	public void writeTaskRelationMatrix(){
 		this.deleteTaskRelationMatrix();
-		log.info("generating the task relation graph...");
-		DefaultTaskMining dtm = new DefaultTaskMining();
-		dtm.generateTaskRelationGraph(this.userActivityLogFile);
+		this.getTaskRelationMatrix();
 		log.info("saving...");
-		Map<Integer, TaskRelation> taskRelationGraph = dtm.getTaskRelationGraph();
 		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
 			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
 		}
@@ -145,10 +193,13 @@ public class MatrixWriter {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
-//		w.writeLocationRelationMatrix();
 //		w.writeTaskRelationMatrix();
 //		w.writeTopicRelationMatrix();
-		w.writeLocationRelationMatrix();
+//		w.writeLocationRelationMatrix();
+		
+		System.out.println(Math.E);
+		for(int i=1; i<20 ; i++)
+			System.out.println(i + "\t" + w.getTaskRelationScore(i));
 		
 	}
 

@@ -401,13 +401,13 @@ public class IndexReader {
 	
 	public static void main(String args[]){
 		IndexReader indexReader = new IndexReader();
-		int[] documents = new int[]{81840, 82259};
+		int[] documents = new int[]{82065, 82068};
 		for(int i=0; i<documents.length; i++)
 			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
 		
 //		System.out.println(indexReader.getDocumentsByName("ÇîÓÎ½õÄÒ-¼ÃÖÝµº.pdf").get(0).getDocID());
-		
-		
+//		System.out.println(indexReader.getDocumentsByDirectoryIDCursor(25735).count());
+//		System.out.println(indexReader.getDirectoryByDirectoryID(25735).getDirectoryPath());
 	}
 }
 

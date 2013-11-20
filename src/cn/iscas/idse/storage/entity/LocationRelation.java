@@ -32,7 +32,7 @@ public class LocationRelation {
 	 * key : id of the related document
 	 * value : the location relation score between the two documents.
 	 */
-	private Map<Integer, Double> relatedDocumentIDs = new HashMap<Integer, Double>();
+	private Map<Integer, Float> relatedDocumentIDs = new HashMap<Integer, Float>();
 
 	private LocationRelation(){}
 	
@@ -48,11 +48,11 @@ public class LocationRelation {
 		this.documentID = documentID;
 	}
 
-	public Map<Integer, Double> getRelatedDocumentIDs() {
+	public Map<Integer, Float> getRelatedDocumentIDs() {
 		return relatedDocumentIDs;
 	}
 
-	public void setRelatedDocumentIDs(Map<Integer, Double> relatedDocumentIDs) {
+	public void setRelatedDocumentIDs(Map<Integer, Float> relatedDocumentIDs) {
 		this.relatedDocumentIDs = relatedDocumentIDs;
 	}
 	/**
@@ -60,7 +60,7 @@ public class LocationRelation {
 	 * @param docID
 	 * @param score
 	 */
-	public void putNewRelatedDocument(int docID, double score){
+	public void putNewRelatedDocument(int docID, float score){
 		this.relatedDocumentIDs.put(docID, score);
 	}
 }

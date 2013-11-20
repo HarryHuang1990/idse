@@ -67,7 +67,14 @@ public class SystemConfiguration {
 	/**
 	 * 文件之间的切换距离上限，凡是切换距离D(a,b)大于上限的两个document，不建立location语义关联
 	 */
-	public static int dMAX_GAMA = 3;
+	public static int dMAX_GAMA = 1;
+	
+	/**
+	 * 各部分得分对总关系得分的贡献比例
+	 */
+	public static double topicFactor = 0.4;
+	public static double taskFactor = 0.4;
+	public static double locationFactor = 0.2;
 	
 	/**
 	 * 待索引的目标目录列表

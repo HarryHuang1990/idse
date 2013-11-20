@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class PathRelation {
 	public int directoryID;
-	public Map<Integer, Double> relatedDirectories = new HashMap<Integer, Double>();
+	public Map<Integer, Float> relatedDirectories = new HashMap<Integer, Float>();
 	
 	public PathRelation(int directoryID){
 		this.directoryID = directoryID;
@@ -24,11 +24,11 @@ public class PathRelation {
 		this.directoryID = directoryID;
 	}
 
-	public Map<Integer, Double> getRelatedDirectories() {
+	public Map<Integer, Float> getRelatedDirectories() {
 		return relatedDirectories;
 	}
 	
-	public void putNewRelatedDirectory(int directoryID, double score){
-		this.putNewRelatedDirectory(directoryID, score);
+	public void putNewRelatedDirectory(int directoryID, float score){
+		this.relatedDirectories.put(directoryID, score);
 	}
 }

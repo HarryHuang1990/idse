@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.rank.MatrixWriter;
 import cn.iscas.idse.storage.entity.Directory;
@@ -22,13 +24,29 @@ import cn.iscas.idse.storage.entity.TaskRelation;
  *
  */
 public class TaskMining {
-	
+	private static final Logger log = Logger.getLogger(TaskMining.class);
 	protected IndexReader indexReader = new IndexReader();
 	protected Map<Integer, TaskRelation> taskRelationGraph = new HashMap<Integer, TaskRelation>();
+	/**
+	 * the occurrences of every document.
+	 */
+	protected Map<Integer, Integer> docOccurrences = new HashMap<Integer, Integer>(); 
+	protected int totalOccurrence = 0;
 	
 	public Map<Integer, TaskRelation> getTaskRelationGraph() {
 		return taskRelationGraph;
 	}
+	
+	/**
+	 * calculate the eValue of pageRank for each document using occurrences, 
+	 * then add the value into the graph 
+	 */
+	protected void calculateEValue(){
+		log.info("calculating e-value...");
+		for(int docID : this.taskRelationGraph.keySet())
+			this.taskRelationGraph.get(docID).seteValue(this.docOccurrences.get(docID) * 1.0 / this.totalOccurrence);
+	}
+	
 	
 	/**
 	 * identity the doc name in log from the Berkeley DB.

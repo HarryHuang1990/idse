@@ -33,34 +33,63 @@ public class DefaultTaskMining extends TaskMining{
 	
 	/**
 	 * generate the task relation graph.
-	 * record the interaction frequency between two given documentID 
+	 * record the interaction frequency between two given documentIDs.  
+	 * Note that adjacent duplicated record exists in the raw task. 
+	 * e.g., 
+	 * 			A
+	 * 			A
+	 * 			A
+	 * 			B
+	 * 			C
 	 * @param logFile	the user activity log file path
 	 */
+	int count = 0;
 	public void generateTaskRelationGraph(String logFile){
 		CSVParser parser = new CSVParser();
 		this.rawtasks = parser.execute(logFile);
-		if(this.rawtasks.size() > 1){
+		if(this.rawtasks.size() > 0){
 			for(List<Log> task : this.rawtasks){
-				int lastDocID = this.identityFile(task.get(0).getFileName());
+				// a sequence of docID after filtering.
+				List<Integer> docSequence = new ArrayList<Integer>();
+				int lastDocID = -1;
 				int currentDocID = -1;
-				for(int i=1; i<task.size(); i++){
+				// handle the adjacent duplicated record and none-existed record.
+				for(int i=0; i<task.size(); i++){
 					currentDocID = this.identityFile(task.get(i).getFileName());
-					if(lastDocID == -1){
+					if(currentDocID == -1)continue;
+					else if(currentDocID != lastDocID){
+						docSequence.add(currentDocID);
 						lastDocID = currentDocID;
-						continue;
 					}
-					else{
-						if(currentDocID == -1) continue;
-						else{
-							this.addToGraph(lastDocID, currentDocID);
-							lastDocID = currentDocID;
-						}
-					}
+				}
+				
+				// get the interaction frequency and occurrences
+				// Note that after filtering, the tasks containing only 1 recored exits, which result in 
+				// that the size of occurrences is larger than size of graph.
+				if(docSequence.size() == 1) System.out.println(++count);
+				for(int i=0; i<docSequence.size(); i++){
+					this.addOccurrences(docSequence.get(i));
+					if(i < docSequence.size() - 1)
+						this.addToGraph(docSequence.get(i), docSequence.get(i + 1));
 				}
 			}
 		}
+		this.calculateEValue();
 	}
 	
+	
+	
+	/**
+	 * add the occurrences of files
+	 */
+	private void addOccurrences(int docID){
+		this.totalOccurrence ++;
+		if(this.docOccurrences.containsKey(docID))
+			this.docOccurrences.put(docID, this.docOccurrences.get(docID) + 1);
+		else
+			this.docOccurrences.put(docID, 1);
+	}
+
 	private void addToGraph(int docID1, int docID2){
 		if(docID1 == docID2)return;
 		if(this.taskRelationGraph.containsKey(docID1)){

@@ -42,7 +42,6 @@ public class LocationMining {
 	 * value : LocationRelation Entity, which includes the related documents and scores.
 	 */
 	private Map<Integer, LocationRelation> locationRelationGraph = new HashMap<Integer, LocationRelation>();
-	
 	/**
 	 * the relation between two files is actually the relation between the directories the two files in.
 	 * key : the directory id;;
@@ -69,16 +68,19 @@ public class LocationMining {
 	private void generateLocationRelationGraph(){
 		for(PathRelation pathRelation : this.pathRelationGraph.values()){
 			List<Document> dir1Docs = indexReader.getDocumentsByDirectoryID(pathRelation.getDirectoryID());
-			for(Entry<Integer, Double>relatedDir : pathRelation.getRelatedDirectories().entrySet()){
+			for(Entry<Integer, Float>relatedDir : pathRelation.getRelatedDirectories().entrySet()){
 				List<Document> dir2Docs = indexReader.getDocumentsByDirectoryID(relatedDir.getKey());
 				for(int i=0; i<dir1Docs.size(); i++)
-					for(int j=0; j<dir2Docs.size(); j++)
-						this.addToLocationRelationGraph(dir1Docs.get(i).getDocID(), dir2Docs.get(j).getDocID(), relatedDir.getValue());
+					for(int j=0; j<dir2Docs.size(); j++){
+						if(dir1Docs.get(i).getDocID() != dir2Docs.get(j).getDocID())
+							this.addToLocationRelationGraph(dir1Docs.get(i).getDocID(), dir2Docs.get(j).getDocID(), relatedDir.getValue());
+					}
+						
 			}
 		}
 	}
 	
-	private void addToPathRelationGraph(int dirID1, int dirID2, double score){
+	private void addToPathRelationGraph(int dirID1, int dirID2, float score){
 		if(this.pathRelationGraph.containsKey(dirID1)){
 			this.pathRelationGraph.get(dirID1).putNewRelatedDirectory(dirID2, score);
 		}
@@ -100,11 +102,11 @@ public class LocationMining {
 	
 	private void addToLocationRelationGraph(int docID1, int docID2, double score){
 		if(this.locationRelationGraph.containsKey(docID1)){
-			this.locationRelationGraph.get(docID1).putNewRelatedDocument(docID2, score);
+			this.locationRelationGraph.get(docID1).putNewRelatedDocument(docID2, (float) score);
 		}
 		else{
 			LocationRelation locationRelation = new LocationRelation(docID1);
-			locationRelation.putNewRelatedDocument(docID2, score);
+			locationRelation.putNewRelatedDocument(docID2, (float) score);
 			this.locationRelationGraph.put(docID1, locationRelation);
 		}
 		
@@ -131,7 +133,7 @@ public class LocationMining {
 				double[]metrics = this.parsePaths(dir1.getDirectoryPath(), dir2.getDirectoryPath());
 				if(metrics != null){
 					double score = this.calculateTheMatrics(metrics);
-					this.addToPathRelationGraph(dir1.getDirectoryID(), dir2.getDirectoryID(), score);
+					this.addToPathRelationGraph(dir1.getDirectoryID(), dir2.getDirectoryID(), (float)score);
 				}
 			}
 		}
@@ -200,7 +202,7 @@ public class LocationMining {
 		//F://$RECYCLE.BIN
 		//D:/迅雷下载/【铁血战士】【高清1280版HD-RMVB.中字】【2013最新美国科幻恐怖大片】
 		//F://beijing gps/cluster/dataset
-		double[] metrics = lm.parsePaths("D:/My DBank/总体部/上海专项编译构建环境、系统测试工作", "D:/My DBank/总体部/上海专项编译构建环境、系统测试工作/脚本/脚本备份");
+		double[] metrics = lm.parsePaths("D:/My DBank/总体部/上海专项编译构建环境、系统测试工作", "D:/My DBank/总体部/上海专项编译构建环境、系统测试工作");
 		System.out.println(metrics);
 		if(metrics != null){
 			System.out.println("D(a,b)=" + metrics[0] + "\tE(a,b)=" + metrics[1] + "\tM(a,b)=" + metrics[2]);

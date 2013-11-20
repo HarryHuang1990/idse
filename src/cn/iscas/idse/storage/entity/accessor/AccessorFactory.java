@@ -44,4 +44,7 @@ public class AccessorFactory {
 	public static TopicRelationAccessor getTopicAccessor(EntityStore store){
 		return new TopicRelationAccessor(store);
 	}
+	public static PageRankGraphAccessor getPageRankGraphAccessor(EntityStore store){
+		return new PageRankGraphAccessor(store);
+	}
 }
