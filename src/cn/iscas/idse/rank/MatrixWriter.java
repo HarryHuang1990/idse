@@ -1,6 +1,8 @@
 package cn.iscas.idse.rank;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,6 +30,7 @@ import cn.iscas.idse.storage.entity.TopicRelation;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.DocumentAccessor;
 import cn.iscas.idse.storage.entity.accessor.LocationRelationAccessor;
+import cn.iscas.idse.storage.entity.accessor.PageRankGraphAccessor;
 import cn.iscas.idse.storage.entity.accessor.TopicRelationAccessor;
 import cn.iscas.idse.storage.entity.accessor.TaskRelationAccessor;
 
@@ -41,13 +44,13 @@ public class MatrixWriter {
 	private Map<Integer, TopicRelation> topicRelationGraph;
 	private Map<Integer, LocationRelation> locationRelationGraph;
 	private Map<Integer, TaskRelation> taskRelationGraph;
-	private Map<Integer, PageRankGraph> pageRankGraph;
+	private Map<Integer, PageRankGraph> pageRankGraph = new HashMap<Integer, PageRankGraph>();
 	
+	PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
 	TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
 	LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
 	TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 	DocumentAccessor documentAccessor = AccessorFactory.getDocumentAccessor(SystemConfiguration.database.getIndexStore());
-
 	
 	public MatrixWriter(){}
 	public MatrixWriter(
@@ -61,23 +64,75 @@ public class MatrixWriter {
 	}
 	
 	public void run(){
-		this.writeTaskRelationMatrix();
-		this.writeTopicRelationMatrix();
-		this.writeLocationRelationMatrix();
+//		this.writeTaskRelationMatrix();
+//		this.writeTopicRelationMatrix();
+//		this.writeLocationRelationMatrix();
+		this.getTopicRelationMatrix();
+		this.getTaskRelationMatrix();
+		this.getLocationRelationMatrix();
+		this.writePageRankGraph();
 	}
 	
 	/**
 	 * integrate the 3 relation graph
 	 */
 	public void getPageRankGraph(){
-		// TODO 
+		log.info("generate PageRank graph...");
+		IndexReader indexReader = new IndexReader();
+		Set<Integer> docIDSet = indexReader.getDocumentIDs();
+		for(int docID : docIDSet){
+			TopicRelation topicRelation = this.topicRelationGraph.get(docID);
+			LocationRelation locationRelation = this.locationRelationGraph.get(docID);
+			TaskRelation taskRelation = this.taskRelationGraph.get(docID);
+			Set<Integer> relatedDocIDs = new HashSet<Integer>();
+			// get all related docs
+			if(topicRelation != null)
+				relatedDocIDs.addAll(topicRelation.getRelatedDocumentIDs().keySet());
+			if(locationRelation != null)
+				relatedDocIDs.addAll(locationRelation.getRelatedDocumentIDs().keySet());
+			if(taskRelation != null)
+				relatedDocIDs.addAll(taskRelation.getRelatedDocumentIDs().keySet());
+			
+			for(Iterator<Integer>it = relatedDocIDs.iterator(); it.hasNext();){
+				Double jsValue = null;
+				Float locationScore = null;
+				Integer frequency = null;
+				double score = 0;
+				int doc = it.next();
+				if(topicRelation != null)
+					jsValue = topicRelation.getRelatedDocumentIDs().get(doc);
+				if(locationRelation != null)
+					locationScore = locationRelation.getRelatedDocumentIDs().get(doc);
+				if(taskRelation != null)
+					frequency = taskRelation.getRelatedDocumentIDs().get(doc);
+				
+				jsValue = jsValue == null ? Double.POSITIVE_INFINITY : jsValue;
+				locationScore = locationScore == null ? 0 : locationScore;
+				frequency = frequency == null ? 0 : frequency;
+				score = this.getIntegratedScore(this.getTaskRelationScore(frequency), locationScore, this.getTopicRelationScore(jsValue));
+				this.addToPageRankGraph(docID, doc, score);
+			}
+		}
+		
+		
+	}
+	
+	public void addToPageRankGraph(int docID1, int docID2, double score){
+		if(this.pageRankGraph.containsKey(docID1)){
+			this.pageRankGraph.get(docID1).putNewRelatedDoc(docID2, score);
+		}
+		else{
+			PageRankGraph pageRankGraph = new PageRankGraph(docID1);
+			pageRankGraph.putNewRelatedDoc(docID2, score);
+			this.pageRankGraph.put(docID1, pageRankGraph);
+		}
 	}
 	
 	public double getTaskRelationScore(int freq){
 		return (Math.log(freq + 1)/Math.log(2)) / (1 + Math.log(freq + 1)/Math.log(2));
 	}
 	
-	public double getTopicRelationScore(int jsValue){
+	public double getTopicRelationScore(double jsValue){
 		return 1 / Math.pow(Math.E, jsValue);
 	}
 	
@@ -87,10 +142,41 @@ public class MatrixWriter {
 				topicScore * SystemConfiguration.topicFactor;
 	}
 	
+	/**
+	 * write pageRank graph into the Berkeley DB
+	 */
+	public void writePageRankGraph(){
+		this.deletePageRankGraph();
+		this.getPageRankGraph();
+		log.info("saving...");
+		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
+			entry.getValue().convertScoreToProbs();// convert the correlation score to the probability of transfer
+			this.pageRankGraphAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
+		}
+		log.info("pageRank graph DONE.");
+	}
+	
+	/**
+	 * remove pageRank graph from Berkeley DB
+	 * @return
+	 */
+	private void deletePageRankGraph(){
+		log.info("removing pageRank graph...");
+		Set<Integer> keys = this.pageRankGraphAccessor.getPrimaryDocumentID().sortedMap().keySet();
+		if(keys != null)
+			for(int key : keys)
+				this.pageRankGraphAccessor.getPrimaryDocumentID().delete(key);
+	}
+	
+
 	
 	
 	
-	public void getTopicRelationMatrix(){
+	
+	
+	
+	
+	private void getTopicRelationMatrix(){
 		log.info("generating the topic relation graph...");
 		TopicSimilarity ts = new TopicSimilarity(this.LDAdocIDListFileName, this.LDADataFileName);
 		ts.run();
@@ -123,7 +209,7 @@ public class MatrixWriter {
 	}
 	
 	private void getLocationRelationMatrix(){
-		log.info("start generating the topic relation graph...");
+		log.info("start generating the Location relation graph...");
 		LocationMining locationMining = new LocationMining();
 		locationMining.run();
 		locationRelationGraph = locationMining.getLocationRelationGraph();
@@ -197,9 +283,18 @@ public class MatrixWriter {
 //		w.writeTopicRelationMatrix();
 //		w.writeLocationRelationMatrix();
 		
-		System.out.println(Math.E);
-		for(int i=1; i<20 ; i++)
-			System.out.println(i + "\t" + w.getTaskRelationScore(i));
+//		System.out.println(Math.E);
+//		for(int i=1; i<20 ; i++)
+//			System.out.println(i + "\t" + w.getTaskRelationScore(i));
+		w.run();
+		PersonalRank pr = new PersonalRank();
+		pr.run();
+		
+//		Double jsValue = 0.22 ;
+//		float locationScore = 0.75f;
+//		int frequency = 0;
+//		double score = w.getIntegratedScore(w.getTaskRelationScore(frequency), locationScore, w.getTopicRelationScore(jsValue));
+//		System.out.println(score);
 		
 	}
 

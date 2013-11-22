@@ -12,6 +12,7 @@ import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.FileType;
 import cn.iscas.idse.storage.entity.LocationRelation;
+import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.PostingContent;
 import cn.iscas.idse.storage.entity.PostingTitle;
 import cn.iscas.idse.storage.entity.TargetDirectory;
@@ -24,6 +25,7 @@ import cn.iscas.idse.storage.entity.accessor.DirectoryAccessor;
 import cn.iscas.idse.storage.entity.accessor.DocumentAccessor;
 import cn.iscas.idse.storage.entity.accessor.FileTypeAccessor;
 import cn.iscas.idse.storage.entity.accessor.LocationRelationAccessor;
+import cn.iscas.idse.storage.entity.accessor.PageRankGraphAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
 import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
@@ -207,6 +209,7 @@ public class BerkelyDBDemo {
 		EntityCursor<TopicRelation> cursor = topicRelationAccessor.getPrimaryDocumentID().entities();
 		for(TopicRelation entity : cursor)
 			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+		cursor.close();
 	}
 	
 	public void showTaskRelationMatrix(){
@@ -214,6 +217,7 @@ public class BerkelyDBDemo {
 		EntityCursor<TaskRelation> cursor = topicRelationAccessor.getPrimaryDocumentID().entities();
 		for(TaskRelation entity : cursor)
 			System.out.println(entity.getDocumentID() + "\t" + entity.geteValue() + "\t" + entity.getRelatedDocumentIDs().toString());
+		cursor.close();
 	}
 	
 	public void showLocationRelationMatrix(){
@@ -221,7 +225,38 @@ public class BerkelyDBDemo {
 		EntityCursor<LocationRelation> cursor = locationRelationAccessor.getPrimaryDocumentID().entities();
 		for(LocationRelation entity : cursor)
 			System.out.println(entity.getDocumentID() + "\t" + entity.getRelatedDocumentIDs().toString());
+		cursor.close();
 	}
+	
+	public void showPageRankGraphMatrix(){
+		PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
+		EntityCursor<PageRankGraph> cursor = pageRankGraphAccessor.getPrimaryDocumentID().entities();
+		for(PageRankGraph entity : cursor)
+			System.out.println(entity.getDocumentID() + "\t" + entity.getPageRankScore() + "\t" + entity.getRelatedDocumentIDs().toString());
+		cursor.close();
+	}
+	
+	public TopicRelation getTopicRelationByDocID(int docID){
+		TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
+		return topicRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	public TaskRelation getTaskRelationByDocID(int docID){
+		TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
+		return taskRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	public LocationRelation getLocationRelationByDocID(int docID){
+		LocationRelationAccessor LocationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
+		return LocationRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	public PageRankGraph getPageRankGraphByDocID(int docID){
+		PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
+		return pageRankGraphAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
@@ -232,7 +267,19 @@ public class BerkelyDBDemo {
 //		demo.showPostingTitle();
 //		demo.showPostingContent();
 //		demo.showLocationRelationMatrix();
-		demo.showTaskRelationMatrix();
+//		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
+		demo.showPageRankGraphMatrix();
+		
+//		LocationRelation local = demo.getLocationRelationByDocID(82124);
+//		TaskRelation task = demo.getTaskRelationByDocID(82124);
+//		TopicRelation topic = demo.getTopicRelationByDocID(82124);
+//		
+//		if(local != null)
+//			System.out.println("location : " + local.getRelatedDocumentIDs().toString());
+//		if(task != null)
+//			System.out.println("task : " + task.getRelatedDocumentIDs().toString());
+//		if(topic != null)
+//			System.out.println("topic : " + topic.getRelatedDocumentIDs().toString());
 	}
 }

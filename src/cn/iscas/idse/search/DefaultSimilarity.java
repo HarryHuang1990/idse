@@ -96,7 +96,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @return
 	 */
 	private float fieldSimilarity(Query query, Document document, boolean isTitle){
-		float similarity = this.queryNormal(query) * this.vectorsProduct(query, document, isTitle)
+		float similarity = this.queryNormal(query, isTitle) * this.vectorsProduct(query, document, isTitle)
 				* this.documentNormal(document, isTitle) * this.documentBoost(document);
 		return similarity;
 	}
@@ -160,8 +160,21 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param query
 	 * @return
 	 */
-	private float queryNormal(Query query){
-		return 1.0f;
+	private float queryNormal(Query query, boolean isTitle){
+		float sumOfSquare = 0.0f;
+		Map<String, List<Integer>> queryVector = query.getQueryPosting();
+		
+		for(Entry<String, List<Integer>> entry : queryVector.entrySet()){
+			if(isTitle && !this.dfMap[0].containsKey(entry.getKey()))
+				continue;
+			if(!isTitle && !this.dfMap[1].containsKey(entry.getKey()))
+				continue;
+			
+			sumOfSquare += Math.pow(this.IDF(entry.getKey(), isTitle), 2);
+		}
+		
+		return sumOfSquare == 0 ? 0 : 1.0f / (float) Math.sqrt(sumOfSquare);
+//		return 1.0f;
 	}
 
 	/**

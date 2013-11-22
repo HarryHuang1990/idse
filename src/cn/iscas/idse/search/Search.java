@@ -60,8 +60,8 @@ public class Search {
 		 * df map
 		 */
 		Map<String, Integer>[] dfMap = new Map[2];
-		dfMap[0] = new HashMap<String, Integer>();
-		dfMap[1] = new HashMap<String, Integer>();
+		dfMap[0] = new HashMap<String, Integer>();	// for title
+		dfMap[1] = new HashMap<String, Integer>();	// for content
 		/*
 		 * document number
 		 */

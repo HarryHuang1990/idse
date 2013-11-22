@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.persist.EntityCursor;
@@ -14,19 +15,27 @@ import cn.iscas.idse.storage.entity.Category;
 import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
 import cn.iscas.idse.storage.entity.FileType;
+import cn.iscas.idse.storage.entity.LocationRelation;
+import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.PostingContent;
 import cn.iscas.idse.storage.entity.PostingTitle;
 import cn.iscas.idse.storage.entity.TargetDirectory;
+import cn.iscas.idse.storage.entity.TaskRelation;
 import cn.iscas.idse.storage.entity.Term;
+import cn.iscas.idse.storage.entity.TopicRelation;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.CategoryAccessor;
 import cn.iscas.idse.storage.entity.accessor.DirectoryAccessor;
 import cn.iscas.idse.storage.entity.accessor.DocumentAccessor;
 import cn.iscas.idse.storage.entity.accessor.FileTypeAccessor;
+import cn.iscas.idse.storage.entity.accessor.LocationRelationAccessor;
+import cn.iscas.idse.storage.entity.accessor.PageRankGraphAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
 import cn.iscas.idse.storage.entity.accessor.TargetDirectoryAccessor;
+import cn.iscas.idse.storage.entity.accessor.TaskRelationAccessor;
 import cn.iscas.idse.storage.entity.accessor.TermAccessor;
+import cn.iscas.idse.storage.entity.accessor.TopicRelationAccessor;
 
 
 /**
@@ -45,6 +54,10 @@ public class IndexReader {
 	private TermAccessor termAccessor = AccessorFactory.getTermAccessor(SystemConfiguration.database.getIndexStore());
 	private PostingTitleAccessor postingTitleAccessor = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
 	private PostingContentAccessor postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
+	private PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
+	private TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
+	private LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
+	private TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 	
 	
 	public CategoryAccessor getCategoryAccessor() {
@@ -279,6 +292,10 @@ public class IndexReader {
 		return this.documentAccessor.getPrimaryDocumentID().entities();
 	}
 	
+	public Set<Integer> getDocumentIDs(){
+		return this.documentAccessor.getPrimaryDocumentID().map().keySet();
+	}
+	
 	public List<Document> getDocuments(){
 		List<Document> documents = new ArrayList<Document>(this.documentAccessor.getPrimaryDocumentID().map().values());
 		return documents;
@@ -341,9 +358,29 @@ public class IndexReader {
 		return this.fileTypeAccessor.getPrimaryType().map().values();
 	}
 	
-
+	public TaskRelation getTaskRelationByDocID(int docID){
+		return this.taskRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
 	
+	public TopicRelation getTopicRelationByDocID(int docID){
+		return this.topicRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
 	
+	public LocationRelation getLocationRelationByDocID(int docID){
+		return this.locationRelationAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	public PageRankGraph getPageRankGraphByID(int docID){
+		return this.pageRankGraphAccessor.getPrimaryDocumentID().get(docID);
+	}
+	
+	public Map<Integer, PageRankGraph> getPageRankGraph(){
+		return this.pageRankGraphAccessor.getPrimaryDocumentID().map();
+	}
+	
+	public Map<Integer, TaskRelation> getTaskRelation(){
+		return this.taskRelationAccessor.getPrimaryDocumentID().map();
+	}
 	
 	/**
 	 * remove the targetDirectory entity of given ID
@@ -390,6 +427,10 @@ public class IndexReader {
 		this.termAccessor.getPrimaryTerm().put(entity);
 	}
 	
+	public void addAndUpdatePageRankGraph(PageRankGraph entity){
+		this.pageRankGraphAccessor.getPrimaryDocumentID().put(entity);
+	}
+	
 	public boolean isExistDirectoryByPath(String path){
 		return this.directoryAccessor.getSecondaryDirectoryPath().contains(path);
 	}
@@ -401,7 +442,7 @@ public class IndexReader {
 	
 	public static void main(String args[]){
 		IndexReader indexReader = new IndexReader();
-		int[] documents = new int[]{82065, 82068};
+		int[] documents = new int[]{82171, 82036};
 		for(int i=0; i<documents.length; i++)
 			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
 		
