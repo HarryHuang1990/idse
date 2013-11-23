@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import cn.iscas.idse.config.SystemConfiguration;
+import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.storage.DBManager;
 import cn.iscas.idse.storage.entity.Category;
 import cn.iscas.idse.storage.entity.Directory;
@@ -236,31 +237,50 @@ public class BerkelyDBDemo {
 		cursor.close();
 	}
 	
-	public TopicRelation getTopicRelationByDocID(int docID){
+	public void showTopicRelationByDocID(int docID){
+		IndexReader indexReader = new IndexReader();
 		TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
-		return topicRelationAccessor.getPrimaryDocumentID().get(docID);
+		TopicRelation topicRelation = topicRelationAccessor.getPrimaryDocumentID().get(docID);
+		System.out.println(docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		for(Entry<Integer, Double> doc : topicRelation.getRelatedDocumentIDs().entrySet()){
+			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
+		}
+		
 	}
 	
-	public TaskRelation getTaskRelationByDocID(int docID){
+	public void showTaskRelationByDocID(int docID){
+		IndexReader indexReader = new IndexReader();
 		TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
-		return taskRelationAccessor.getPrimaryDocumentID().get(docID);
+		TaskRelation taskRelation = taskRelationAccessor.getPrimaryDocumentID().get(docID);
+		System.out.println(docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		for(Entry<Integer, Integer> doc : taskRelation.getRelatedDocumentIDs().entrySet()){
+			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
+		}
 	}
 	
-	public LocationRelation getLocationRelationByDocID(int docID){
+	public void showLocationRelationByDocID(int docID){
+		IndexReader indexReader = new IndexReader();
 		LocationRelationAccessor LocationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
-		return LocationRelationAccessor.getPrimaryDocumentID().get(docID);
+		LocationRelation locationRelation = LocationRelationAccessor.getPrimaryDocumentID().get(docID);
+		System.out.println(docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		for(Entry<Integer, Float> doc : locationRelation.getRelatedDocumentIDs().entrySet())
+			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
 	}
 	
-	public PageRankGraph getPageRankGraphByDocID(int docID){
-		PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
-		return pageRankGraphAccessor.getPrimaryDocumentID().get(docID);
+	public void showPageRankGraphByDocID(int docID){
+		IndexReader indexReader = new IndexReader();
+		PageRankGraph pageRankGraph = indexReader.getPageRankGraphByID(docID);
+		System.out.println(pageRankGraph.getPageRankScore() + "\t" + docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		for(Entry<Integer, Double> doc : pageRankGraph.getRelatedDocumentIDs().entrySet()){
+			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
+		}
 	}
 	
 	
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-//		demo.showEntityDirectory();
+		demo.showEntityDirectory();
 //		demo.showEntityDocument();
 //		demo.showEntityFileType();
 //		demo.showDictionary();
@@ -269,7 +289,11 @@ public class BerkelyDBDemo {
 //		demo.showLocationRelationMatrix();
 //		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
-		demo.showPageRankGraphMatrix();
+//		demo.showPageRankGraphMatrix();
+//		demo.showPageRankGraphByDocID(77337);
+//		demo.showLocationRelationByDocID(77337);
+//		demo.showTopicRelationByDocID(77337);
+//		demo.showTaskRelationByDocID(77337);
 		
 //		LocationRelation local = demo.getLocationRelationByDocID(82124);
 //		TaskRelation task = demo.getTaskRelationByDocID(82124);

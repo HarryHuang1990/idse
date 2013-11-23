@@ -42,7 +42,7 @@ public class QueryResult {
 		/*
 		 * create a priority queue whose members are ordered by score descently.
 		 */
-		this.scoreQueue = new PriorityQueue<Score>(this.resultCount, new Comparator<Score>(){
+		this.scoreQueue = new PriorityQueue<Score>(5, new Comparator<Score>(){
 			public int compare(final Score o1,final Score o2) 
 	        {
 	            double r = o1.getScore() - o2.getScore();
@@ -61,17 +61,38 @@ public class QueryResult {
 		this.scoreQueue.add(score);
 	}
 	
+	public void clear(){
+		this.scoreQueue.clear();
+		this.resultCount = 0;
+	}
 	
+	public PriorityQueue<Score> getScoreQueue() {
+		return scoreQueue;
+	}
+
+	public void setScoreQueue(PriorityQueue<Score> scoreQueue) {
+		this.scoreQueue = scoreQueue;
+	}
+
+	public int getResultCount() {
+		return resultCount;
+	}
+
+	public void setResultCount(int resultCount) {
+		this.resultCount = resultCount;
+	}
+
 	/**
 	 * return the K document with the highest score ordered by score descently.
 	 * @param K
 	 * @return
 	 */
-	public List<Document> getTopK(int K){
-		List<Document> topKList = new ArrayList<Document>();
-		Iterator<Score> iterator = this.scoreQueue.iterator();
-		for(int i=0; iterator.hasNext() && i < K; i++){
-			topKList.add(this.indexReader.getDocumentByDocID(iterator.next().getDocID()));
+	public List<Score> getTopK(int K){
+		List<Score> topKList = new ArrayList<Score>();
+		int i=0;
+		while(this.scoreQueue.size() != 0){
+			topKList.add(this.scoreQueue.poll());
+			if(++i == K)break;
 		}
 		return topKList;
 	}
@@ -82,23 +103,34 @@ public class QueryResult {
 	 * @param pageCount		-	result number displayed on each page.
 	 * @return
 	 */
-	public List<Document> getPageN(int pageNo, int pageCount){
-		List<Document> pageList = new ArrayList<Document>();
-		Iterator<Score> iterator = this.scoreQueue.iterator();
-		int pageStart = 1 + (pageNo - 1) * pageCount;
-		int pageEnd = pageNo * pageCount;
-		for(int i=1; iterator.hasNext() && (i >= pageStart && i <= pageEnd); i++){
-			pageList.add(this.indexReader.getDocumentByDocID(iterator.next().getDocID()));
-		}
-		return pageList;
-	}
+//	public List<Document> getPageN(int pageNo, int pageCount){
+//		List<Document> pageList = new ArrayList<Document>();
+//		Iterator<Score> iterator = this.scoreQueue.iterator();
+//		int pageStart = 1 + (pageNo - 1) * pageCount;
+//		int pageEnd = pageNo * pageCount;
+//		for(int i=1; iterator.hasNext() && (i >= pageStart && i <= pageEnd); i++){
+//			pageList.add(this.indexReader.getDocumentByDocID(iterator.next().getDocID()));
+//		}
+//		return pageList;
+//	}
 	/**
 	 * output the query result on the console. 
 	 */
 	public void showResult(){
+		int i=0;
 		while(this.scoreQueue.size() != 0){
 			Score score = this.scoreQueue.poll();
 			System.out.println(score.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(score.getDocID()));
+			PriorityQueue<Score>candidates = score.getMostRelatedDocs();
+			int k=0;
+			while(candidates.size() != 0){
+				Score cand = candidates.poll();
+				System.out.println("\t" + cand.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(cand.getDocID()));
+				k++;
+				if(k==5)break;
+			}
+			i++;
+			if(i==20)break;
 		}
 	}
 	/**

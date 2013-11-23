@@ -1,15 +1,25 @@
 package cn.iscas.idse.search;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.search.entity.Document;
 import cn.iscas.idse.search.entity.Query;
+import cn.iscas.idse.search.entity.Score;
+import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.PostingContent;
 import cn.iscas.idse.storage.entity.PostingTitle;
 import cn.iscas.idse.storage.entity.Term;
@@ -22,6 +32,7 @@ import cn.iscas.idse.storage.entity.Term;
  */
 public class Search {
 	
+	private static final Logger log = Logger.getLogger(Search.class);
 	
 	private QueryParser queryParser;
 	private IndexReader indexReader;
@@ -31,7 +42,7 @@ public class Search {
 		this.indexReader = new IndexReader();
 	}
 
-	public void executeSearch(String query){
+	public void executeSearch(String query, boolean PR){
 		
 		/*
 		 * parse the query
@@ -40,7 +51,9 @@ public class Search {
 		this.queryParser.parse();
 		System.out.println(this.queryParser.getQueryEntity().toString());
 		
-		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity());
+		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity(), PR);
+		queryResult = this.getFinalScoreOfTopN(queryResult);
+		
 		if(queryResult != null)
 			queryResult.showResult();
 	}
@@ -51,7 +64,7 @@ public class Search {
 	 * @param queryEntity
 	 * @return
 	 */
-	public QueryResult getQueryResult(Query queryEntity){
+	public QueryResult getQueryResult(Query queryEntity, boolean PR){
 		/*
 		 *  candidate documents map <documentId, document object>
 		 */
@@ -73,8 +86,12 @@ public class Search {
 			Term termEntity = this.indexReader.getTermByTerm(term);
 			if(termEntity == null)continue;
 			//df
-			dfMap[0].put(term, termEntity.getDocumentFrequenceForTitle());
-			dfMap[1].put(term, termEntity.getDocumentFrequenceForContent());
+			int df_title = termEntity.getDocumentFrequenceForTitle();
+			int df_content = termEntity.getDocumentFrequenceForContent();
+			if(df_title != 0)
+				dfMap[0].put(term, termEntity.getDocumentFrequenceForTitle());
+			if(df_content != 0)
+				dfMap[1].put(term, termEntity.getDocumentFrequenceForContent());
 			// get title posting list
 			for(int postingID : termEntity.getPostingTitle()){
 				PostingTitle pt = this.indexReader.getPostingTitleByPostingID(postingID);
@@ -107,6 +124,7 @@ public class Search {
 			queryResult = new QueryResult(documents.size());
 			DefaultSimilarity similarity = new DefaultSimilarity(dfMap, documentNumber);
 			for(Entry<Integer, Document>entry : documents.entrySet()){
+//				queryResult.put(this.getFinalScore(similarity.score(queryEntity, entry.getValue()), PR));
 				queryResult.put(similarity.score(queryEntity, entry.getValue()));
 			}
 		}
@@ -114,11 +132,58 @@ public class Search {
 		return queryResult;
 	}
 	
+	/**
+	 * sort the topN relevent result with pageRank score (view as secondary sort) . and return the new sort.
+	 * topN(default 20) is set in the {@link cn.iscas.idse.config.SystemConfiguration}.
+	 * @param releventResult
+	 * @return
+	 */
+	public QueryResult getFinalScoreOfTopN(QueryResult releventResult){
+		
+		List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
+		releventResult.clear();
+		for(Score score : releventList){
+			PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+			if(pageRankGraph != null){
+				score.setScore(pageRankGraph.getPageRankScore());
+				// get top5 most related documents
+				score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+				releventResult.put(score);
+			}
+//			else
+//				score.setScore(0);
+			
+		}
+		return releventResult;
+	}
+	
+
+	
+	
+	/**
+	 * ### Combine the cosin score with the pageRank score if the pageRank mode is chosen.
+	 * @param cosinScore	the tf-idf score
+	 * @param PR			PR = true, combine the tf-idf score and pageRank; PR=false, return directly without pageRank.
+	 * @return
+	 */
+	public Score getFinalScore(Score cosinScore, boolean PR){
+		Score score = cosinScore;
+		if(PR){
+			PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+			if(pageRankGraph == null)
+				System.out.println(score.getDocID());
+			score.setScore(score.getScore() * pageRankGraph.getPageRankScore());
+		}
+		return score;
+	}
+	
 	public static void main(String[]args){
 		Search search = new Search();
 		while(true){
 			Scanner str = new Scanner(System.in);
-			search.executeSearch(str.nextLine());
+			String[]input = str.nextLine().split(",");
+			
+			search.executeSearch(input[0], Boolean.parseBoolean(input[1]));
 		}
 		
 	}

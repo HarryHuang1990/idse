@@ -1,28 +1,22 @@
 package cn.iscas.idse.rank;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
 
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityIndex;
-import com.sleepycat.persist.evolve.Deleter;
-import com.sleepycat.persist.evolve.Mutations;
-
 import cn.iscas.idse.config.SystemConfiguration;
-import cn.iscas.idse.index.Index;
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.rank.location.LocationMining;
 import cn.iscas.idse.rank.task.mining.DefaultTaskMining;
 import cn.iscas.idse.rank.topic.TopicSimilarity;
-import cn.iscas.idse.storage.entity.Document;
+import cn.iscas.idse.search.entity.Score;
 import cn.iscas.idse.storage.entity.LocationRelation;
 import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.TaskRelation;
@@ -70,8 +64,92 @@ public class MatrixWriter {
 		this.getTopicRelationMatrix();
 		this.getTaskRelationMatrix();
 		this.getLocationRelationMatrix();
+		this.getPageRankGraph();
+		this.getRecommends();
 		this.writePageRankGraph();
 	}
+	
+	/**
+	 * Recommend 5 most related documents for every documents. 
+	 */
+	public void getRecommends(){
+		log.info("serching relevent candidates...");
+		for(Entry<Integer, PageRankGraph> docPageRankNode : this.pageRankGraph.entrySet()){
+			this.recommendReleventDocuments(docPageRankNode.getValue());
+		}
+	}
+	
+	/**
+	 * recommend the 5 most related documents with the given documents.
+	 * @param score
+	 * @param pageRankGraph
+	 */
+	public void recommendReleventDocuments(PageRankGraph pageRankGraph){
+		/*
+		 * key : candidate document ID
+		 * value : transfer probability
+		 */
+		Map<Integer, Double> candidatesProbsSum = new HashMap<Integer, Double>();
+		PriorityQueue<Score> recommendedDocs = new PriorityQueue<Score>(5, new Comparator<Score>(){
+			public int compare(final Score o1,final Score o2) 
+	        {
+	            double r = o1.getScore() - o2.getScore();
+	            return r<0 ? 1 : -1;
+	        }
+		});
+		int step = 0;
+		this.recursionSearch(candidatesProbsSum, pageRankGraph, step, pageRankGraph.getDocumentID(), -1, 1);
+		for(Integer docID : candidatesProbsSum.keySet()){
+			recommendedDocs.add(new Score(docID, candidatesProbsSum.get(docID)));
+		}
+		for(int i=0; i<SystemConfiguration.recommendedDocNumber; i++){
+			pageRankGraph.getRecommendedDocs().add(recommendedDocs.poll().getDocID());
+		}
+	}
+	
+	/**
+	 * search candidate documents and calculate the transfer probability recursively. 
+	 */
+	public void recursionSearch(
+			Map<Integer, Double> candidatesProbsSum, 
+			PageRankGraph pageRankGraph, 
+			int step, 
+			int sourceDocID, 
+			int formerDocID, 
+			double probs){
+		
+		step++;
+		if(step > SystemConfiguration.step)
+			return;
+		
+		for(Entry<Integer, Double>doc : pageRankGraph.getRelatedDocumentIDs().entrySet()){
+			// return the source node or former node is not allowed.
+			if(doc.getKey() != formerDocID && doc.getKey() != sourceDocID){
+				// the transfer probability from the source docNode to current docNode
+				double newProbs = probs * doc.getValue();
+				// add transfer probability of current docNode to the buffer
+				this.addTransferProbability(step, doc.getKey(), newProbs, candidatesProbsSum);
+				// get the nodes on the next level
+				PageRankGraph docNode = this.pageRankGraphAccessor.getPrimaryDocumentID().get(doc.getKey());
+				// search recursively
+				this.recursionSearch(candidatesProbsSum, docNode, step, sourceDocID, pageRankGraph.getDocumentID(), newProbs);
+			}
+		}
+	}
+	
+	public void addTransferProbability(
+			int step,
+			int docID, 
+			double probs, 
+			Map<Integer, Double> candidatesProbsSum){
+		if(candidatesProbsSum.containsKey(docID)){
+			candidatesProbsSum.put(docID, candidatesProbsSum.get(docID) + probs);
+		}
+		else{
+			candidatesProbsSum.put(docID, probs);
+		}
+	}
+	
 	
 	/**
 	 * integrate the 3 relation graph
@@ -113,8 +191,6 @@ public class MatrixWriter {
 				this.addToPageRankGraph(docID, doc, score);
 			}
 		}
-		
-		
 	}
 	
 	public void addToPageRankGraph(int docID1, int docID2, double score){
@@ -147,7 +223,6 @@ public class MatrixWriter {
 	 */
 	public void writePageRankGraph(){
 		this.deletePageRankGraph();
-		this.getPageRankGraph();
 		log.info("saving...");
 		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
 			entry.getValue().convertScoreToProbs();// convert the correlation score to the probability of transfer
@@ -289,12 +364,6 @@ public class MatrixWriter {
 		w.run();
 		PersonalRank pr = new PersonalRank();
 		pr.run();
-		
-//		Double jsValue = 0.22 ;
-//		float locationScore = 0.75f;
-//		int frequency = 0;
-//		double score = w.getIntegratedScore(w.getTaskRelationScore(frequency), locationScore, w.getTopicRelationScore(jsValue));
-//		System.out.println(score);
 		
 	}
 

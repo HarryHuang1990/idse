@@ -77,6 +77,19 @@ public class SystemConfiguration {
 	public static double locationFactor = 0.2;
 	
 	/**
+	 * 返回给用户的结果数
+	 */
+	public static int topN = 20;
+	/**
+	 * 相关文档的推荐步长
+	 */
+	public static int step = 3;
+	/**
+	 * 推荐的文档数
+	 */
+	public static int recommendedDocNumber = 5;
+	
+	/**
 	 * 待索引的目标目录列表
 	 */
 	public static List<String> targetDirectories = new ArrayList<String>();

@@ -69,21 +69,30 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @return
 	 */
 	public Score score(Query query, Document document){
-		/*
-		 * get the tuning factors according to the hits of different fields of document.
-		 */
-		float factors[] = this.getTuningFactor(
-				this.coord(document.getTitlePostings().size(), query.getQueryPosting().size()), 
-				this.coord(document.getContentPostings().size(), query.getQueryPosting().size()));
-		/*
-		 * calculate the similarity score on different fields.
-		 */
-		float scoreTitle = this.fieldSimilarity(query, document, true);
-		float scoreContent = this.fieldSimilarity(query, document, false);
-		
-		Score score = new Score(
-				document.getDocID(), 
-				factors[0] * scoreTitle + factors[1] * scoreContent);
+		Score score = null;
+		double hitsRatioTitle = this.coord(document.getTitlePostings().size(), query.getQueryPosting().size());
+		double hitsRatioContent = this.coord(document.getContentPostings().size(), query.getQueryPosting().size());
+		if(hitsRatioTitle<0.5 && hitsRatioContent<0.5){
+			hitsRatioTitle = 0;
+			hitsRatioContent = 0;
+		}
+		if(hitsRatioTitle + hitsRatioContent != 0){
+			/*
+			 * get the tuning factors according to the hits of different fields of document.
+			 */
+			double factors[] = this.getTuningFactor(hitsRatioTitle, hitsRatioContent);
+			/*
+			 * calculate the similarity score on different fields.
+			 */
+			double scoreTitle = this.fieldSimilarity(query, document, true);
+			double scoreContent = this.fieldSimilarity(query, document, false);
+			
+			score = new Score(
+					document.getDocID(), 
+					(factors[0] * scoreTitle + factors[1] * scoreContent));
+		}
+		else
+			score = new Score(document.getDocID(), 	0);
 		
 		return score;
 	}
@@ -95,8 +104,8 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param isTitle	-  indicates the object of calculation : title or content?
 	 * @return
 	 */
-	private float fieldSimilarity(Query query, Document document, boolean isTitle){
-		float similarity = this.queryNormal(query, isTitle) * this.vectorsProduct(query, document, isTitle)
+	private double fieldSimilarity(Query query, Document document, boolean isTitle){
+		double similarity = this.queryNormal(query, isTitle) * this.vectorsProduct(query, document, isTitle)
 				* this.documentNormal(document, isTitle) * this.documentBoost(document);
 		return similarity;
 	}
@@ -107,8 +116,8 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param documentVector
 	 * @return
 	 */
-	private float vectorsProduct(Query query, Document document, boolean isTitle){
-		float result = 0.0f;
+	private double vectorsProduct(Query query, Document document, boolean isTitle){
+		double result = 0.0;
 		Map<String, List<Integer>> queryVector = query.getQueryPosting();
 		Map<String, List<Integer>> documentVector = isTitle ? document.getTitlePostings() : document.getContentPostings();
 		
@@ -116,7 +125,6 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 			//vector space product = Q * D
 			result += this.IDF(entry.getKey(), isTitle) * this.TFIDF(entry.getKey(), entry.getValue().size(), isTitle);
 		}
-		
 		return result;
 	}
 	
@@ -127,7 +135,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param isTitle
 	 * @return
 	 */
-	private float TFIDF(String term, int tf, boolean isTitle){
+	private double TFIDF(String term, int tf, boolean isTitle){
 		return this.TF(tf) * this.IDF(term, isTitle);
 	}
 	
@@ -136,8 +144,8 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param tf
 	 * @return
 	 */
-	private float TF(int tf){
-		return (float) (1 + Math.log10(tf));
+	private double TF(int tf){
+		return (1 + Math.log10(tf));
 	}
 	
 	/**
@@ -146,12 +154,12 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param isTitle
 	 * @return
 	 */
-	private float IDF(String term, boolean isTitle){
-		float idf = 1.0f;
+	private double IDF(String term, boolean isTitle){
+		double idf = 1.0;
 		if(isTitle)
-			idf = (float) (1 + Math.log10(this.documentNumber * 1.0f / this.dfMap[0].get(term)));
+			idf = (1 + Math.log10(this.documentNumber * 1.0f / this.dfMap[0].get(term)));
 		else
-			idf = (float) (1 + Math.log10(this.documentNumber * 1.0f / this.dfMap[1].get(term)));
+			idf = (1 + Math.log10(this.documentNumber * 1.0f / this.dfMap[1].get(term)));
 		return idf;
 	}
 	
@@ -160,8 +168,8 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param query
 	 * @return
 	 */
-	private float queryNormal(Query query, boolean isTitle){
-		float sumOfSquare = 0.0f;
+	private double queryNormal(Query query, boolean isTitle){
+		double sumOfSquare = 0.0;
 		Map<String, List<Integer>> queryVector = query.getQueryPosting();
 		
 		for(Entry<String, List<Integer>> entry : queryVector.entrySet()){
@@ -172,8 +180,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 			
 			sumOfSquare += Math.pow(this.IDF(entry.getKey(), isTitle), 2);
 		}
-		
-		return sumOfSquare == 0 ? 0 : 1.0f / (float) Math.sqrt(sumOfSquare);
+		return sumOfSquare == 0 ? 0 : 1.0 / Math.sqrt(sumOfSquare);
 //		return 1.0f;
 	}
 
@@ -183,17 +190,16 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param isTitle
 	 * @return
 	 */
-	private float documentNormal(Document document, boolean isTitle){
+	private double documentNormal(Document document, boolean isTitle){
 		
-		float sumOfSquare = 0f;
+		double sumOfSquare = 0f;
 		
 		Map<String, List<Integer>> documentVector = isTitle ? document.getTitlePostings() : document.getContentPostings();
 		
 		for(Entry<String, List<Integer>> entry : documentVector.entrySet()){
 			sumOfSquare += Math.pow(this.TFIDF(entry.getKey(), entry.getValue().size(), isTitle), 2);
 		}
-		
-		return sumOfSquare == 0 ? 0 : 1.0f / (float) Math.sqrt(sumOfSquare);
+		return sumOfSquare == 0 ? 0 : 1.0f / Math.sqrt(sumOfSquare);
 	}
 	
 	/**
@@ -202,8 +208,8 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param document
 	 * @return
 	 */
-	private float documentBoost(Document document){
-		return 1.0f;
+	private double documentBoost(Document document){
+		return 1.0;
 	}
 	
 	/**
@@ -223,9 +229,10 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @param coordContent
 	 * @return float[0] - factor for title-part; float[1] - factor for content-part.
 	 */
-	private float[] getTuningFactor(float coordTitle, float coordContent){
-		float[] factors = new float[2];
-		float sumOfSquare = (float) Math.sqrt(Math.pow(coordTitle, 2) + Math.pow(coordContent, 2));
+	private double[] getTuningFactor(double coordTitle, double coordContent){
+		double[] factors = new double[2];
+//		float sumOfSquare = (float) Math.sqrt(Math.pow(coordTitle, 2) + Math.pow(coordContent, 2));
+		double sumOfSquare = coordTitle + coordContent;
 		factors[0] = coordTitle / sumOfSquare;
 		factors[1] = coordContent / sumOfSquare;
 		return factors;
