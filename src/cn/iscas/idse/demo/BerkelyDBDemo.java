@@ -280,7 +280,7 @@ public class BerkelyDBDemo {
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showEntityDirectory();
+//		demo.showEntityDirectory();
 //		demo.showEntityDocument();
 //		demo.showEntityFileType();
 //		demo.showDictionary();
@@ -290,10 +290,10 @@ public class BerkelyDBDemo {
 //		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
 //		demo.showPageRankGraphMatrix();
-//		demo.showPageRankGraphByDocID(77337);
-//		demo.showLocationRelationByDocID(77337);
-//		demo.showTopicRelationByDocID(77337);
-//		demo.showTaskRelationByDocID(77337);
+		demo.showPageRankGraphByDocID(70407);
+//		demo.showLocationRelationByDocID(70407);
+//		demo.showTopicRelationByDocID(70407);
+//		demo.showTaskRelationByDocID(70407);
 		
 //		LocationRelation local = demo.getLocationRelationByDocID(82124);
 //		TaskRelation task = demo.getTaskRelationByDocID(82124);

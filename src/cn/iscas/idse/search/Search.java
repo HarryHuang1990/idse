@@ -42,7 +42,7 @@ public class Search {
 		this.indexReader = new IndexReader();
 	}
 
-	public void executeSearch(String query, boolean PR){
+	public QueryResult executeSearch(String query){
 		
 		/*
 		 * parse the query
@@ -51,11 +51,13 @@ public class Search {
 		this.queryParser.parse();
 		System.out.println(this.queryParser.getQueryEntity().toString());
 		
-		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity(), PR);
+		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity());
 		queryResult = this.getFinalScoreOfTopN(queryResult);
 		
 		if(queryResult != null)
 			queryResult.showResult();
+		
+		return queryResult;
 	}
 	
 	/**
@@ -64,7 +66,7 @@ public class Search {
 	 * @param queryEntity
 	 * @return
 	 */
-	public QueryResult getQueryResult(Query queryEntity, boolean PR){
+	public QueryResult getQueryResult(Query queryEntity){
 		/*
 		 *  candidate documents map <documentId, document object>
 		 */
@@ -128,7 +130,6 @@ public class Search {
 				queryResult.put(similarity.score(queryEntity, entry.getValue()));
 			}
 		}
-		
 		return queryResult;
 	}
 	
@@ -160,30 +161,29 @@ public class Search {
 
 	
 	
-	/**
-	 * ### Combine the cosin score with the pageRank score if the pageRank mode is chosen.
-	 * @param cosinScore	the tf-idf score
-	 * @param PR			PR = true, combine the tf-idf score and pageRank; PR=false, return directly without pageRank.
-	 * @return
-	 */
-	public Score getFinalScore(Score cosinScore, boolean PR){
-		Score score = cosinScore;
-		if(PR){
-			PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
-			if(pageRankGraph == null)
-				System.out.println(score.getDocID());
-			score.setScore(score.getScore() * pageRankGraph.getPageRankScore());
-		}
-		return score;
-	}
+//	/**
+//	 * ### Combine the cosin score with the pageRank score if the pageRank mode is chosen.
+//	 * @param cosinScore	the tf-idf score
+//	 * @param PR			PR = true, combine the tf-idf score and pageRank; PR=false, return directly without pageRank.
+//	 * @return
+//	 */
+//	public Score getFinalScore(Score cosinScore, boolean PR){
+//		Score score = cosinScore;
+//		if(PR){
+//			PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+//			if(pageRankGraph == null)
+//				System.out.println(score.getDocID());
+//			score.setScore(score.getScore() * pageRankGraph.getPageRankScore());
+//		}
+//		return score;
+//	}
 	
 	public static void main(String[]args){
 		Search search = new Search();
 		while(true){
 			Scanner str = new Scanner(System.in);
-			String[]input = str.nextLine().split(",");
-			
-			search.executeSearch(input[0], Boolean.parseBoolean(input[1]));
+			String keyword = str.nextLine();
+			search.executeSearch(keyword);
 		}
 		
 	}

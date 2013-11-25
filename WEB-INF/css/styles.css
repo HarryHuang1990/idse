@@ -1,0 +1,264 @@
+a{
+	text-decoration:none;
+	color:#0078B6;
+}
+a:hover{
+	text-decoration:none;
+	color:#000;
+}
+
+.w_body{
+	background: url(../pictures/index_bgre.png) repeat-x top white;
+}
+
+.main_bg{
+	width: 950px;
+	margin: 0 auto;
+	padding-top: 51px;
+	background: url(../pictures/index_bg.png) center top no-repeat;
+	
+}
+
+#logo_bg{
+	margin-top:70px;
+}
+
+.logo_img{
+	display: block;
+	background: url(../pictures/index_logo.png) no-repeat;
+	width: 222px;
+	height: 61px;
+	text-indent: -9999px;
+	outline: none;
+	margin: 0 auto;
+}
+
+.search_head{
+	margin-top:50px;
+}
+
+.search_input_b {
+border: solid 3px #D5EAF4;
+border-radius: 3px;
+width:600px;
+margin:0 auto;
+}
+
+.search_input_b .search_input_wrap {
+height: 35px;
+border-top: solid 1px #4FA4CF;
+border-left: solid 1px #4FA4CF;
+border-right: solid 1px #84C1E0;
+border-bottom: solid 1px #84C1E0;
+}
+
+.search_input_b .searchBtn_box {
+height: 37px;
+width: 74px;
+margin: -1px -1px -1px 0;
+float: right;
+overflow: hidden;
+}
+
+.search_input_b .searchBtn {
+display: block;
+background: url(../pictures/search_btn.png) no-repeat -76px 0;
+width: 74px;
+height: 37px;
+text-indent: -9999px;
+outline: none;
+}
+
+.search_input_b .searchInp_box {
+background: white;
+margin-right: 71px;
+
+}
+
+.search_input_b .searchInp_auto {
+
+padding: 0 8px;
+box-shadow: inset 2px 2px 3px rgba(102,102,102,.4);
+}
+
+.search_input_b .searchInp_box .searchInp_form {
+
+background: none;
+width: 99%;
+height: 32px;
+overflow: hidden;
+border: none;
+line-height: 32px;
+font-size: 20px;
+color: #333;
+font-family: Î¢ÈíÑÅºÚ;
+}
+
+
+
+
+
+/**************************************************************/
+
+.main{
+	width: 950px;
+	margin: 0 auto;
+	background: url(../pictures/index_bg.png) center top no-repeat;
+}
+
+.search_result_head{
+	/*overflow:auto;*/
+	clear:both;
+}
+
+.search_logo {
+background: url(../pictures/search_logo.png) no-repeat;
+width: 130px;
+height: 35px;
+margin-top: 25px;
+margin-bottom:10px;
+float: left;
+}
+
+.search_input {
+float:left;
+border: solid 3px #ADD7ED;
+border-radius: 3px;
+width:500px;
+margin-top:22px;
+margin-left:20px;
+margin-bottom:10px;
+}
+
+.search_input .search_input_wrap {
+height: 30px;
+border: solid 1px #39C;
+}
+
+.search_input .searchBtn_box {
+height: 32px;
+width: 74px;
+margin: -1px -1px -1px 0;
+float: right;
+overflow: hidden;
+}
+
+.search_input .searchBtn {
+display: block;
+background: url(../pictures/search_btn.png?id=1339038274533) no-repeat;
+width: 74px;
+height: 32px;
+text-indent: -9999px;
+outline: none;
+}
+
+.search_input .searchInp_box {
+background: white;
+margin-right: 71px;
+_margin-right: 0;
+_padding-right: 71px;
+}
+
+.search_input .searchInp_auto {
+padding: 0 8px;
+box-shadow: inset 2px 2px 3px rgba(102,102,102,.4);
+}
+
+.search_input .searchInp_box .searchInp_form {
+background: none;
+width: 99%;
+height: 28px;
+overflow: hidden;
+border: none;
+line-height: 28px;
+font-size: 20px;
+color: #333;
+font-family: Î¢ÈíÑÅºÚ;
+}
+
+.cur{
+	color: #333 !important;
+	cursor: default;
+	font-weight: bold;
+}
+
+.s_wrap{
+}
+
+.s_wrap .search_top{
+	width:650px;
+	margin-top:10px;
+	height:15px;
+	clear:both;
+	overflow:auto;
+}
+
+.s_wrap .search_top .top_num{
+	color: #777;
+	float:right;
+	font: 12px/1.125 Arial,Helvetica,sans-serif;
+}
+
+
+.s_wrap .search_content{
+	width: 660px;
+	background:white;
+	padding-top:20px;
+	padding-bottom:20px;
+	margin-top:10px;
+}
+
+.s_wrap .search_content  #pl_weibo_filtertab{
+	margin: 0 40px 20px;
+	border-bottom: solid 1px #E5E5E5;
+	font: 12px/1.125 Arial,Helvetica,sans-serif;
+	padding-bottom:10px;
+}
+
+.s_wrap .search_content #pl_weibo_filtertab a{
+	color: #0078B6;
+	margin-right:10px;
+}
+
+.s_wrap .search_content #content_list{
+	margin: 0 40px;
+}
+
+.s_wrap .search_content #content_list .list_item{
+	border-bottom: solid 1px #E5E5E5;
+	overflow:auto;
+	clear:both;
+	border-color:#CCC;
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+	padding: 10px 0;
+	font-size:14px;
+}
+
+
+.s_wrap .search_content #content_list .list_item .item_body .file_name{
+	color:#0078B6;
+	margin-bottom:5px;
+}
+.s_wrap .search_content #content_list .list_item .item_body .file_path{
+	margin-bottom:10px;
+	color: #9ABBC8;
+	font-size:13px;
+}
+.s_wrap .search_content #content_list .list_item .item_body .recommend_part{
+	color: #9ABBC8;
+	font-size:12px;
+}
+
+.recommend_list{
+	list-style-type: none
+}
+.recommend_list li{
+	margin-bottom:5px;
+}
+.re_file_name{
+	margin-bottom: 3px;
+}
+.re_file_path{}
+
+

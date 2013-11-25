@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import net.sf.json.JSONObject;
+
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.search.entity.Score;
+import cn.iscas.idse.storage.entity.Directory;
 import cn.iscas.idse.storage.entity.Document;
 
 /**
@@ -121,18 +124,47 @@ public class QueryResult {
 		while(this.scoreQueue.size() != 0){
 			Score score = this.scoreQueue.poll();
 			System.out.println(score.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(score.getDocID()));
-			PriorityQueue<Score>candidates = score.getMostRelatedDocs();
-			int k=0;
-			while(candidates.size() != 0){
-				Score cand = candidates.poll();
-				System.out.println("\t" + cand.getScore() + "\t" + this.indexReader.getAbsolutePathOfDocument(cand.getDocID()));
-				k++;
-				if(k==5)break;
-			}
+			List<Integer>candidates = score.getMostRelatedDocs();
+			for(int docID : candidates)
+				System.out.println("\t" + this.indexReader.getAbsolutePathOfDocument(docID));
 			i++;
 			if(i==20)break;
 		}
 	}
+	
+	public JSONObject getResultsInJSON(){
+		JSONObject jsonObject = new JSONObject();
+		List<ResultBean> resultList = new ArrayList<ResultBean>();
+		int resultSize = 0;
+		int i=0;
+		while(this.scoreQueue.size() != 0){
+			Score score = this.scoreQueue.poll();
+			ResultBean bean = this.getResultBeanWithoutRecommends(score.getDocID());
+			List<Integer>candidates = score.getMostRelatedDocs();
+			for(int docID : candidates)
+				bean.getRecommends().add(this.getResultBeanWithoutRecommends(docID));
+			bean.setRecommendSize(bean.getRecommends().size());
+			resultList.add(bean);
+			i++;
+			if(i==20)break;
+		}
+		resultSize = resultList.size();
+		jsonObject.accumulate("resultList", resultList);
+		jsonObject.accumulate("resultSize", resultSize);
+		jsonObject.accumulate("totalSize", this.resultCount);
+		return jsonObject;
+	}
+	
+	private ResultBean getResultBeanWithoutRecommends(int docID){
+		Document document = this.indexReader.getDocumentByDocID(docID);
+		Directory directory = this.indexReader.getDirectoryByDirectoryID(document.getDirectoryID());
+		ResultBean bean = new ResultBean();
+		bean.setDocID(docID);
+		bean.setFile(document.getDocumentName());
+		bean.setDirectory(directory.getDirectoryPath());
+		return bean;
+	}
+	
 	/**
 	 * output the top K query result on the console. 
 	 */

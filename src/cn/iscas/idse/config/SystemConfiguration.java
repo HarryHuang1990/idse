@@ -83,7 +83,7 @@ public class SystemConfiguration {
 	/**
 	 * 相关文档的推荐步长
 	 */
-	public static int step = 3;
+	public static int step = 2;
 	/**
 	 * 推荐的文档数
 	 */

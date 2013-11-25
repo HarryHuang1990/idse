@@ -67,7 +67,25 @@ public class MatrixWriter {
 		this.getPageRankGraph();
 		this.getRecommends();
 		this.writePageRankGraph();
+		
+//		this.updateRecommends();
 	}
+	
+//	public void updateRecommends(){
+//		log.info("serching relevent candidates...");
+//		IndexReader reader = new IndexReader();
+//		this.pageRankGraph = reader.getPageRankGraph();
+//		for(Entry<Integer, PageRankGraph> docPageRankNode : this.pageRankGraph.entrySet()){
+//			this.recommendReleventDocuments(docPageRankNode.getValue());
+//		}
+//		this.updatePageRankGraph();
+//	}
+//	
+//	public void updatePageRankGraph(){
+//		for(Entry<Integer, PageRankGraph> docPageRankNode : this.pageRankGraph.entrySet()){
+//			this.pageRankGraphAccessor.getPrimaryDocumentID().putNoReturn(docPageRankNode.getValue());
+//		}
+//	}
 	
 	/**
 	 * Recommend 5 most related documents for every documents. 
@@ -102,8 +120,12 @@ public class MatrixWriter {
 		for(Integer docID : candidatesProbsSum.keySet()){
 			recommendedDocs.add(new Score(docID, candidatesProbsSum.get(docID)));
 		}
-		for(int i=0; i<SystemConfiguration.recommendedDocNumber; i++){
+		// get top 5.
+		int k=0;
+		while(recommendedDocs.size() != 0){
 			pageRankGraph.getRecommendedDocs().add(recommendedDocs.poll().getDocID());
+			k++;
+			if(k == 5)break;
 		}
 	}
 	
@@ -131,6 +153,10 @@ public class MatrixWriter {
 				this.addTransferProbability(step, doc.getKey(), newProbs, candidatesProbsSum);
 				// get the nodes on the next level
 				PageRankGraph docNode = this.pageRankGraphAccessor.getPrimaryDocumentID().get(doc.getKey());
+				if(docNode == null){
+					System.out.println(doc.getKey());
+					System.exit(1);
+				}
 				// search recursively
 				this.recursionSearch(candidatesProbsSum, docNode, step, sourceDocID, pageRankGraph.getDocumentID(), newProbs);
 			}
