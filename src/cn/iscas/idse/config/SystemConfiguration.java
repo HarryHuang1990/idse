@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.json.JSONObject;
+
+import cn.iscas.idse.index.segmentation.StopWordFilter;
+import cn.iscas.idse.index.segmentation.TermLemmatizer;
+import cn.iscas.idse.index.segmentation.WordSegmentation;
 import cn.iscas.idse.storage.DBManager;
 import cn.iscas.idse.storage.entity.Category;
 import cn.iscas.idse.storage.entity.FileType;
@@ -93,15 +98,28 @@ public class SystemConfiguration {
 	 * 待索引的目标目录列表
 	 */
 	public static List<String> targetDirectories = new ArrayList<String>();
+	public static String targetDirectoryValues = null;
 	/**
 	 * 应用程序根目录路径。路径由反斜杠/间隔，路径末尾以反斜杠/结束
 	 */
 	public static String rootPath = "";
+	
+	/**
+	 * 用户行为日志文件
+	 */
+	public static String userActivityLogFile = "F:/user_activity_log/log.csv";
 	/**
 	 * LDA目录
 	 */
 	public static String LDAPath = "";
-	
+	/**
+	 * 用于LDA建模的docID列表文件 (固定名称)
+	 */
+	public static String LDAdocIDListFileName = "00000000.map";
+	/**
+	 * 用于LDA建模的doc数据文件 (固定名称)
+	 */
+	public static String LDADataFileName = "00000000";
 	
 	
 	/**
@@ -121,10 +139,18 @@ public class SystemConfiguration {
 	/**
 	 * 用于task合并的相似度阈值
 	 */
-	public static float taskSimilarityThreshold = 0.5f;
+	public static double taskSimilarityThreshold = 0.5f;
+	
+	
+	public static TermLemmatizer lemmatizer = null;
+	public static StopWordFilter stopWordFilter = null;
+	public static WordSegmentation wordSegmentor = null;
+	
+	public static void init(){};
 	
 	
 	static{
+		System.out.println("系统正在初始化...");
 		String formatSuffixValue = "";
 		String formatSuffixSplits[] = null;
 		String classValue = "";
@@ -132,11 +158,11 @@ public class SystemConfiguration {
 		String formatClassValue = "";
 		String formatClassSplits[] = null;
 		
-		String targetDirectoryValues = "";
 		String targetDirectorySplits[] = null;
 		
 		String formatCategory = "";
 		String formatCategorySplits[] = null;
+		
 		
 		/*
 		 * 加载文件类型后缀和插件（类名）
@@ -172,7 +198,7 @@ public class SystemConfiguration {
 		/*
 		 * 加载LDA目录的
 		 */
-		LDAPath = PropertiesManager.getKeyValue("LDA.dir");
+		LDAPath = rootPath + "LDA/";//PropertiesManager.getKeyValue("LDA.dir");
 		
 		/*
 		 * 判断索引目标是否改变
@@ -210,5 +236,97 @@ public class SystemConfiguration {
 		}
 		
 		
+		// 加载建模参数
+		maxSizeAllowed_PDF = Short.parseShort(PropertiesManager.getKeyValue("maxSizeAllowed_PDF"));				
+		maxSizeAllowed_TXT = Short.parseShort(PropertiesManager.getKeyValue("maxSizeAllowed_TXT"));
+		maxFileCountPreDirectory = Integer.parseInt(PropertiesManager.getKeyValue("maxFileCountPreDirectory"));
+		validViewPeriod = Integer.parseInt(PropertiesManager.getKeyValue("validViewPeriod"));
+		intervalTaskPeriod = Integer.parseInt(PropertiesManager.getKeyValue("intervalTaskPeriod"));
+		taskSimilarityThreshold = Double.parseDouble(PropertiesManager.getKeyValue("taskSimilarityThreshold"));
+		klUpbound = Double.parseDouble(PropertiesManager.getKeyValue("klUpbound"));
+		dMAX_GAMA = Integer.parseInt(PropertiesManager.getKeyValue("dMAX_GAMA"));
+		topicFactor = Double.parseDouble(PropertiesManager.getKeyValue("topicFactor"));
+		taskFactor = Double.parseDouble(PropertiesManager.getKeyValue("taskFactor"));
+		locationFactor = Double.parseDouble(PropertiesManager.getKeyValue("locationFactor"));
+		topN = Integer.parseInt(PropertiesManager.getKeyValue("topN"));
+		step = Integer.parseInt(PropertiesManager.getKeyValue("step"));
+		recommendedDocNumber = Integer.parseInt(PropertiesManager.getKeyValue("recommendedDocNumber"));
+		userActivityLogFile = PropertiesManager.getKeyValue("userActivityLogFile");
+		
+		
+		// 初始化 停用词，分词，词形归并对象
+		lemmatizer = new TermLemmatizer(); 
+		stopWordFilter = new StopWordFilter();
+		wordSegmentor = new WordSegmentation();
+	}
+	
+	public static JSONObject getParamsInJSON(){
+		JSONObject obj = new JSONObject();
+		obj.accumulate("target_directory", targetDirectoryValues);
+		obj.accumulate("pdf_size", maxSizeAllowed_PDF);
+		obj.accumulate("txt_size", maxSizeAllowed_TXT);
+		obj.accumulate("directory_size", maxFileCountPreDirectory);
+		obj.accumulate("duration", validViewPeriod);
+		obj.accumulate("interval", intervalTaskPeriod);
+		obj.accumulate("task_similarity", taskSimilarityThreshold);
+		obj.accumulate("kl", klUpbound);
+		obj.accumulate("transfer_length", dMAX_GAMA);
+		obj.accumulate("topic_factor", topicFactor);
+		obj.accumulate("task_factor", taskFactor);
+		obj.accumulate("location_factor", locationFactor);
+		obj.accumulate("result_number", topN);
+		obj.accumulate("recommend_step", step);
+		obj.accumulate("recommend_size", recommendedDocNumber);
+		obj.accumulate("log_file", userActivityLogFile);
+		return obj;
+	}
+	
+	public static void updateParams(
+			String targetDirectoryValues,
+			short maxSizeAllowed_PDF,
+			short maxSizeAllowed_TXT,
+			int maxFileCountPreDirectory,
+			int validViewPeriod,
+			int intervalTaskPeriod,
+			Double taskSimilarityThreshold,
+			double klUpbound,
+			int dMAX_GAMA,
+			double topicFactor,
+			double taskFactor,
+			double locationFactor,
+			int topN,
+			int step,
+			int recommendedDocNumber,
+			String userActivityLogFile
+			){
+		SystemConfiguration.targetDirectoryValues = targetDirectoryValues;
+		String[]targetDirectorySplits = SystemConfiguration.targetDirectoryValues.split(",");
+		SystemConfiguration.targetDirectories.clear();
+		for(int i=0; i<targetDirectorySplits.length; i++){
+			SystemConfiguration.targetDirectories.add(targetDirectorySplits[i]);
+			System.out.println(targetDirectorySplits[i]);
+		}
+		
+		SystemConfiguration.maxSizeAllowed_PDF = maxSizeAllowed_PDF;
+		SystemConfiguration.maxSizeAllowed_TXT = maxSizeAllowed_TXT;
+		SystemConfiguration.maxFileCountPreDirectory = maxFileCountPreDirectory;
+		SystemConfiguration.validViewPeriod = validViewPeriod;
+		SystemConfiguration.intervalTaskPeriod = intervalTaskPeriod;
+		SystemConfiguration.taskSimilarityThreshold = taskSimilarityThreshold;
+		SystemConfiguration.klUpbound = klUpbound;
+		SystemConfiguration.dMAX_GAMA = dMAX_GAMA;
+		SystemConfiguration.topicFactor = topicFactor;
+		SystemConfiguration.taskFactor = taskFactor;
+		SystemConfiguration.locationFactor = locationFactor;
+		SystemConfiguration.topN = topN;
+		SystemConfiguration.step = step;
+		SystemConfiguration.recommendedDocNumber = recommendedDocNumber;
+		SystemConfiguration.userActivityLogFile = userActivityLogFile;
+	}
+	
+	public static void main(String args[]){
+		String s = "dfsf\\dfs\\sdfs\\";
+		
+		System.out.println(s.replaceAll("\\\\", "/"));
 	}
 }

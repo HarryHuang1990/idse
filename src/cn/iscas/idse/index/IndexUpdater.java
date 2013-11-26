@@ -354,6 +354,6 @@ public class IndexUpdater {
 		IndexUpdater iu = new IndexUpdater(wordSegmentor);
 		iu.execute();
 		wordSegmentor.exitICTCLAS();
-		wordSegmentor.destoryInstance();
+//		wordSegmentor.destoryInstance();
 	}
 }

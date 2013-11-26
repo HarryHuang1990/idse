@@ -17,55 +17,59 @@ import cn.iscas.idse.config.SystemConfiguration;
  */
 public class StopWordFilter {
 	
-	private static StopWordFilter instance = null;
-	private Set<String>stopWordEnglish = new HashSet<String>();
-	private Set<String>stopWordChinese = new HashSet<String>();
+//	private static StopWordFilter instance = null;
+	private static Set<String>stopWordEnglish = new HashSet<String>();
+	private static Set<String>stopWordChinese = new HashSet<String>();
 	
-	public static StopWordFilter getInstance(){
-		if(instance == null){
-			instance = new StopWordFilter();
-		}
-		return instance;
-	}
+//	public static StopWordFilter getInstance(){
+//		if(instance == null){
+//			instance = new StopWordFilter();
+//		}
+//		return instance;
+//	}
 	
 	public StopWordFilter(){
-		try {
-			String stopWord;
-			/*
-			 * load the Chinese stop word list;
-			 */
-			BufferedReader reader = new BufferedReader(new FileReader(new File(SystemConfiguration.rootPath+"/resource/stop_word_ch.txt")));
-			while((stopWord = reader.readLine()) != null){
-				this.stopWordChinese.add(stopWord.trim());
+//		if(stopWordChinese == null && stopWordEnglish == null){
+			stopWordEnglish = new HashSet<String>();
+			stopWordChinese = new HashSet<String>();
+			try {
+				String stopWord;
+				/*
+				 * load the Chinese stop word list;
+				 */
+				BufferedReader reader = new BufferedReader(new FileReader(new File(SystemConfiguration.rootPath+"/resource/stop_word_ch.txt")));
+				while((stopWord = reader.readLine()) != null){
+					stopWordChinese.add(stopWord.trim());
+				}
+				reader.close();
+				/*
+				 * load the English stop word list;
+				 */
+				reader = new BufferedReader(new FileReader(new File(SystemConfiguration.rootPath+"/resource/stop_word_en.txt")));
+				while((stopWord = reader.readLine()) != null){
+					stopWordEnglish.add(stopWord.trim());
+				}
+				reader.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			reader.close();
-			/*
-			 * load the English stop word list;
-			 */
-			reader = new BufferedReader(new FileReader(new File(SystemConfiguration.rootPath+"/resource/stop_word_en.txt")));
-			while((stopWord = reader.readLine()) != null){
-				this.stopWordEnglish.add(stopWord.trim());
-			}
-			reader.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		}
 	}
 	
 	/**
 	 * destroy the instance and release its memory.
 	 */
-	public void destoryInstance(){
-		instance = null;
-	}
+//	public void destoryInstance(){
+//		instance = null;
+//	}
 	
 	/**
 	 * the function runs the procedure of stop-word-remove
 	 * @param termSet
 	 */
-	public synchronized void execute(Set<TermOffset> termSet){
+	public void execute(Set<TermOffset> termSet){
 		if(termSet != null){
 			Set<TermOffset> wordToRemoveSet = new HashSet<TermOffset>();
 			for(TermOffset termOffset : termSet){
@@ -81,16 +85,16 @@ public class StopWordFilter {
 	 * @param term
 	 * @return if term is a stop word, then return true; else return false.
 	 */
-	public synchronized boolean isStopWord(String term){
+	public boolean isStopWord(String term){
 		
-		if(this.stopWordChinese.contains(term) || this.stopWordEnglish.contains(term))
+		if(stopWordChinese.contains(term) || stopWordEnglish.contains(term))
 			return true;
 		return false;
 		
 	}
 	
 	public static void main(String args[]){
-		StopWordFilter swf = StopWordFilter.getInstance();
+		StopWordFilter swf = new StopWordFilter();
 		
 		Set<TermOffset> s = new HashSet<TermOffset>();
 		TermOffset t1 = new TermOffset("a", 12);

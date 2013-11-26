@@ -28,45 +28,47 @@ import ICTCLAS.I3S.AC.ICTCLAS50;
  */
 public class WordSegmentation {
 
-	private ICTCLAS50 ICTCLAS50 = null;
+	private static ICTCLAS50 ICTCLAS50 = null;
 	
-	private static WordSegmentation instance = null;
+//	private static WordSegmentation instance = null;
 	
-	public static WordSegmentation getInstance(){
-		if(instance == null)
-			instance = new WordSegmentation();
-		return instance;
-	}
+//	public static WordSegmentation getInstance(){
+//		if(instance == null)
+//			instance = new WordSegmentation();
+//		return instance;
+//	}
 	
-	private WordSegmentation(){};
+	public WordSegmentation(){};
 	
 	/**
 	 * destroy the instance and release its memory.
 	 */
-	public void destoryInstance(){
-		instance = null;
-	}
+//	public void destoryInstance(){
+//		instance = null;
+//	}
 	
 	/**
 	 * Initialize the ICTCLA for word segmentation.
 	 */
 	public void initialize(){
-		ICTCLAS50 = new ICTCLAS50();
-		String argu = ".";
-		//初始化
-		try {
-			if (ICTCLAS50.ICTCLAS_Init(argu.getBytes("GB2312")) == false)
-			{
-				System.err.println("Init Fail!");
-				throw new Exception();
+//		if(ICTCLAS50 == null){
+			ICTCLAS50 = new ICTCLAS50();
+			String argu = ".";
+			//初始化
+			try {
+				if (ICTCLAS50.ICTCLAS_Init(argu.getBytes("GB2312")) == false)
+				{
+					System.err.println("Init Fail!");
+					throw new Exception();
+				}
+				//设置词性标注集(0 计算所二级标注集，1 计算所一级标注集，2 北大二级标注集，3 北大一级标注集)
+				ICTCLAS50.ICTCLAS_SetPOSmap(2);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			//设置词性标注集(0 计算所二级标注集，1 计算所一级标注集，2 北大二级标注集，3 北大一级标注集)
-			ICTCLAS50.ICTCLAS_SetPOSmap(2);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		}
 	}
 	
 	/**
@@ -108,7 +110,7 @@ public class WordSegmentation {
 		
 		String text = "public File_Extractor gets_Files_Extracting(String fileSuffix){";
 		
-		WordSegmentation ws = WordSegmentation.getInstance();
+		WordSegmentation ws = new WordSegmentation();
 		ws.initialize();
 		//字符串分词   
 		for(int i=1; i<2; i++){

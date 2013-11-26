@@ -54,8 +54,8 @@ public class Search {
 		QueryResult queryResult = this.getQueryResult(this.queryParser.getQueryEntity());
 		queryResult = this.getFinalScoreOfTopN(queryResult);
 		
-		if(queryResult != null)
-			queryResult.showResult();
+//		if(queryResult != null)
+//			queryResult.showResult();
 		
 		return queryResult;
 	}
@@ -140,20 +140,20 @@ public class Search {
 	 * @return
 	 */
 	public QueryResult getFinalScoreOfTopN(QueryResult releventResult){
-		
-		List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
-		releventResult.clear();
-		for(Score score : releventList){
-			PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
-			if(pageRankGraph != null){
-				score.setScore(pageRankGraph.getPageRankScore());
-				// get top5 most related documents
-				score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
-				releventResult.put(score);
+		if(releventResult != null){
+			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
+			releventResult.clear();
+			for(Score score : releventList){
+				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+				if(pageRankGraph != null){
+					score.setScore(pageRankGraph.getPageRankScore());
+					// get top5 most related documents
+					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+					releventResult.put(score);
+				}
+//				else
+//					score.setScore(0);
 			}
-//			else
-//				score.setScore(0);
-			
 		}
 		return releventResult;
 	}

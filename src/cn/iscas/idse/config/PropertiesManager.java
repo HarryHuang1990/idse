@@ -20,7 +20,7 @@ public class PropertiesManager {
     /**
      * 属性文件的路径
      */
-    static String profilepath = System.getProperty("user.dir") + "/src/configure.properties";
+    static String profilepath = System.getProperty("user.dir") + "/configure.properties";
     /**
     * 采用静态方法
     */

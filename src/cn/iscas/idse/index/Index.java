@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.index.segmentation.WordSegmentation;
+import cn.iscas.idse.rank.topic.InputDataForLDA;
 
 /**
  * the main interface of indexing
@@ -34,7 +35,12 @@ public class Index {
 			}
 		}
 		wordSegmentor.exitICTCLAS();
-		wordSegmentor.destoryInstance();
+//		wordSegmentor.destoryInstance();
+		
+		//execute the LDA input data.
+		InputDataForLDA LDADataBuilder = new InputDataForLDA(100000);
+		LDADataBuilder.executeFormat();
+		LDADataBuilder.saveWordListBuffer();
 	}
 	/**
 	 * execute index updating from here
@@ -46,7 +52,12 @@ public class Index {
 		IndexUpdater indexUpdater = new IndexUpdater(wordSegmentor);
 		indexUpdater.execute();
 		wordSegmentor.exitICTCLAS();
-		wordSegmentor.destoryInstance();
+//		wordSegmentor.destoryInstance();
+		
+		//execute the LDA input data.
+		InputDataForLDA LDADataBuilder = new InputDataForLDA(100000);
+		LDADataBuilder.executeFormat();
+		LDADataBuilder.saveWordListBuffer();
 	}
 	
 	public static void main(String args[]){

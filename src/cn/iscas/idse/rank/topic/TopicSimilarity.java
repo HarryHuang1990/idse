@@ -75,8 +75,8 @@ public class TopicSimilarity {
 	public void run(){
 		this.loadDocIndexMap();
 		// read the topic distribution
-//		this.getTopicDistribution();
-		this.getTopicDistribution("model-final.theta");
+		this.getTopicDistribution();
+//		this.getTopicDistribution("model-final.theta");
 		// calculate the similarity of every two document topic and generate the topic relation graph
 		this.generateTopicRelationGraph();
 	}

@@ -117,7 +117,7 @@ public class InputDataForLDA {
 			e.printStackTrace();
 		} finally{
 			this.wordSegmentor.exitICTCLAS();
-			this.wordSegmentor.destoryInstance();
+//			this.wordSegmentor.destoryInstance();
 		}
 	}
 	

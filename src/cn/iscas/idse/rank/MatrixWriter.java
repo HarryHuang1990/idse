@@ -46,25 +46,22 @@ public class MatrixWriter {
 	TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 	DocumentAccessor documentAccessor = AccessorFactory.getDocumentAccessor(SystemConfiguration.database.getIndexStore());
 	
-	public MatrixWriter(){}
-	public MatrixWriter(
-			String userActivityLogFile,
-			String LDAdocIDListFileName,
-			String LDADataFileName
-			){
-		this.userActivityLogFile = userActivityLogFile;
-		this.LDAdocIDListFileName = LDAdocIDListFileName;
-		this.LDADataFileName = LDADataFileName;
+	public MatrixWriter(){
+		this.userActivityLogFile = SystemConfiguration.userActivityLogFile;
+		this.LDAdocIDListFileName = SystemConfiguration.LDAdocIDListFileName;
+		this.LDADataFileName = SystemConfiguration.LDADataFileName;
 	}
 	
 	public void run(){
 //		this.writeTaskRelationMatrix();
 //		this.writeTopicRelationMatrix();
 //		this.writeLocationRelationMatrix();
+		
 		this.getTopicRelationMatrix();
 		this.getTaskRelationMatrix();
 		this.getLocationRelationMatrix();
 		this.getPageRankGraph();
+		this.writePageRankGraph();
 		this.getRecommends();
 		this.writePageRankGraph();
 		
@@ -379,7 +376,7 @@ public class MatrixWriter {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
+//		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
 //		w.writeTaskRelationMatrix();
 //		w.writeTopicRelationMatrix();
 //		w.writeLocationRelationMatrix();
@@ -387,6 +384,7 @@ public class MatrixWriter {
 //		System.out.println(Math.E);
 //		for(int i=1; i<20 ; i++)
 //			System.out.println(i + "\t" + w.getTaskRelationScore(i));
+		MatrixWriter w = new MatrixWriter();
 		w.run();
 		PersonalRank pr = new PersonalRank();
 		pr.run();

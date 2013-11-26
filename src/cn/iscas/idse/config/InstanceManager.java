@@ -44,13 +44,13 @@ public class InstanceManager {
 		Object instance = null;
 		switch(classNo){
 		case InstanceManager.CLASS_TERMLEMMATIZER:
-			instance = TermLemmatizer.getInstance();
+			instance = SystemConfiguration.lemmatizer;
 			break;
 		case InstanceManager.CLASS_STOPWORDFILTER:
-			instance = StopWordFilter.getInstance();
+			instance = SystemConfiguration.stopWordFilter;
 			break;
 		case InstanceManager.CLASS_WORDSEGMENTATION:
-			instance = WordSegmentation.getInstance();
+			instance = SystemConfiguration.wordSegmentor;
 			break;
 		}
 		return instance;
@@ -60,17 +60,17 @@ public class InstanceManager {
 	 * destroy the instance of specific class to release memory.
 	 * @param classNo
 	 */
-	public static void destroyInstance(short classNo){
-		switch(classNo){
-		case InstanceManager.CLASS_TERMLEMMATIZER:
-			TermLemmatizer.getInstance().destoryInstance();
-			break;
-		case InstanceManager.CLASS_STOPWORDFILTER:
-			StopWordFilter.getInstance().destoryInstance();
-			break;
-		case InstanceManager.CLASS_WORDSEGMENTATION:
-			WordSegmentation.getInstance().destoryInstance();
-			break;
-		}
-	}
+//	public static void destroyInstance(short classNo){
+//		switch(classNo){
+//		case InstanceManager.CLASS_TERMLEMMATIZER:
+//			TermLemmatizer.getInstance().destoryInstance();
+//			break;
+//		case InstanceManager.CLASS_STOPWORDFILTER:
+//			StopWordFilter.getInstance().destoryInstance();
+//			break;
+//		case InstanceManager.CLASS_WORDSEGMENTATION:
+//			WordSegmentation.getInstance().destoryInstance();
+//			break;
+//		}
+//	}
 }

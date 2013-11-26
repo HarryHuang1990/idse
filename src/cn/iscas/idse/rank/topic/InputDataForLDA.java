@@ -160,7 +160,7 @@ public class InputDataForLDA {
 			e.printStackTrace();
 		} finally{
 			this.wordSegmentor.exitICTCLAS();
-			this.wordSegmentor.destoryInstance();
+//			this.wordSegmentor.destoryInstance();
 		}
 	}
 	
@@ -273,7 +273,7 @@ public class InputDataForLDA {
 		System.out.println("formating done. time = " + ((end - start) * 1.0 / 1000 / 60) + " min");
 		// destroy the segmentor
 		this.wordSegmentor.exitICTCLAS();
-		this.wordSegmentor.destoryInstance();
+//		this.wordSegmentor.destoryInstance();
 	}
 
 	public static void main(String args[]){

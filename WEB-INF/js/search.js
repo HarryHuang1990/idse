@@ -19,7 +19,7 @@ $(document).ready(function(){
 		type:"GET",
 		url:"/QUERY",
 		dataType:"text",
-		data:"op=query&keyWords="+encodeURIComponent(keyword,'UTF-8')+"&random="+(new Date()).getTime(),
+		data:"keyWords="+encodeURIComponent(keyword,'UTF-8')+"&random="+(new Date()).getTime(),
 		success:Handle,
 	});
 });
@@ -27,7 +27,7 @@ $(document).ready(function(){
 
 var Handle = function(data){
 	data = data.trim();
-	alert(data);
+//	alert(data);
 	
 	var obj = JSON.parse(data);
 	var totalSize = obj.totalSize;
@@ -75,18 +75,31 @@ $(function(){
 		refresh(kw, 2, 1, 'n');
 	});
 	
+	$(".open_destination_link").live("click", function(){
+//		alert($(this).parent().next().html());
+		$.ajax({
+			type:"GET",
+			url:"/OPEN",
+			dataType:"text",
+			data:"directory="+encodeURIComponent($(this).parent().next().html(),'UTF-8')+"&random="+(new Date()).getTime(),
+			success:function(data){
+				if(data.equals("false"))
+					alert("目录不存在!");
+			},
+		});
+	});
 });
 
 
 var reultItemHtml = function(docID, docName, directory, recommendSize, recommendList){
 	var html =	"<div class='list_item' id='doc_" + docID + "'>";
 	html += "<div class='item_body'>";
-	html += "<div class='file_name'><a href='javascript:open();'>" + docName + "</a></div>";
+	html += "<div class='file_name'><a class='open_destination_link' href='javascript:;'>" + docName + "</a></div>";
 	html += "<div class='file_path'>" + directory + "</div>";
 	html += "<div class='recommend_part'>";
 	html += "<ol class='recommend_list'>";
 	for(var i=0; i<recommendSize; i++)
-		html += "<li><div class='re_file_name'><a href='javascript:open();'>"+recommendList[i].file+"</a></div><div class='re_file_path'>" + recommendList[i].directory + "</div></li>";
+		html += "<li><div class='re_file_name'><a class='open_destination_link' href='javascript:;'>"+recommendList[i].file+"</a></div><div class='re_file_path'>" + recommendList[i].directory + "</div></li>";
 		
 	html += "</ol>";
 	html += "</div>";
@@ -105,7 +118,6 @@ var refresh = function(keywords){
 	//刷新页面
 	window.location.href=url;
 };
-
 
 	
 

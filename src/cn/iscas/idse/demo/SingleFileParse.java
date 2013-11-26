@@ -73,7 +73,7 @@ public class SingleFileParse {
 		}
 		
 		ws.exitICTCLAS();
-		ws.destoryInstance();
+//		ws.destoryInstance();
 	}
 	
 	/**

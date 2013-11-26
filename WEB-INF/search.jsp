@@ -41,7 +41,7 @@
 		
 		<div class="s_wrap">
 			<div class="search_top">
-				<div class="top_num" id="result_num">找到2条结果</div>
+				<div class="top_num" id="result_num">��</div>
 			</div>
 			<div class="search_content" id="search_content">
 				<div id="content_list">
@@ -51,20 +51,20 @@
  
 					<div class="list_item" onmouseover="showWeibox(weiboid)" onmouseout="destoryWeibox()">
 						<div class="item_body">
-							<div class="file_name"><a href="javascript:open();">aaa</a></div>
-							<div class="file_path">aaa</div>
+							<div class="file_name"><a class="open_destination_link" href="javascript:;">aaa</a></div>
+							<div class="file_path">//aaa</div>
 							<div class="recommend_part">
 								<ol class="recommend_list">
-									<li><div class="re_file_name"><a href="javascript:open();">aaa</a></div><div class="re_file_path">aaa</div></li>
-									<li><div class="re_file_name"><a href="javascript:open();">aa</a></div><div class="re_file_path">aaa</div></li>
-									<li><div class="re_file_name"><a href="javascript:open();">aaa</a></div><div class="re_file_path">aaa</div></li>
-									<li><div class="re_file_name"><a href="javascript:open();">aaa</a></div><div class="re_file_path">aaa</div></li>
-									<li><div class="re_file_name"><a href="javascript:open();">aaa</a></div><div class="re_file_path">aaa</div></li> 
+									<li><div class="re_file_name"><a class="open_destination_link" href="javascript:;">aaa</a></div><div class="re_file_path">/aaa</div></li>
+									<li><div class="re_file_name"><a class="open_destination_link" href="javascript:;">aa</a></div><div class="re_file_path">//aaa</div></li>
+									<li><div class="re_file_name"><a class="open_destination_link" href="javascript:;">aaa</a></div><div class="re_file_path">aaa</div></li>
+									<li><div class="re_file_name"><a class="open_destination_link" href="javascript:;">aaa</a></div><div class="re_file_path">aaa</div></li>
+									<li><div class="re_file_name"><a class="open_destination_link" href="javascript:;">aaa</a></div><div class="re_file_path">aaa</div></li> 
 								</ol>
 							</div>
 						</div>
 					</div>
-					
+				
 				</div>
 			</div>
 		</div>

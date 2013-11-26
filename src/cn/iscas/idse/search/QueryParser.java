@@ -47,7 +47,7 @@ public class QueryParser {
 		segmentation.initialize();
 		String segmentResult = segmentation.segmentString(this.query);
 		segmentation.exitICTCLAS();
-		segmentation.destoryInstance();
+//		segmentation.destoryInstance();
 		if(segmentResult != null){
 			StringTokenizer tokenizer = new StringTokenizer(segmentResult);
 			String currentTerm = "";

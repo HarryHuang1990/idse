@@ -66,7 +66,6 @@ public class QueryResult {
 	
 	public void clear(){
 		this.scoreQueue.clear();
-		this.resultCount = 0;
 	}
 	
 	public PriorityQueue<Score> getScoreQueue() {

@@ -1,12 +1,12 @@
 #Fat Jar Configuration File
-#Sat Oct 12 15:12:12 CST 2013
-onejar.license.required=true
+#Tue Nov 26 20:58:01 CST 2013
+onejar.license.required=false
 manifest.classpath=
 manifest.removesigners=false
-onejar.checkbox=false
-jarname=F\:\\JGibbLDA\\lda.jar
+onejar.checkbox=true
+jarname=E\:\\IDSE_release\\idse.jar
 manifest.mergeall=false
-manifest.mainclass=jgibblda.LDA
+manifest.mainclass=cn.iscas.idse.console.MainFrame
 manifest.file=<createnew>
 jarname.isextern=true
 onejar.expand=

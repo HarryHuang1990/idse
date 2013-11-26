@@ -283,6 +283,6 @@ public class IndexWriter {
 		IndexWriter indexer = new IndexWriter(wordSegmentor);
 		indexer.executeIndexing();
 		wordSegmentor.exitICTCLAS();
-		wordSegmentor.destoryInstance();
+//		wordSegmentor.destoryInstance();
 	}
 }

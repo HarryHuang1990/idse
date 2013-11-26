@@ -17,9 +17,15 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
+import cn.iscas.idse.config.SystemConfiguration;
+
 public class ServerIDSE{
-	public static void main(String[] args) throws Exception
-	{
+	
+	/**
+	 * initialize and startup the server.
+	 * @throws Exception 
+	 */
+	public void startUP() throws Exception{
 	    // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
 	    // then a randomly available port will be assigned that you can either look in the logs for the port,
 	    // or programmatically obtain it for use in test cases.
@@ -31,18 +37,20 @@ public class ServerIDSE{
 	    // Configure the ResourceHandler. Setting the resource base indicates where the files should be served out of.
 	    // In this example it is the current directory but it can be configured to anything that the jvm has access to.
 	    resource_handler.setDirectoriesListed(true);
-	    resource_handler.setWelcomeFiles(new String[]{ "index.jsp", "search.jsp" });
+	    resource_handler.setWelcomeFiles(new String[]{ "index.jsp", "search.jsp", "config.jsp" });
 	    resource_handler.setResourceBase("./WEB-INF");
-
 
 	    ContextHandler contextQuery = new ContextHandler("/QUERY");
 	    contextQuery.setHandler(new QueryHandler());
 	    ContextHandler contextConfig = new ContextHandler("/CONFIG");
 	    contextConfig.setHandler(new ConfigHandler());
+	    ContextHandler contextOpen = new ContextHandler("/OPEN");
+	    contextOpen.setHandler(new DirectoryHandler());
+	    
 
 	    // Add the ResourceHandler to the server.
 	    ContextHandlerCollection contexts = new ContextHandlerCollection();
-	    contexts.setHandlers(new Handler[] { contextQuery, contextConfig });
+	    contexts.setHandlers(new Handler[] { contextQuery, contextConfig, contextOpen });
 	    HandlerList handlers = new HandlerList();
 	    handlers.setHandlers(new Handler[] {contexts, resource_handler, new DefaultHandler()});
 	    
@@ -52,5 +60,11 @@ public class ServerIDSE{
 	    // See "http://docs.oracle.com/javase/1.5.0/docs/api/java/lang/Thread.html#join()" for more details.
 	    server.start();
 	    server.join();
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		ServerIDSE server = new ServerIDSE();
+	    server.startUP();
 	}
 }

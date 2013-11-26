@@ -106,13 +106,13 @@ public class TermLemmatizer
 	private Lemmatizer lemmatizer = null;
 	private SpellingStandardizer standardizer = null;
 	
-	private static TermLemmatizer instance = null;
-	
-	public static TermLemmatizer getInstance(){
-		if(instance == null)
-			instance = new TermLemmatizer();
-		return instance;
-	}
+//	private static TermLemmatizer instance = null;
+//	
+//	public static TermLemmatizer getInstance(){
+//		if(instance == null)
+//			instance = new TermLemmatizer();
+//		return instance;
+//	}
 	
 
 	/**	Main program.
@@ -123,16 +123,19 @@ public class TermLemmatizer
 	public static void main( String[] args )
 	{
 //		String[] textToAdorns = {"Files","Extracting","Has", "Been", "successfully", "applied", "to", "various", "applications"};
-		String[] textToAdorns = {"clustering"};
-		TermLemmatizer obj = TermLemmatizer.getInstance();
-		for(String textToAdorn : textToAdorns)
+		String[] textToAdorns = {"clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering", "clustering"};
+//		TermLemmatizer obj = TermLemmatizer.getInstance();
+		
+		for(String textToAdorn : textToAdorns){
+			TermLemmatizer obj = new TermLemmatizer();
 			System.out.println(obj.adornText( textToAdorn ));
+		}
 	}
 	
 	/**
 	 * Constructor : initialize the instance
 	 */
-	private TermLemmatizer(){
+	public TermLemmatizer(){
 		
 		try {
 			//Get default part of speech tagger. // this step takes a very long time.
@@ -178,9 +181,9 @@ public class TermLemmatizer
 	/**
 	 * destroy the instance and release its memory.
 	 */
-	public void destoryInstance(){
-		instance = null;
-	}
+//	public void destoryInstance(){
+//		instance = null;
+//	}
 	
 	/**	Adorn text specified as a program parameter.
 	 *
