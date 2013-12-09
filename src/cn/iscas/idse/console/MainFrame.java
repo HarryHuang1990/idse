@@ -100,11 +100,11 @@ public class MainFrame {
 		   
 		   //索引更新选项
 		   MenuItem indexUpdateItem = new MenuItem("update index");
-		   indexUpdateItem.setEnabled(false);
+//		   indexUpdateItem.setEnabled(false);
 		   
 		   //构建pageRankGraph(或Knowledge Graph)选项
 		   MenuItem pageRankGrapItem = new MenuItem("build knowledge graph");
-		   pageRankGrapItem.setEnabled(false);
+//		   pageRankGrapItem.setEnabled(false);
 		   
 		   //退出程序选项
 		   MenuItem exitItem = new MenuItem("exit");

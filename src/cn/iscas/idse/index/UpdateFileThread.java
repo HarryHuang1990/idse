@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.config.PropertiesManager;
 import cn.iscas.idse.config.SystemConfiguration;
@@ -23,8 +25,11 @@ import cn.iscas.idse.storage.entity.Term;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
+import cn.iscas.idse.storage.entity.accessor.TermAccessor;
 
 public class UpdateFileThread{
+	
+	private static Logger log = Logger.getLogger(UpdateFileThread.class);
 	
 	public static DiskScanner scanner = null;
 	
@@ -34,7 +39,16 @@ public class UpdateFileThread{
 	 * dictionary for index. store the term list temporarily in the memory.
 	 */
 	public static Map<String, Term> dictionary = new HashMap<String, Term>();
-
+	/**
+	 * count of title and content posting
+	 */
+	public static int postingCount = 0;
+	/**
+	 * In order the out of memory, once the posting count reaches the threshold,
+	 * the dictionary will be written into the DB 
+	 */
+	public static int dictWriteThreshold = 500000;
+	
 	public static int postingTitleID = 1;
 	public static int postingContentID = 1;
 	
@@ -53,6 +67,7 @@ public class UpdateFileThread{
 	
 	private PostingTitleAccessor postingTitleAccessor = null;
 	private PostingContentAccessor postingContentAccessor = null;
+	private TermAccessor termAccessor = null;
 	private WordSegmentation wordSegmentor = null;
 	
 	private int docID;
@@ -63,6 +78,7 @@ public class UpdateFileThread{
 		this.wordSegmentor = wordSegmentor;
 		this.postingTitleAccessor = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
 		this.postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
+		this.termAccessor = AccessorFactory.getTermAccessor(SystemConfiguration.database.getIndexStore());
 		this.docID = docID;
 		this.file = file;
 		this.suffix = suffix;
@@ -74,6 +90,7 @@ public class UpdateFileThread{
 	public static void initParameter(){
 		postingTitleID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_title_id"));
 		postingContentID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_content_id"));
+		postingCount = 0;
 	}
 	
 	/**
@@ -158,8 +175,32 @@ public class UpdateFileThread{
 			this.postingContentAccessor.getPrimaryPostingID().put(entry.getValue());
 		}
 
+		/*
+		 * write dictionary into DB if the posting count satisfies the threshold
+		 */
+		if(UpdateFileThread.postingCount >= UpdateFileThread.dictWriteThreshold){
+			this.updateDictionaryIntoDB();
+			UpdateFileThread.postingCount = 0;
+		}
+		
 		UpdateFileThread.numberOfFinishedFile ++;
 		//System.out.println("finished : " + UpdateFileThread.numberOfFinishedFile + "/" + UpdateFileThread.scanner.getFileNumber() + "(" + (UpdateFileThread.numberOfFinishedFile*100.0/UpdateFileThread.scanner.getFileNumber()) + "%)");
+	}
+	
+	private void updateDictionaryIntoDB(){
+		log.info("updating directory...");
+		for(Entry<String, Term>entry : UpdateFileThread.dictionary.entrySet()){
+			Term term = this.termAccessor.getPrimaryTerm().get(entry.getKey());
+			if(term != null){
+				term.getPostingTitle().addAll(entry.getValue().getPostingTitle());
+				term.getPostingContent().addAll(entry.getValue().getPostingContent());
+			}
+			else
+				term = entry.getValue();
+			this.termAccessor.getPrimaryTerm().put(term);
+		}
+		UpdateFileThread.dictionary.clear();
+		log.info("updating done.");
 	}
 	
 	/**
@@ -206,7 +247,8 @@ public class UpdateFileThread{
 										PostingTitle posting = new PostingTitle(postingID, docID);
 										posting.getOffsets().add(offset);
 										this.postingTitles.put(word, posting);
-										// add new posting to posting list of the corresponding term 
+										// add new posting to posting list of the corresponding term
+										UpdateFileThread.postingCount++;
 										if(UpdateFileThread.dictionary.containsKey(word)){
 											UpdateFileThread.dictionary.get(word).getPostingTitle().add(postingID);
 										}
@@ -226,7 +268,8 @@ public class UpdateFileThread{
 										PostingContent posting = new PostingContent(postingID, docID);
 										posting.getOffsets().add(offset);
 										this.postingContents.put(word, posting);
-										// add new posting to posting list of the corresponding term 
+										// add new posting to posting list of the corresponding term
+										UpdateFileThread.postingCount++;
 										if(UpdateFileThread.dictionary.containsKey(word)){
 											UpdateFileThread.dictionary.get(word).getPostingContent().add(postingID);
 										}

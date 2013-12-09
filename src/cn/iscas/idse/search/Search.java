@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
@@ -23,6 +24,7 @@ import cn.iscas.idse.storage.entity.PageRankGraph;
 import cn.iscas.idse.storage.entity.PostingContent;
 import cn.iscas.idse.storage.entity.PostingTitle;
 import cn.iscas.idse.storage.entity.Term;
+import cn.iscas.idse.utilities.Sort;
 
 /**
  * this is a main API for query.
@@ -127,7 +129,9 @@ public class Search {
 			DefaultSimilarity similarity = new DefaultSimilarity(dfMap, documentNumber);
 			for(Entry<Integer, Document>entry : documents.entrySet()){
 //				queryResult.put(this.getFinalScore(similarity.score(queryEntity, entry.getValue()), PR));
-				queryResult.put(similarity.score(queryEntity, entry.getValue()));
+				Score score = similarity.score(queryEntity, entry.getValue());
+				if(score.getScore() != 0)
+					queryResult.put(score);
 			}
 		}
 		return queryResult;
@@ -143,16 +147,44 @@ public class Search {
 		if(releventResult != null){
 			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
 			releventResult.clear();
+			List<List<Score>> secondarySort = new ArrayList<List<Score>>();
+			secondarySort.add(new ArrayList<Score>()); // >0.8 , 0
+			secondarySort.add(new ArrayList<Score>()); // >0.6 , 1
+			secondarySort.add(new ArrayList<Score>()); // >0.4 , 2
+			secondarySort.add(new ArrayList<Score>()); // >0.2 , 3
+			secondarySort.add(new ArrayList<Score>()); // <=0.2, 4
 			for(Score score : releventList){
 				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
 				if(pageRankGraph != null){
-					score.setScore(pageRankGraph.getPageRankScore());
+					double cosin = score.getScore();
+					score.setScore(cosin * pageRankGraph.getPageRankScore());
 					// get top5 most related documents
 					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+					if(cosin < 0.2){
+						secondarySort.get(4).add(score);
+					}
+					else if(cosin < 0.4){
+						secondarySort.get(3).add(score);
+					}
+					else if(cosin < 0.6){
+						secondarySort.get(2).add(score);
+					}
+					else if(cosin < 0.8){
+						secondarySort.get(1).add(score);
+					}
+					else{
+						secondarySort.get(0).add(score);
+					}	
+				}
+			}
+			// secondary sort;
+			int rank = 0;
+			for(List<Score> secList : secondarySort){
+				Sort.sortDoubleList(secList);
+				for(Score score : secList){
+					score.setScore(1.0/(++rank));
 					releventResult.put(score);
 				}
-//				else
-//					score.setScore(0);
 			}
 		}
 		return releventResult;

@@ -25,9 +25,10 @@ import cn.iscas.idse.storage.entity.Term;
 import cn.iscas.idse.storage.entity.accessor.AccessorFactory;
 import cn.iscas.idse.storage.entity.accessor.PostingContentAccessor;
 import cn.iscas.idse.storage.entity.accessor.PostingTitleAccessor;
+import cn.iscas.idse.storage.entity.accessor.TermAccessor;
 
 public class IndexFileThread{
-	private static final Logger log = Logger.getLogger(Index.class);
+	private static final Logger log = Logger.getLogger(IndexFileThread.class);
 	
 	public static DiskScanner scanner = null;
 	public static int numberOfFinishedFile = 0;
@@ -36,6 +37,16 @@ public class IndexFileThread{
 	 * dictionary for index. store the term list temporarily in the memory.
 	 */
 	public static Map<String, Term> dictionary = new HashMap<String, Term>();
+
+	/**
+	 * count of title and content posting
+	 */
+	public static int postingCount = 0;
+	/**
+	 * In order the out of memory, once the posting count reaches the threshold,
+	 * the dictionary will be written into the DB 
+	 */
+	public static int dictWriteThreshold = 500000;
 
 	public static int postingTitleID = 1;
 	public static int postingContentID = 1;
@@ -55,6 +66,7 @@ public class IndexFileThread{
 	
 	private PostingTitleAccessor postingTitleAccessor = null;
 	private PostingContentAccessor postingContentAccessor = null;
+	private TermAccessor termAccessor = null;
 	private WordSegmentation wordSegmentor = null;
 	
 	private int docID;
@@ -65,6 +77,7 @@ public class IndexFileThread{
 		this.wordSegmentor = wordSegmentor;
 		this.postingTitleAccessor = AccessorFactory.getPostingTitleAccessor(SystemConfiguration.database.getIndexStore());
 		this.postingContentAccessor = AccessorFactory.getPostingContentAccessor(SystemConfiguration.database.getIndexStore());
+		this.termAccessor = AccessorFactory.getTermAccessor(SystemConfiguration.database.getIndexStore());
 		this.docID = docID;
 		this.file = file;
 		this.suffix = suffix;
@@ -76,6 +89,7 @@ public class IndexFileThread{
 	public static void initParameter(){
 		postingTitleID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_title_id"));
 		postingContentID = Integer.parseInt(PropertiesManager.getKeyValue("berkeley.posting_content_id"));
+		postingCount = 0;
 	}
 	
 	/**
@@ -159,9 +173,33 @@ public class IndexFileThread{
 		for(Entry<String, PostingContent>entry : this.postingContents.entrySet()){
 			this.postingContentAccessor.getPrimaryPostingID().put(entry.getValue());
 		}
+		
+		/*
+		 * write dictionary into DB if the posting count satisfies the threshold
+		 */
+		if(IndexFileThread.postingCount >= IndexFileThread.dictWriteThreshold){
+			this.writeDictionaryIntoDB();
+			IndexFileThread.postingCount = 0;
+		}
 
 		IndexFileThread.numberOfFinishedFile ++;
 		//System.out.println("finished : " + IndexFileThread.numberOfFinishedFile + "/" + IndexFileThread.scanner.getFileNumber() + "(" + (IndexFileThread.numberOfFinishedFile*100.0/IndexFileThread.scanner.getFileNumber()) + "%)");
+	}
+	
+	private void writeDictionaryIntoDB(){
+		log.info("writing directory...");
+		for(Entry<String, Term>entry : IndexFileThread.dictionary.entrySet()){
+			Term term = this.termAccessor.getPrimaryTerm().get(entry.getKey());
+			if(term != null){
+				term.getPostingTitle().addAll(entry.getValue().getPostingTitle());
+				term.getPostingContent().addAll(entry.getValue().getPostingContent());
+			}
+			else
+				term = entry.getValue();
+			this.termAccessor.getPrimaryTerm().put(term);
+		}
+		IndexFileThread.dictionary.clear();
+		log.info("writing done.");
 	}
 	
 	/**
@@ -209,6 +247,7 @@ public class IndexFileThread{
 										posting.getOffsets().add(offset);
 										this.postingTitles.put(word, posting);
 										// add new posting to posting list of the corresponding term 
+										IndexFileThread.postingCount++;
 										if(IndexFileThread.dictionary.containsKey(word)){
 											IndexFileThread.dictionary.get(word).getPostingTitle().add(postingID);
 										}
@@ -228,7 +267,8 @@ public class IndexFileThread{
 										PostingContent posting = new PostingContent(postingID, docID);
 										posting.getOffsets().add(offset);
 										this.postingContents.put(word, posting);
-										// add new posting to posting list of the corresponding term 
+										// add new posting to posting list of the corresponding term
+										IndexFileThread.postingCount++;
 										if(IndexFileThread.dictionary.containsKey(word)){
 											IndexFileThread.dictionary.get(word).getPostingContent().add(postingID);
 										}

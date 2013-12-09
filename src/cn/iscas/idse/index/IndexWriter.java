@@ -218,8 +218,18 @@ public class IndexWriter {
 	 * then flush the memory space.
 	 */
 	private void writeDictionaryIntoDB(){
+//		for(Entry<String, Term>entry : IndexFileThread.dictionary.entrySet()){
+//			this.termAccessor.getPrimaryTerm().put(entry.getValue());
+//		}
 		for(Entry<String, Term>entry : IndexFileThread.dictionary.entrySet()){
-			this.termAccessor.getPrimaryTerm().put(entry.getValue());
+			Term term = this.termAccessor.getPrimaryTerm().get(entry.getKey());
+			if(term != null){
+				term.getPostingTitle().addAll(entry.getValue().getPostingTitle());
+				term.getPostingContent().addAll(entry.getValue().getPostingContent());
+			}
+			else
+				term = entry.getValue();
+			this.termAccessor.getPrimaryTerm().put(term);
 		}
 		//release the memory
 		IndexFileThread.dictionary.clear();

@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import cn.iscas.idse.search.entity.Score;
+
 
 public class Sort {
 	
@@ -51,5 +53,27 @@ public class Sort {
             }
         });
         return list;
+	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	static public void sortDoubleList(List<Score> list){
+		java.util.Collections.sort(list,new Comparator() 
+        {
+            public int compare(final Object o1,final Object o2) 
+            {
+                final Score m1 = (Score) o1;
+                final Score m2 = (Score) o2;
+                double r = m1.getScore() - m2.getScore();
+                if (r<0)
+                {
+                    return 1;
+                }
+                else if(r > 0) 
+                {
+                    return -1;
+                }
+                else
+                	return 0;
+            }
+        });
 	}
 }
