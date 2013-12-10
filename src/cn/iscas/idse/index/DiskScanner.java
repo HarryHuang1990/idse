@@ -101,10 +101,11 @@ public class DiskScanner {
 		++this.directoryNumber;
 		
 		// get list of file and directory obj.
-		File[]files = directory.listFiles();
-		if(files != null && files.length != 0){
+		String[]files = directory.list();
+		if(files != null && files.length != 0 && files.length < SystemConfiguration.maxFileCountPreDirectory){
 			// scan each file or directory.
-			for(File object : files){
+			for(String file : files){
+				File object = new File(directory, file);
 				if(object.isDirectory()){
 					// scan directory
 					this.scanDirectory(object);

@@ -166,7 +166,7 @@ public class IndexUpdater {
 	 */
 	private void updateDirectory(File directory, short targetID){
 		int directoryID = -1;
-		File[]files = directory.listFiles();
+		String[]files = directory.list();
 		List<String> remains = new ArrayList<String>(); // existed old files since the last indexing.
 		// existed or new ?  and get the directory ID
 		Directory directoryEntity = this.reader.getDirectoryByPath(Converter.convertBackSlashToSlash(directory.getAbsolutePath()));
@@ -180,7 +180,8 @@ public class IndexUpdater {
 			// get current file names 
 			List<String> currentFiles = new ArrayList<String>();
 			if(files != null && files.length != 0){
-				for(File object : files){
+				for(String file : files){
+					File object = new File(directory, file);
 					if(object.isFile())
 						currentFiles.add(object.getName());
 				}
@@ -208,7 +209,8 @@ public class IndexUpdater {
 		// add new documents
 		if(files != null && files.length != 0){
 			// update each file or directory.
-			for(File object : files){
+			for(String file : files){
+				File object = new File(directory, file);
 				if(object.isDirectory()){
 					// update directory
 					this.updateDirectory(object, targetID);
@@ -286,11 +288,16 @@ public class IndexUpdater {
 		for(Entry<String, FileType> entry : SystemConfiguration.fileTypeBuff.entrySet()){
 			if(!entry.getValue().getDocumentIDs().isEmpty()){
 				FileType fileType = this.reader.getFileTypeByType(entry.getKey());
-				Set<Integer> documentIDs = new HashSet<Integer>();
-				documentIDs.addAll(fileType.getDocumentIDs());
-				documentIDs.addAll(entry.getValue().getDocumentIDs());
-				fileType.setDocumentIDs(documentIDs);
-				this.reader.addAndUpdateFileType(fileType);
+				if(fileType != null){
+					Set<Integer> documentIDs = new HashSet<Integer>();
+					documentIDs.addAll(fileType.getDocumentIDs());
+					documentIDs.addAll(entry.getValue().getDocumentIDs());
+					fileType.setDocumentIDs(documentIDs);
+					this.reader.addAndUpdateFileType(fileType);
+				}
+				else{
+					this.reader.addAndUpdateFileType(entry.getValue());
+				}
 				SystemConfiguration.fileTypeBuff.get(entry.getKey()).getDocumentIDs().clear();
 			}
 		}

@@ -208,7 +208,13 @@ public class IndexWriter {
 	 */
 	private void writeTypeIndexIntoDB(){
 		for(Entry<String, FileType>entry : SystemConfiguration.fileTypeBuff.entrySet()){
-			this.fileTypeAccessor.getPrimaryType().put(entry.getValue());
+			FileType fileType = this.fileTypeAccessor.getPrimaryType().get(entry.getKey());
+			if(fileType != null){
+				fileType.getDocumentIDs().addAll(entry.getValue().getDocumentIDs());
+				this.fileTypeAccessor.getPrimaryType().put(fileType);
+			}
+			else
+				this.fileTypeAccessor.getPrimaryType().put(entry.getValue());
 			SystemConfiguration.fileTypeBuff.get(entry.getKey()).getDocumentIDs().clear();
 		}
 	}
@@ -249,10 +255,11 @@ public class IndexWriter {
 			this.directoryAccessor.getPrimaryDirectoryID().putNoReturn(
 					new Directory(directoryID, targetID, Converter.convertBackSlashToSlash(directory.getAbsolutePath())));
 		// get list of file and directory obj.
-		File[]files = directory.listFiles();
+		String[]files = directory.list();
 		if(files != null && files.length != 0 && files.length < SystemConfiguration.maxFileCountPreDirectory){
 			// index each file or directory.
-			for(File object : files){
+			for(String file : files){
+				File object = new File(directory, file);
 				if(object.isDirectory()){
 					// index directory
 					this.indexDirectory(object, targetID);
