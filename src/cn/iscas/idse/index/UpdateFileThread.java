@@ -47,7 +47,7 @@ public class UpdateFileThread{
 	 * In order the out of memory, once the posting count reaches the threshold,
 	 * the dictionary will be written into the DB 
 	 */
-	public static int dictWriteThreshold = 500000;
+	public static int dictWriteThreshold = SystemConfiguration.dictionaryWriteCountThreshold;
 	
 	public static int postingTitleID = 1;
 	public static int postingContentID = 1;

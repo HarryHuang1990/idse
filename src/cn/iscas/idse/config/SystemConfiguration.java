@@ -121,6 +121,16 @@ public class SystemConfiguration {
 	 */
 	public static String LDADataFileName = "00000000";
 	
+	/**
+	 * pageRank分批写入数据库，每增加5000个节点的时候，写入数据库
+	 */
+	public static int pageRankWriteCountThreshold = 5000;
+	/**
+	 * dictionary分批写入数据库，每增加300000个posting写一个数据库
+	 */
+	public static int dictionaryWriteCountThreshold = 300000;
+	
+	public static int LDAIteration = 100;
 	
 	/**
 	 * 过滤时间间隔-用于界定有效打开文件，对于那些打开之后再很短的时间内就关闭的文件，
@@ -252,6 +262,9 @@ public class SystemConfiguration {
 		step = Integer.parseInt(PropertiesManager.getKeyValue("step"));
 		recommendedDocNumber = Integer.parseInt(PropertiesManager.getKeyValue("recommendedDocNumber"));
 		userActivityLogFile = PropertiesManager.getKeyValue("userActivityLogFile");
+		pageRankWriteCountThreshold = Integer.parseInt(PropertiesManager.getKeyValue("pagerank.update.threshold"));
+		dictionaryWriteCountThreshold = Integer.parseInt(PropertiesManager.getKeyValue("dictionary.update.threshold"));
+		LDAIteration = Integer.parseInt(PropertiesManager.getKeyValue("LDA.iteration"));
 		
 		
 		// 初始化 停用词，分词，词形归并对象

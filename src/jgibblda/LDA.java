@@ -46,7 +46,7 @@ public class LDA {
 		option.alpha = 0.01;
 		option.beta = 0.01;
 		option.K = 100;
-		option.niters = 100;
+		option.niters = SystemConfiguration.LDAIteration;
 		option.savestep = 500;
 		option.twords = 30;
 		option.dir = SystemConfiguration.LDAPath;

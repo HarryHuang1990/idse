@@ -288,6 +288,13 @@ public class BerkelyDBDemo {
 		System.out.println(indexReader.getTermByTerm(term));
 	}
 	
+	public void showPageRankCount(){
+		IndexReader indexReader = new IndexReader();
+		long pageRankCount = indexReader.getPageRankGraph().size();
+		long documentCount = indexReader.getDocuments().size();
+		System.out.println("pageRank = "+pageRankCount + "\tdocument size = " + documentCount);
+	}
+	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
 //		demo.showEntityDirectory();
@@ -299,13 +306,14 @@ public class BerkelyDBDemo {
 //		demo.showLocationRelationMatrix();
 //		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
-//		demo.showPageRankGraphMatrix();
+		demo.showPageRankGraphMatrix();
 //		demo.showPageRankGraphByDocID(82314);
 //		demo.showLocationRelationByDocID(82314);
 //		demo.showTopicRelationByDocID(82314);
 //		demo.showTaskRelationByDocID(82314);
 //		demo.showPostingCount();
-		demo.showTerm("21212f5s4rwefsf");
+//		demo.showTerm("21212f5s4rwefsf");
+//		demo.showPageRankCount();
 		
 //		LocationRelation local = demo.getLocationRelationByDocID(82124);
 //		TaskRelation task = demo.getTaskRelationByDocID(82124);

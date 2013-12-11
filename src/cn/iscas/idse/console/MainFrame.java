@@ -97,14 +97,14 @@ public class MainFrame {
 		   
 		   //索引选项
 		   MenuItem indexItem = new MenuItem("start index");
+		   MenuItem indexItemWithoutGraph = new MenuItem("start index (without Graph Build)");
 		   
 		   //索引更新选项
 		   MenuItem indexUpdateItem = new MenuItem("update index");
-//		   indexUpdateItem.setEnabled(false);
+		   MenuItem indexUpdateItemWithoutGraph = new MenuItem("update index (without Graph Build)");
 		   
 		   //构建pageRankGraph(或Knowledge Graph)选项
 		   MenuItem pageRankGrapItem = new MenuItem("build knowledge graph");
-//		   pageRankGrapItem.setEnabled(false);
 		   
 		   //退出程序选项
 		   MenuItem exitItem = new MenuItem("exit");
@@ -118,16 +118,20 @@ public class MainFrame {
 		   popup.add(mainFrameItem);
 		   popup.add(configItem);
 		   popup.add(indexItem);
+		   popup.add(indexItemWithoutGraph);
 		   popup.add(indexUpdateItem);
+		   popup.add(indexUpdateItemWithoutGraph);
 		   popup.add(pageRankGrapItem);
 		   popup.add(exitItem);
 		   
 		   trayIcon = new TrayIcon(image, "IDSE", popup);// 创建trayIcon
 		   trayIcon.addActionListener(listener);	//添加双击托盘图标时的响应事件
 		   
-		   indexItem.addActionListener(new IndexItemActionListener(trayIcon, indexItem, indexUpdateItem, pageRankGrapItem));
-		   indexUpdateItem.addActionListener(new IndexUpdateItemActionListener(trayIcon, indexUpdateItem, pageRankGrapItem));
-		   pageRankGrapItem.addActionListener(new KnowLedgeGraphBuildItemActionListener(trayIcon, indexUpdateItem, pageRankGrapItem));
+		   indexItem.addActionListener(new IndexItemActionListener(trayIcon));
+		   indexUpdateItem.addActionListener(new IndexUpdateItemActionListener(trayIcon));
+		   pageRankGrapItem.addActionListener(new KnowLedgeGraphBuildItemActionListener(trayIcon));
+		   indexItemWithoutGraph.addActionListener(new IndexItemWithoutGraphActionListener(trayIcon));
+		   indexUpdateItemWithoutGraph.addActionListener(new IndexUpdateItemWithoutGraphActionListener(trayIcon));
 		   
 		   try {
 			   tray.add(trayIcon);
@@ -155,24 +159,33 @@ public class MainFrame {
  * @author dell
  *
  */
-class IndexItemActionListener implements ActionListener{
+class IndexItemWithoutGraphActionListener implements ActionListener{
 	private TrayIcon trayIcon = null;
-	private MenuItem indexItem = null;
-	private MenuItem indexUpdateItem = null;
-	private MenuItem pageRankGrapItem = null;
 	
-	public IndexItemActionListener(TrayIcon trayIcon, MenuItem indexItem, MenuItem indexUpdateItem, MenuItem pageRankGrapItem){
+	public IndexItemWithoutGraphActionListener(TrayIcon trayIcon){
 		this.trayIcon = trayIcon;
-		this.indexItem = indexItem;
-		this.indexUpdateItem = indexUpdateItem;
-		this.pageRankGrapItem = pageRankGrapItem;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		this.trayIcon.setToolTip("IDSE | Indexing...");
-		this.indexItem.setEnabled(false);
-		this.indexItem.setName("start index (indexing...)");
+		// index
+		Index index = new Index();
+		index.createIndex();
+		this.trayIcon.setToolTip("IDSE | Indexing DONE.");
+	}
+}
+
+class IndexItemActionListener implements ActionListener{
+	private TrayIcon trayIcon = null;
+	
+	public IndexItemActionListener(TrayIcon trayIcon){
+		this.trayIcon = trayIcon;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.trayIcon.setToolTip("IDSE | Indexing...");
 		// index
 		Index index = new Index();
 		index.createIndex();
@@ -182,31 +195,36 @@ class IndexItemActionListener implements ActionListener{
 		PersonalRank pageRankRunner = new PersonalRank();
 		pageRankRunner.run();
 		this.trayIcon.setToolTip("IDSE | Indexing DONE.");
-		this.indexItem.setName("start index (DONE.)");
-		this.indexUpdateItem.setEnabled(true);
-		this.pageRankGrapItem.setEnabled(true);
 	}
 }
 
-
-
-class IndexUpdateItemActionListener implements ActionListener{
+class IndexUpdateItemWithoutGraphActionListener implements ActionListener{
 	private TrayIcon trayIcon = null;
-	private MenuItem indexUpdateItem = null;
-	private MenuItem pageRankGrapItem = null;
 	
-	public IndexUpdateItemActionListener(TrayIcon trayIcon, MenuItem indexUpdateItem, MenuItem pageRankGrapItem){
+	public IndexUpdateItemWithoutGraphActionListener(TrayIcon trayIcon){
 		this.trayIcon = trayIcon;
-		this.indexUpdateItem = indexUpdateItem;
-		this.pageRankGrapItem = pageRankGrapItem;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		this.trayIcon.setToolTip("IDSE | Updating Index...");
-		this.indexUpdateItem.setEnabled(false);
-		this.pageRankGrapItem.setEnabled(false);
-		this.indexUpdateItem.setName("update index (updating...)");
+		// index 
+		Index index = new Index();
+		index.updateIndex();
+		this.trayIcon.setToolTip("IDSE | Updating Index DONE.");
+	}
+}
+
+class IndexUpdateItemActionListener implements ActionListener{
+	private TrayIcon trayIcon = null;
+	
+	public IndexUpdateItemActionListener(TrayIcon trayIcon){
+		this.trayIcon = trayIcon;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.trayIcon.setToolTip("IDSE | Updating Index...");
 		// index 
 		Index index = new Index();
 		index.updateIndex();
@@ -216,39 +234,25 @@ class IndexUpdateItemActionListener implements ActionListener{
 		PersonalRank pageRankRunner = new PersonalRank();
 		pageRankRunner.run();
 		this.trayIcon.setToolTip("IDSE | Updating Index DONE.");
-		this.indexUpdateItem.setName("update index (DONE.)");
-		this.indexUpdateItem.setEnabled(true);
-		this.pageRankGrapItem.setEnabled(true);
-		
 	}
 }
 
 
 class KnowLedgeGraphBuildItemActionListener implements ActionListener{
 	private TrayIcon trayIcon = null;
-	private MenuItem indexUpdateItem = null;
-	private MenuItem pageRankGrapItem = null;
 	
-	public KnowLedgeGraphBuildItemActionListener(TrayIcon trayIcon, MenuItem indexUpdateItem, MenuItem pageRankGrapItem){
+	public KnowLedgeGraphBuildItemActionListener(TrayIcon trayIcon){
 		this.trayIcon = trayIcon;
-		this.indexUpdateItem = indexUpdateItem;
-		this.pageRankGrapItem = pageRankGrapItem;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		this.trayIcon.setToolTip("IDSE | Building Knowledge Graph...");
-		this.indexUpdateItem.setEnabled(false);
-		this.pageRankGrapItem.setEnabled(false);
-		this.pageRankGrapItem.setName("build knowledge graph (building...)");
 		// knowledge graph building
 		MatrixWriter graphBuilder = new MatrixWriter();
 		graphBuilder.run();
 		PersonalRank pageRankRunner = new PersonalRank();
 		pageRankRunner.run();
 		this.trayIcon.setToolTip("IDSE | Building Knowledge Graph DONE.");
-		this.pageRankGrapItem.setName("build knowledge graph (DONE.)");
-		this.indexUpdateItem.setEnabled(true);
-		this.pageRankGrapItem.setEnabled(true);	
 	}
 }

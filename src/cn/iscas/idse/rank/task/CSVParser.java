@@ -55,8 +55,8 @@ public class CSVParser {
 					String[]splits = this.getAttributesValues(line);
 					Log log = new Log();
 					log.setFileName(splits[0]);
-					log.setStart(this.dateFormat.parse(splits[1]));
-					log.setEnd(this.dateFormat.parse(splits[2]));
+					log.setStart(this.dateFormat.parse(splits[1].replaceAll("-", "/")));
+					log.setEnd(this.dateFormat.parse(splits[2].replaceAll("-", "/")));
 					log.setDuration(this.getDuration(splits[3]));
 					log.setDomain(splits[4]);
 					
@@ -250,8 +250,15 @@ public class CSVParser {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		CSVParser parser = new CSVParser();
-		parser.execute("F:\\user_activity_log\\ManicTimeData_doc.csv", "F:\\user_activity_log\\tasks_v2");
+//		CSVParser parser = new CSVParser();
+//		parser.execute("F:\\user_activity_log\\ManicTimeData_doc.csv", "F:\\user_activity_log\\tasks_v2");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		try {
+			System.out.println(dateFormat.parse("2012-9-2 02:03:03".replaceAll("-", "/")).getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
@@ -38,7 +39,10 @@ public class MatrixWriter {
 	private Map<Integer, TopicRelation> topicRelationGraph;
 	private Map<Integer, LocationRelation> locationRelationGraph;
 	private Map<Integer, TaskRelation> taskRelationGraph;
-	private Map<Integer, PageRankGraph> pageRankGraph = new HashMap<Integer, PageRankGraph>();
+	private Map<Integer, PageRankGraph> pageRankGraph = new TreeMap<Integer, PageRankGraph>();
+	private int pageRankCount = 0;
+	private int updateCount = 0;
+	
 	
 	PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
 	TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
@@ -61,7 +65,9 @@ public class MatrixWriter {
 		this.getTaskRelationMatrix();
 		this.getLocationRelationMatrix();
 		this.getPageRankGraph();
-		this.writePageRankGraph();
+		this.updatePageRankGraph();
+		this.releaseSpace();
+		this.convertScoreToProbs();
 		this.getRecommends();
 		this.writePageRankGraph();
 		
@@ -83,6 +89,12 @@ public class MatrixWriter {
 //			this.pageRankGraphAccessor.getPrimaryDocumentID().putNoReturn(docPageRankNode.getValue());
 //		}
 //	}
+	
+	public void releaseSpace(){
+		this.topicRelationGraph = null;
+		this.taskRelationGraph = null;
+		this.locationRelationGraph = null;
+	}
 	
 	/**
 	 * Recommend 5 most related documents for every documents. 
@@ -224,6 +236,11 @@ public class MatrixWriter {
 			PageRankGraph pageRankGraph = new PageRankGraph(docID1);
 			pageRankGraph.putNewRelatedDoc(docID2, score);
 			this.pageRankGraph.put(docID1, pageRankGraph);
+			this.pageRankCount++;
+			if(this.pageRankCount >= SystemConfiguration.pageRankWriteCountThreshold){
+				this.updatePageRankGraph();
+				this.pageRankCount = 0;
+			}
 		}
 	}
 	
@@ -242,16 +259,47 @@ public class MatrixWriter {
 	}
 	
 	/**
+	 * convert pageRank relatedScore to transfer probability
+	 */
+	public void convertScoreToProbs(){
+		log.info("Converting Score to transfer probability...");
+		this.pageRankGraph.clear();
+		this.pageRankGraph.putAll(this.pageRankGraphAccessor.getPrimaryDocumentID().map());
+		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
+			entry.getValue().convertScoreToProbs();// convert the correlation score to the probability of transfer
+		}
+		log.info("Converting Done.");
+	}
+	
+	/**
 	 * write pageRank graph into the Berkeley DB
 	 */
 	public void writePageRankGraph(){
-		this.deletePageRankGraph();
-		log.info("saving...");
+		log.info("saving PageRankGraph... size0="+this.pageRankGraph.size());
+//		this.deletePageRankGraph();
 		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
-			entry.getValue().convertScoreToProbs();// convert the correlation score to the probability of transfer
 			this.pageRankGraphAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
 		}
 		log.info("pageRank graph DONE.");
+	}
+	
+	public void updatePageRankGraph(){
+		this.updateCount++;
+		if(this.updateCount == 1){
+			this.deletePageRankGraph();
+		}
+		log.info("updating pageRankGraph...");
+		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
+			PageRankGraph pageRankGraph = this.pageRankGraphAccessor.getPrimaryDocumentID().get(entry.getKey());
+			if(pageRankGraph != null){
+				pageRankGraph.getRelatedDocumentIDs().putAll(entry.getValue().getRelatedDocumentIDs());
+				this.pageRankGraphAccessor.getPrimaryDocumentID().put(pageRankGraph);
+			}
+			else
+				this.pageRankGraphAccessor.getPrimaryDocumentID().putNoReturn(entry.getValue());
+		}
+		this.pageRankGraph.clear();
+		log.info("pageRank graph update DONE.");
 	}
 	
 	/**
@@ -265,9 +313,6 @@ public class MatrixWriter {
 			for(int key : keys)
 				this.pageRankGraphAccessor.getPrimaryDocumentID().delete(key);
 	}
-	
-
-	
 	
 	
 	
