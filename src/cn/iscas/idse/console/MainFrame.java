@@ -21,6 +21,7 @@ import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.index.Index;
 import cn.iscas.idse.rank.MatrixWriter;
 import cn.iscas.idse.rank.PersonalRank;
+import cn.iscas.idse.rank.topic.InputDataForLDA;
 /**
  * swing程序最小化至系统托盘
  * @author HarryHuang
@@ -103,8 +104,27 @@ public class MainFrame {
 		   MenuItem indexUpdateItem = new MenuItem("update index");
 		   MenuItem indexUpdateItemWithoutGraph = new MenuItem("update index (without Graph Build)");
 		   
+		   //生成LDA输入数据
+		   MenuItem LDADataGeneratorItem = new MenuItem("generate LDA data");
+		   LDADataGeneratorItem.addActionListener(new ActionListener() {
+			   public void actionPerformed(ActionEvent e) {
+				   InputDataForLDA LDADataBuilder = new InputDataForLDA(100000);
+				   LDADataBuilder.executeFormat();
+				   LDADataBuilder.saveWordListBuffer();
+			   }
+		   });
+		   
 		   //构建pageRankGraph(或Knowledge Graph)选项
 		   MenuItem pageRankGrapItem = new MenuItem("build knowledge graph");
+		   
+		   //执行pageRank迭代
+		   MenuItem pageRankIterationItem = new MenuItem("iterate PageRank");
+		   pageRankIterationItem.addActionListener(new ActionListener() {
+			   public void actionPerformed(ActionEvent e) {
+				   PersonalRank pageRankRunner = new PersonalRank();
+				   pageRankRunner.run();
+			   }
+		   });
 		   
 		   //退出程序选项
 		   MenuItem exitItem = new MenuItem("exit");
@@ -121,7 +141,9 @@ public class MainFrame {
 		   popup.add(indexItemWithoutGraph);
 		   popup.add(indexUpdateItem);
 		   popup.add(indexUpdateItemWithoutGraph);
+		   popup.add(LDADataGeneratorItem);
 		   popup.add(pageRankGrapItem);
+		   popup.add(pageRankIterationItem);
 		   popup.add(exitItem);
 		   
 		   trayIcon = new TrayIcon(image, "IDSE", popup);// 创建trayIcon

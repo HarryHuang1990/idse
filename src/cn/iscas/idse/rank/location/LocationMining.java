@@ -2,9 +2,11 @@ package cn.iscas.idse.rank.location;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -56,10 +58,32 @@ public class LocationMining {
 		this.generatePathRelation();
 		log.info("generating the location relation graph...");
 		this.generateLocationRelationGraph();
+		log.info("pruning...");
+		this.executePruning();
 	}
 	
 	public Map<Integer, LocationRelation> getLocationRelationGraph() {
 		return locationRelationGraph;
+	}
+	/**
+	 * pruning the location graph
+	 */
+	private void executePruning(){
+		Set<Integer> nodeToDelete = new HashSet<Integer>();
+		// get the nodes to delete
+		for(Entry<Integer, LocationRelation>entry : this.locationRelationGraph.entrySet()){
+			if(entry.getValue().getRelatedDocumentIDs().size() > SystemConfiguration.neightborThreshold){
+				nodeToDelete.add(entry.getKey());
+			}
+		}
+		// delete the nodes
+		for(int docID : nodeToDelete){
+			Set<Integer> relatedKeys = this.locationRelationGraph.get(docID).getRelatedDocumentIDs().keySet();
+			for(int relatedKey : relatedKeys){
+				this.locationRelationGraph.get(relatedKey).getRelatedDocumentIDs().remove(docID);
+			}
+			this.locationRelationGraph.remove(docID);
+		}
 	}
 	
 	/**

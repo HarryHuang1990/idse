@@ -92,6 +92,18 @@ public class IndexReader {
 		return postingContentAccessor;
 	}
 	
+	public TopicRelationAccessor getTopicRelationAccessor() {
+		return topicRelationAccessor;
+	}
+
+	public TaskRelationAccessor getTaskRelationAccessor() {
+		return taskRelationAccessor;
+	}
+
+	public LocationRelationAccessor getLocationRelationAccessor() {
+		return locationRelationAccessor;
+	}
+
 	/**
 	 * get the documents by the given documen name
 	 * @param documentName
@@ -370,6 +382,14 @@ public class IndexReader {
 		return this.locationRelationAccessor.getPrimaryDocumentID().get(docID);
 	}
 	
+	public Map<Integer, LocationRelation> getLocationRelationMap(){
+		return this.locationRelationAccessor.getPrimaryDocumentID().map();
+	}
+	
+	public Collection<LocationRelation> getLocationRelation(){
+		return this.locationRelationAccessor.getPrimaryDocumentID().map().values();
+	}
+	
 	public PageRankGraph getPageRankGraphByID(int docID){
 		return this.pageRankGraphAccessor.getPrimaryDocumentID().get(docID);
 	}
@@ -439,16 +459,25 @@ public class IndexReader {
 		return this.documentAccessor.getPrimaryDocumentID().contains(docID);
 	}
 
+	public int getDocContentLength(int docID){
+		Collection<PostingContent> contents = this.postingContentAccessor.getSecondaryDocID().subIndex(docID).map().values();
+		int length = 0;
+		for(PostingContent posting : contents)
+			length += posting.getTermFrequency();
+		return length;
+	}
+	
 	
 	public static void main(String args[]){
 		IndexReader indexReader = new IndexReader();
-		int[] documents = new int[]{77337, 82036};
-		for(int i=0; i<documents.length; i++)
-			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
+//		int[] documents = new int[]{77337, 82036};
+//		for(int i=0; i<documents.length; i++)
+//			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
 		
-//		System.out.println(indexReader.getDocumentsByName("tasks.txt").get(0).getDocID());
+//		System.out.println(indexReader.getDocumentsByName("20131112报告整理.docx").get(0).getDocID());
 ////		System.out.println(indexReader.getDocumentsByDirectoryIDCursor(25735).count());
 ////		System.out.println(indexReader.getDirectoryByDirectoryID(25735).getDirectoryPath());
+		System.out.println(indexReader.getDocContentLength(136045));
 	}
 }
 

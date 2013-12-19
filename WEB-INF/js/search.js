@@ -43,7 +43,7 @@ var Handle = function(data){
 	else {
 		for(var i=0; i<resultSize; i++){
 			var res = obj.resultList[i];
-			rsHtml += reultItemHtml(res.docID, res.file, res.directory, res.recommendSize, res.recommends);
+			rsHtml += reultItemHtml(i+1, res.docID, res.file, res.directory, res.recommendSize, res.recommends);
 		}
 		$("#content_list").html(rsHtml);
 		
@@ -91,10 +91,10 @@ $(function(){
 });
 
 
-var reultItemHtml = function(docID, docName, directory, recommendSize, recommendList){
+var reultItemHtml = function(i, docID, docName, directory, recommendSize, recommendList){
 	var html =	"<div class='list_item' id='doc_" + docID + "'>";
 	html += "<div class='item_body'>";
-	html += "<div class='file_name'><a class='open_destination_link' href='javascript:;'>" + docName + "</a></div>";
+	html += "<div class='file_name'>" + i + ".<a class='open_destination_link' href='javascript:;'>" + docName + "</a></div>";
 	html += "<div class='file_path'>" + directory + "</div>";
 	html += "<div class='recommend_part'>";
 	html += "<ol class='recommend_list'>";

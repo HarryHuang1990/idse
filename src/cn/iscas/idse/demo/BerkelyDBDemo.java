@@ -1,9 +1,12 @@
 package cn.iscas.idse.demo;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.index.IndexReader;
@@ -271,6 +274,8 @@ public class BerkelyDBDemo {
 		IndexReader indexReader = new IndexReader();
 		PageRankGraph pageRankGraph = indexReader.getPageRankGraphByID(docID);
 		System.out.println(pageRankGraph.getPageRankScore() + "\t" + docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		for(int id : pageRankGraph.getRecommendedDocs())
+			System.out.println("\t" + id + "\t" + indexReader.getAbsolutePathOfDocument(id));
 		for(Entry<Integer, Double> doc : pageRankGraph.getRelatedDocumentIDs().entrySet()){
 			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
 		}
@@ -295,6 +300,171 @@ public class BerkelyDBDemo {
 		System.out.println("pageRank = "+pageRankCount + "\tdocument size = " + documentCount);
 	}
 	
+	public void showDocumentCount(){
+		IndexReader indexReader = new IndexReader();
+		long docCount = indexReader.getDocumentIDs().size();
+		System.out.println("document size=" + docCount);
+	}
+	
+	public void locationPruning(){
+		IndexReader indexReader = new IndexReader();
+		Map<Integer, LocationRelation> locationRelationGraph = new HashMap<Integer, LocationRelation>();
+		Set<Integer> nodeToDelete = new HashSet<Integer>();
+		locationRelationGraph.putAll(indexReader.getLocationRelationMap());
+		// get the nodes to delete
+		for(Entry<Integer, LocationRelation>entry : locationRelationGraph.entrySet()){
+			if(entry.getValue().getRelatedDocumentIDs().size() > SystemConfiguration.neightborThreshold){
+				nodeToDelete.add(entry.getKey());
+			}
+		}
+		LocationDistribution(locationRelationGraph.values());
+		// delete the nodes
+		for(int docID : nodeToDelete){
+			Set<Integer> relatedKeys = locationRelationGraph.get(docID).getRelatedDocumentIDs().keySet();
+			for(int relatedKey : relatedKeys){
+				locationRelationGraph.get(relatedKey).getRelatedDocumentIDs().remove(docID);
+			}
+			locationRelationGraph.remove(docID);
+		}
+		LocationDistribution(locationRelationGraph.values());
+	}
+	
+	public void LocationDistribution(Collection<LocationRelation> list){
+		Map<Integer, Integer> map = new TreeMap<Integer, Integer>();
+		for(int i=1; i<=11; i++)
+			map.put(i*100, 0);
+		for(LocationRelation graph : list){
+			int size = graph.getRelatedDocumentIDs().size();
+			if(size <= 100)
+				map.put(100, map.get(100)+1);
+			else if(size <= 200)
+				map.put(200, map.get(200)+1);
+			else if(size <= 300)
+				map.put(300, map.get(300)+1);
+			else if(size <= 400)
+				map.put(400, map.get(400)+1);
+			else if(size <= 500)
+				map.put(500, map.get(500)+1);
+			else if(size <= 600)
+				map.put(600, map.get(600)+1);
+			else if(size <= 700)
+				map.put(700, map.get(700)+1);
+			else if(size <= 800)
+				map.put(800, map.get(800)+1);
+			else if(size <= 900)
+				map.put(900, map.get(900)+1);
+			else if(size <= 1000)
+				map.put(1000, map.get(1000)+1);
+			else
+				map.put(1100, map.get(1100)+1);
+		}
+		System.out.println(map.toString());
+		
+	}
+	
+	public void LocationDistribution(){
+		Map<Integer, Integer> map = new TreeMap<Integer, Integer>();
+		for(int i=1; i<=11; i++)
+			map.put(i*100, 0);
+		IndexReader indexReader = new IndexReader();
+		Collection<LocationRelation> list = indexReader.getLocationRelation();
+		for(LocationRelation graph : list){
+			int size = graph.getRelatedDocumentIDs().size();
+			if(size <= 100)
+				map.put(100, map.get(100)+1);
+			else if(size <= 200)
+				map.put(200, map.get(200)+1);
+			else if(size <= 300)
+				map.put(300, map.get(300)+1);
+			else if(size <= 400)
+				map.put(400, map.get(400)+1);
+			else if(size <= 500)
+				map.put(500, map.get(500)+1);
+			else if(size <= 600)
+				map.put(600, map.get(600)+1);
+			else if(size <= 700)
+				map.put(700, map.get(700)+1);
+			else if(size <= 800)
+				map.put(800, map.get(800)+1);
+			else if(size <= 900)
+				map.put(900, map.get(900)+1);
+			else if(size <= 1000)
+				map.put(1000, map.get(1000)+1);
+			else
+				map.put(1100, map.get(1100)+1);
+		}
+		System.out.println(map.toString());
+		
+	}
+	
+	public void PagRankDistribution(){
+		Map<Integer, Integer> map = new TreeMap<Integer, Integer>();
+		for(int i=1; i<=11; i++)
+			map.put(i*100, 0);
+		IndexReader indexReader = new IndexReader();
+		Collection<PageRankGraph> list = indexReader.getPageRankGraph().values();
+		for(PageRankGraph graph : list){
+			int size = graph.getRelatedDocumentIDs().size();
+			if(size <= 100)
+				map.put(100, map.get(100)+1);
+			else if(size <= 200)
+				map.put(200, map.get(200)+1);
+			else if(size <= 300)
+				map.put(300, map.get(300)+1);
+			else if(size <= 400)
+				map.put(400, map.get(400)+1);
+			else if(size <= 500)
+				map.put(500, map.get(500)+1);
+			else if(size <= 600)
+				map.put(600, map.get(600)+1);
+			else if(size <= 700)
+				map.put(700, map.get(700)+1);
+			else if(size <= 800)
+				map.put(800, map.get(800)+1);
+			else if(size <= 900)
+				map.put(900, map.get(900)+1);
+			else if(size <= 1000)
+				map.put(1000, map.get(1000)+1);
+			else
+				map.put(1100, map.get(1100)+1);
+		}
+		System.out.println(map.toString());
+		
+	}
+	
+	public static void PagRankDistribution(Collection<PageRankGraph> list){
+		Map<Integer, Integer> map = new TreeMap<Integer, Integer>();
+		for(int i=1; i<=11; i++)
+			map.put(i*100, 0);
+		for(PageRankGraph graph : list){
+			int size = graph.getRelatedDocumentIDs().size();
+			if(size <= 100)
+				map.put(100, map.get(100)+1);
+			else if(size <= 200)
+				map.put(200, map.get(200)+1);
+			else if(size <= 300)
+				map.put(300, map.get(300)+1);
+			else if(size <= 400)
+				map.put(400, map.get(400)+1);
+			else if(size <= 500)
+				map.put(500, map.get(500)+1);
+			else if(size <= 600)
+				map.put(600, map.get(600)+1);
+			else if(size <= 700)
+				map.put(700, map.get(700)+1);
+			else if(size <= 800)
+				map.put(800, map.get(800)+1);
+			else if(size <= 900)
+				map.put(900, map.get(900)+1);
+			else if(size <= 1000)
+				map.put(1000, map.get(1000)+1);
+			else
+				map.put(1100, map.get(1100)+1);
+		}
+		System.out.println(map.toString());
+		
+	}
+	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
 //		demo.showEntityDirectory();
@@ -307,13 +477,17 @@ public class BerkelyDBDemo {
 //		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
 		demo.showPageRankGraphMatrix();
-//		demo.showPageRankGraphByDocID(82314);
+//		demo.showPageRankGraphByDocID(127959);
 //		demo.showLocationRelationByDocID(82314);
 //		demo.showTopicRelationByDocID(82314);
 //		demo.showTaskRelationByDocID(82314);
 //		demo.showPostingCount();
 //		demo.showTerm("21212f5s4rwefsf");
 //		demo.showPageRankCount();
+//		demo.showDocumentCount();
+//		demo.PagRankDistribution();
+//		demo.LocationDistribution();
+//		demo.locationPruning();
 		
 //		LocationRelation local = demo.getLocationRelationByDocID(82124);
 //		TaskRelation task = demo.getTaskRelationByDocID(82124);

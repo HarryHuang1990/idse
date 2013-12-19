@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import cn.iscas.idse.config.SystemConfiguration;
+import cn.iscas.idse.demo.BerkelyDBDemo;
 import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.rank.location.LocationMining;
 import cn.iscas.idse.rank.task.mining.DefaultTaskMining;
@@ -101,8 +102,12 @@ public class MatrixWriter {
 	 */
 	public void getRecommends(){
 		log.info("serching relevent candidates...");
+		int finished = 0;
+		int total = this.pageRankGraph.size();
 		for(Entry<Integer, PageRankGraph> docPageRankNode : this.pageRankGraph.entrySet()){
+			++finished;
 			this.recommendReleventDocuments(docPageRankNode.getValue());
+			log.info("recommending finished: " + finished + "/" + total);
 		}
 	}
 	
@@ -125,7 +130,10 @@ public class MatrixWriter {
 	        }
 		});
 		int step = 0;
-		this.recursionSearch(candidatesProbsSum, pageRankGraph, step, pageRankGraph.getDocumentID(), -1, 1);
+		int stopStep = 1;
+		if(pageRankGraph.getRelatedDocumentIDs().size() < SystemConfiguration.neightborThreshold)
+			stopStep = SystemConfiguration.step;
+		this.recursionSearch(candidatesProbsSum, pageRankGraph, step, stopStep, pageRankGraph.getDocumentID(), -1, 1);
 		for(Integer docID : candidatesProbsSum.keySet()){
 			recommendedDocs.add(new Score(docID, candidatesProbsSum.get(docID)));
 		}
@@ -144,13 +152,13 @@ public class MatrixWriter {
 	public void recursionSearch(
 			Map<Integer, Double> candidatesProbsSum, 
 			PageRankGraph pageRankGraph, 
-			int step, 
+			int step,
+			int stopStep,
 			int sourceDocID, 
 			int formerDocID, 
 			double probs){
-		
 		step++;
-		if(step > SystemConfiguration.step)
+		if(step > stopStep)
 			return;
 		
 		for(Entry<Integer, Double>doc : pageRankGraph.getRelatedDocumentIDs().entrySet()){
@@ -162,12 +170,8 @@ public class MatrixWriter {
 				this.addTransferProbability(step, doc.getKey(), newProbs, candidatesProbsSum);
 				// get the nodes on the next level
 				PageRankGraph docNode = this.pageRankGraphAccessor.getPrimaryDocumentID().get(doc.getKey());
-				if(docNode == null){
-					System.out.println(doc.getKey());
-					System.exit(1);
-				}
-				// search recursively
-				this.recursionSearch(candidatesProbsSum, docNode, step, sourceDocID, pageRankGraph.getDocumentID(), newProbs);
+				if(docNode != null)
+					this.recursionSearch(candidatesProbsSum, docNode, step, stopStep, sourceDocID, pageRankGraph.getDocumentID(), newProbs);// search recursively
 			}
 		}
 	}
@@ -266,8 +270,10 @@ public class MatrixWriter {
 		this.pageRankGraph.clear();
 		this.pageRankGraph.putAll(this.pageRankGraphAccessor.getPrimaryDocumentID().map());
 		for(Entry<Integer, PageRankGraph>entry : this.pageRankGraph.entrySet()){
+			entry.getValue().getRecommendedDocs().clear();
 			entry.getValue().convertScoreToProbs();// convert the correlation score to the probability of transfer
 		}
+		BerkelyDBDemo.PagRankDistribution(this.pageRankGraph.values());
 		log.info("Converting Done.");
 	}
 	
@@ -429,8 +435,8 @@ public class MatrixWriter {
 //		System.out.println(Math.E);
 //		for(int i=1; i<20 ; i++)
 //			System.out.println(i + "\t" + w.getTaskRelationScore(i));
-		MatrixWriter w = new MatrixWriter();
-		w.run();
+//		MatrixWriter w = new MatrixWriter();
+//		w.run();
 		PersonalRank pr = new PersonalRank();
 		pr.run();
 		

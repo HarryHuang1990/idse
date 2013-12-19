@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -147,41 +148,44 @@ public class Search {
 		if(releventResult != null){
 			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
 			releventResult.clear();
-			List<List<Score>> secondarySort = new ArrayList<List<Score>>();
-			secondarySort.add(new ArrayList<Score>()); // >0.8 , 0
-			secondarySort.add(new ArrayList<Score>()); // >0.6 , 1
-			secondarySort.add(new ArrayList<Score>()); // >0.4 , 2
-			secondarySort.add(new ArrayList<Score>()); // >0.2 , 3
-			secondarySort.add(new ArrayList<Score>()); // <=0.2, 4
+			Map<Integer, List<Score>> secondarySort = new LinkedHashMap<Integer, List<Score>>();
+//			for(Score score : releventList){
+//				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+//				if(pageRankGraph != null){
+//					double cosin = score.getScore();
+//					score.setScore(cosin * pageRankGraph.getPageRankScore());
+//					// get top5 most related documents
+//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+//					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
+//					releventResult.put(score);
+//				}
+//			}
 			for(Score score : releventList){
 				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
 				if(pageRankGraph != null){
 					double cosin = score.getScore();
-					score.setScore(cosin * pageRankGraph.getPageRankScore());
+					int key = (int)(cosin * 10);
+					score.setScore(pageRankGraph.getPageRankScore() * cosin);
 					// get top5 most related documents
 					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
-					if(cosin < 0.2){
-						secondarySort.get(4).add(score);
-					}
-					else if(cosin < 0.4){
-						secondarySort.get(3).add(score);
-					}
-					else if(cosin < 0.6){
-						secondarySort.get(2).add(score);
-					}
-					else if(cosin < 0.8){
-						secondarySort.get(1).add(score);
+					
+					if(secondarySort.containsKey(key)){
+						secondarySort.get(key).add(score);
 					}
 					else{
-						secondarySort.get(0).add(score);
-					}	
+						List<Score> secondaryList = new ArrayList<Score>();
+						secondaryList.add(score);
+						secondarySort.put(key, secondaryList);
+					}
 				}
 			}
 			// secondary sort;
+			IndexReader indexReader = new IndexReader();
 			int rank = 0;
-			for(List<Score> secList : secondarySort){
-				Sort.sortDoubleList(secList);
-				for(Score score : secList){
+			for(Entry<Integer, List<Score>> secList : secondarySort.entrySet()){
+				Sort.sortDoubleList(secList.getValue());
+				for(Score score : secList.getValue()){
+					System.out.println(secList.getKey() + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
 					score.setScore(1.0/(++rank));
 					releventResult.put(score);
 				}

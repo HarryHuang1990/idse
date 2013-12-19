@@ -90,6 +90,10 @@ public class SystemConfiguration {
 	 */
 	public static int step = 2;
 	/**
+	 * 只对相邻节点数小于该阈值的节点采计算2 step推荐
+	 */
+	public static int neightborThreshold = 200;
+	/**
 	 * 推荐的文档数
 	 */
 	public static int recommendedDocNumber = 5;

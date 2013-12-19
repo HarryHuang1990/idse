@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import cn.iscas.idse.index.IndexReader;
 import cn.iscas.idse.search.entity.Document;
 import cn.iscas.idse.search.entity.Query;
 import cn.iscas.idse.search.entity.Score;
@@ -23,6 +24,7 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 */
 	private Map<String, Integer>[] dfMap;
 	private int documentNumber = 0;
+	private IndexReader indexReader = new IndexReader();
 	
 	public DefaultSimilarity(Map<String, Integer>[] dfMap, int documentNumber){
 		this.dfMap = dfMap;
@@ -87,9 +89,12 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 			double scoreTitle = this.fieldSimilarity(query, document, true);
 			double scoreContent = this.fieldSimilarity(query, document, false);
 			
+//			score = new Score(
+//					document.getDocID(), 
+//					(factors[0] * scoreTitle + factors[1] * scoreContent));
 			score = new Score(
 					document.getDocID(), 
-					(factors[0] * scoreTitle + factors[1] * scoreContent));
+					(hitsRatioTitle * scoreTitle + hitsRatioContent * scoreContent));
 		}
 		else
 			score = new Score(document.getDocID(), 	0);
@@ -191,15 +196,16 @@ public class DefaultSimilarity extends TFIDFSimilarity {
 	 * @return
 	 */
 	private double documentNormal(Document document, boolean isTitle){
-		
+		int hitTotalCount = 0;
+		int docLength = indexReader.getDocContentLength(document.getDocID());
 		double sumOfSquare = 0f;
 		
 		Map<String, List<Integer>> documentVector = isTitle ? document.getTitlePostings() : document.getContentPostings();
-		
 		for(Entry<String, List<Integer>> entry : documentVector.entrySet()){
 			sumOfSquare += Math.pow(this.TFIDF(entry.getKey(), entry.getValue().size(), isTitle), 2);
+			hitTotalCount += entry.getValue().size();
 		}
-		return sumOfSquare == 0 ? 0 : 1.0f / Math.sqrt(sumOfSquare);
+		return sumOfSquare == 0 ? 0 : 1.0f / (Math.sqrt(sumOfSquare + (docLength - hitTotalCount)));
 	}
 	
 	/**
