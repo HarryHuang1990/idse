@@ -149,47 +149,81 @@ public class Search {
 			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
 			releventResult.clear();
 			Map<Integer, List<Score>> secondarySort = new LinkedHashMap<Integer, List<Score>>();
-//			for(Score score : releventList){
-//				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
-//				if(pageRankGraph != null){
-//					double cosin = score.getScore();
-//					score.setScore(cosin * pageRankGraph.getPageRankScore());
-//					// get top5 most related documents
-//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
-//					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
-//					releventResult.put(score);
-//				}
-//			}
 			for(Score score : releventList){
 				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
 				if(pageRankGraph != null){
 					double cosin = score.getScore();
-					int key = (int)(cosin * 10);
-					score.setScore(pageRankGraph.getPageRankScore() * cosin);
+					score.setScore(cosin * pageRankGraph.getPageRankScore());
 					// get top5 most related documents
-					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
-					
-					if(secondarySort.containsKey(key)){
-						secondarySort.get(key).add(score);
-					}
-					else{
-						List<Score> secondaryList = new ArrayList<Score>();
-						secondaryList.add(score);
-						secondarySort.put(key, secondaryList);
-					}
-				}
-			}
-			// secondary sort;
-			IndexReader indexReader = new IndexReader();
-			int rank = 0;
-			for(Entry<Integer, List<Score>> secList : secondarySort.entrySet()){
-				Sort.sortDoubleList(secList.getValue());
-				for(Score score : secList.getValue()){
-					System.out.println(secList.getKey() + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
-					score.setScore(1.0/(++rank));
+//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
 					releventResult.put(score);
 				}
 			}
+			
+//			int i=0;
+//			int key=1;
+//			for(Score score : releventList){
+//				i++;
+//				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+//				if(pageRankGraph != null){
+//					double cosin = score.getScore();
+//					score.setScore(pageRankGraph.getPageRankScore() * cosin);
+//					if(i<=10)key=1;
+//					else key=2;
+//					
+//					if(secondarySort.containsKey(key)){
+//						secondarySort.get(key).add(score);
+//					}
+//					else{
+//						List<Score> secondaryList = new ArrayList<Score>();
+//						secondaryList.add(score);
+//						secondarySort.put(key, secondaryList);
+//					}
+//				}
+//			}
+//			// secondary sort;
+//			IndexReader indexReader = new IndexReader();
+//			int rank = 0;
+//			for(Entry<Integer, List<Score>> secList : secondarySort.entrySet()){
+//				Sort.sortDoubleList(secList.getValue());
+//				for(Score score : secList.getValue()){
+//					System.out.println(secList.getKey() + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
+//					score.setScore(1.0/(++rank));
+//					releventResult.put(score);
+//				}
+//			}
+			
+//			for(Score score : releventList){
+//				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+//				if(pageRankGraph != null){
+//					double cosin = score.getScore();
+//					int key = (int)(cosin * 10);
+//					score.setScore(pageRankGraph.getPageRankScore() * cosin);
+//					// get top5 most related documents
+//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+//					
+//					if(secondarySort.containsKey(key)){
+//						secondarySort.get(key).add(score);
+//					}
+//					else{
+//						List<Score> secondaryList = new ArrayList<Score>();
+//						secondaryList.add(score);
+//						secondarySort.put(key, secondaryList);
+//					}
+//				}
+//			}
+//			// secondary sort;
+//			IndexReader indexReader = new IndexReader();
+//			int rank = 0;
+//			for(Entry<Integer, List<Score>> secList : secondarySort.entrySet()){
+//				Sort.sortDoubleList(secList.getValue());
+//				for(Score score : secList.getValue()){
+//					System.out.println(secList.getKey() + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
+//					score.setScore(1.0/(++rank));
+//					releventResult.put(score);
+//				}
+//			}
 		}
 		return releventResult;
 	}

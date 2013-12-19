@@ -74,8 +74,11 @@ public class PersonalRank {
 				double newPageRankScore = this.calculatePageRank(this.d, this.E.get(node.getKey()), node.getKey(), node.getValue());
 				newPageRank.put(node.getKey(), newPageRankScore);
 			}
-			System.out.println("Error = " + this.calculateError(this.pageRank, newPageRank));
+			double error = this.calculateError(this.pageRank, newPageRank);
+			System.out.println("Error = " + error);
 			this.pageRank = newPageRank;
+			if(error < this.epision)
+				break;
 		}
 		this.writePageRankScoreIntoDB();
 	}

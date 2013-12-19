@@ -435,8 +435,8 @@ public class MatrixWriter {
 //		System.out.println(Math.E);
 //		for(int i=1; i<20 ; i++)
 //			System.out.println(i + "\t" + w.getTaskRelationScore(i));
-//		MatrixWriter w = new MatrixWriter();
-//		w.run();
+		MatrixWriter w = new MatrixWriter();
+		w.run();
 		PersonalRank pr = new PersonalRank();
 		pr.run();
 		
