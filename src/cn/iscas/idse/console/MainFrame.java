@@ -46,7 +46,7 @@ public class MainFrame {
 					 if(java.awt.Desktop.isDesktopSupported()){
 				            try {
 				                //创建一个URI实例
-				                java.net.URI uri = java.net.URI.create("http://localhost:8081"); 
+				                java.net.URI uri = java.net.URI.create("http://localhost:8080"); 
 				                //获取当前系统桌面扩展
 				                java.awt.Desktop dp = java.awt.Desktop.getDesktop();
 				                //判断系统桌面是否支持要执行的功能
@@ -79,7 +79,7 @@ public class MainFrame {
 					 if(java.awt.Desktop.isDesktopSupported()){
 				            try {
 				                //创建一个URI实例
-				                java.net.URI uri = java.net.URI.create("http://localhost:8081/config.jsp"); 
+				                java.net.URI uri = java.net.URI.create("http://localhost:8080/config.jsp"); 
 				                //获取当前系统桌面扩展
 				                java.awt.Desktop dp = java.awt.Desktop.getDesktop();
 				                //判断系统桌面是否支持要执行的功能
