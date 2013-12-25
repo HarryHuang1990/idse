@@ -156,6 +156,12 @@ public class SystemConfiguration {
 	public static double taskSimilarityThreshold = 0.5f;
 	
 	
+	/**
+	 * ·þÎñÆ÷¶Ë¿Ú
+	 */
+	public static int ServerPort = 8081;
+	
+	
 	public static TermLemmatizer lemmatizer = null;
 	public static StopWordFilter stopWordFilter = null;
 	public static WordSegmentation wordSegmentor = null;

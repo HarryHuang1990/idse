@@ -255,7 +255,7 @@ public class BerkelyDBDemo {
 		IndexReader indexReader = new IndexReader();
 		TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 		TaskRelation taskRelation = taskRelationAccessor.getPrimaryDocumentID().get(docID);
-		System.out.println(docID + "\t" + indexReader.getAbsolutePathOfDocument(docID));
+		System.out.println(docID + "\t" + taskRelation.geteValue() + "\t" + indexReader.getAbsolutePathOfDocument(docID));
 		for(Entry<Integer, Integer> doc : taskRelation.getRelatedDocumentIDs().entrySet()){
 			System.out.println("\t" + doc.getValue() + "\t" + doc.getKey() + "\t" + indexReader.getAbsolutePathOfDocument(doc.getKey()));
 		}
@@ -467,7 +467,7 @@ public class BerkelyDBDemo {
 	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-//		demo.showEntityDirectory();
+		demo.showEntityDirectory();
 //		demo.showEntityDocument();
 //		demo.showEntityFileType();
 //		demo.showDictionary();
@@ -476,11 +476,11 @@ public class BerkelyDBDemo {
 //		demo.showLocationRelationMatrix();
 //		demo.showTaskRelationMatrix();
 //		demo.showTopicRelationMatrix();
-		demo.showPageRankGraphMatrix();
-//		demo.showPageRankGraphByDocID(127959);
-//		demo.showLocationRelationByDocID(82314);
-//		demo.showTopicRelationByDocID(82314);
-//		demo.showTaskRelationByDocID(82314);
+//		demo.showPageRankGraphMatrix();
+//		demo.showPageRankGraphByDocID(135905);
+//		demo.showLocationRelationByDocID(112370);
+//		demo.showTopicRelationByDocID(112370);
+//		demo.showTaskRelationByDocID(112370);
 //		demo.showPostingCount();
 //		demo.showTerm("21212f5s4rwefsf");
 //		demo.showPageRankCount();

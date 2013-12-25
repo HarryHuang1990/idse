@@ -254,14 +254,14 @@ public class TopicSimilarity {
 //		double[]v3 = ts.getVector(str3);
 ////		System.out.println(ts.getDistanceJS(v1, v2));
 ////		System.out.println(ts.getDistanceJS(v1, v3));
-//		System.out.println(ts.getScore(0.0000112));
-//		System.out.println(ts.getScore(0.1000112));
-//		System.out.println(ts.getScore(0.2000112));
-//		System.out.println(ts.getScore(0.3000112));
-//		System.out.println(ts.getScore(0.4000112));
-//		System.out.println(ts.getScore(0.5000112));
-//		System.out.println(ts.getScore(0.6000112));
-//		System.out.println(ts.getScore(0.7000112));
+		System.out.println(ts.getScore(0.0000112));
+		System.out.println(ts.getScore(0.1000112));
+		System.out.println(ts.getScore(0.2000112));
+		System.out.println(ts.getScore(0.3000112));
+		System.out.println(ts.getScore(0.4000112));
+		System.out.println(ts.getScore(0.5000112));
+		System.out.println(ts.getScore(0.6000112));
+		System.out.println(ts.getScore(0.7000112));
 		
 		ts.run();
 		

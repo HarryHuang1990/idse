@@ -146,20 +146,20 @@ public class Search {
 	 */
 	public QueryResult getFinalScoreOfTopN(QueryResult releventResult){
 		if(releventResult != null){
-//			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
-//			releventResult.clear();
-//			Map<Integer, List<Score>> secondarySort = new LinkedHashMap<Integer, List<Score>>();
-//			for(Score score : releventList){
-//				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
-//				if(pageRankGraph != null){
-//					double cosin = score.getScore();
-//					score.setScore(cosin * pageRankGraph.getPageRankScore());
-//					// get top5 most related documents
-////					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
-//					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
-//					releventResult.put(score);
-//				}
-//			}
+			List<Score> releventList = releventResult.getTopK(SystemConfiguration.topN);
+			releventResult.clear();
+			Map<Integer, List<Score>> secondarySort = new LinkedHashMap<Integer, List<Score>>();
+			for(Score score : releventList){
+				PageRankGraph pageRankGraph = this.indexReader.getPageRankGraphByID(score.getDocID());
+				if(pageRankGraph != null){
+					double cosin = score.getScore();
+					score.setScore(cosin * pageRankGraph.getPageRankScore());
+					// get top5 most related documents
+//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
+					releventResult.put(score);
+				}
+			}
 			
 //			int i=0;
 //			int key=1;

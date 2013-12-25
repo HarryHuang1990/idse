@@ -249,7 +249,8 @@ public class MatrixWriter {
 	}
 	
 	public double getTaskRelationScore(int freq){
-		return (Math.log(freq + 1)/Math.log(2)) / (1 + Math.log(freq + 1)/Math.log(2));
+		return (Math.log(freq*freq + 1)/Math.log(4)) / (1 + Math.log(freq*freq + 1)/Math.log(4));
+//		return Math.pow(freq + 1.0, 0.25) / (1 + Math.pow(freq + 1.0, 0.25));
 	}
 	
 	public double getTopicRelationScore(double jsValue){
@@ -427,13 +428,13 @@ public class MatrixWriter {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-//		MatrixWriter w = new MatrixWriter("F:/user_activity_log/log.csv", "00000000.map", "00000000");
+//		MatrixWriter w = new MatrixWriter();
 //		w.writeTaskRelationMatrix();
 //		w.writeTopicRelationMatrix();
 //		w.writeLocationRelationMatrix();
 		
 //		System.out.println(Math.E);
-//		for(int i=1; i<20 ; i++)
+//		for(int i=1; i<100 ; i++)
 //			System.out.println(i + "\t" + w.getTaskRelationScore(i));
 		MatrixWriter w = new MatrixWriter();
 		w.run();

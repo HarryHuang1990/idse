@@ -56,8 +56,8 @@ public class LDA {
 	public static void main(String args[]){
 		
 		LDA lda = new LDA();
-		lda.getTopicDistribuiton("00000000");
-//		lda.generateTopicModel("00000000");
+//		lda.getTopicDistribuiton("00000000");
+		lda.generateTopicModel("00000000");
 		
 		
 	}

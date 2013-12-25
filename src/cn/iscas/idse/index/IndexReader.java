@@ -474,10 +474,10 @@ public class IndexReader {
 //		for(int i=0; i<documents.length; i++)
 //			System.out.println(indexReader.getAbsolutePathOfDocument(documents[i]));
 		
-//		System.out.println(indexReader.getDocumentsByName("20131112报告整理.docx").get(0).getDocID());
+		System.out.println(indexReader.getDocumentsByName("DataOS-20130502.pptx").get(0).getDocID());
 ////		System.out.println(indexReader.getDocumentsByDirectoryIDCursor(25735).count());
 ////		System.out.println(indexReader.getDirectoryByDirectoryID(25735).getDirectoryPath());
-		System.out.println(indexReader.getDocContentLength(136045));
+//		System.out.println(indexReader.getDocContentLength(136045));
 	}
 }
 
