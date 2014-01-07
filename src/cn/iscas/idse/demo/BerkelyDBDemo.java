@@ -3,6 +3,7 @@ package cn.iscas.idse.demo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -465,9 +466,29 @@ public class BerkelyDBDemo {
 		
 	}
 	
+	public void getFileSystemInfo(){
+		IndexReader iReader = new IndexReader();
+		int docCount = iReader.getDocumentIDs().size();
+		int dirCount = iReader.getDirectorys().size();
+		int maxdepth = 0;
+		int sumdepth = 0;
+		List<Directory> dirs = iReader.getDirectorys();
+		for(Directory dir : dirs){
+			String path = dir.getDirectoryPath().replaceAll("//", "/");
+			int depth = path.split("/").length;
+			sumdepth += depth;
+			if(depth > maxdepth)maxdepth = depth;
+		}
+		System.out.println("文件数=" + docCount);
+		System.out.println("目录数=" + dirCount);
+		System.out.println("最大深度=" + maxdepth);
+		System.out.println("深度和=" + sumdepth);
+		
+	}
+	
 	public static void main(String[] args){
 		BerkelyDBDemo demo = new BerkelyDBDemo();
-		demo.showEntityDirectory();
+//		demo.showEntityDirectory();
 //		demo.showEntityDocument();
 //		demo.showEntityFileType();
 //		demo.showDictionary();
@@ -488,6 +509,7 @@ public class BerkelyDBDemo {
 //		demo.PagRankDistribution();
 //		demo.LocationDistribution();
 //		demo.locationPruning();
+		demo.getFileSystemInfo();
 		
 //		LocationRelation local = demo.getLocationRelationByDocID(82124);
 //		TaskRelation task = demo.getTaskRelationByDocID(82124);

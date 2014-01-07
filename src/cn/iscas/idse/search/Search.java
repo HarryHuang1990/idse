@@ -155,7 +155,7 @@ public class Search {
 					double cosin = score.getScore();
 					score.setScore(cosin * pageRankGraph.getPageRankScore());
 					// get top5 most related documents
-//					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
+					score.setMostRelatedDocs(pageRankGraph.getRecommendedDocs());
 					System.out.println(cosin + "\t" + score.getScore() + "\t" + indexReader.getAbsolutePathOfDocument(score.getDocID()));
 					releventResult.put(score);
 				}
