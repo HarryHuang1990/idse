@@ -7,7 +7,7 @@ import cn.iscas.idse.config.InstanceManager;
 import cn.iscas.idse.config.SystemConfiguration;
 import cn.iscas.idse.format.FileExtractor;
 import cn.iscas.idse.format.implement.PdfFileExtractor;
-import ICTCLAS.I3S.AC.ICTCLAS50;
+import ICTCLAS.CLibrary;
 
 
 /**
@@ -28,7 +28,7 @@ import ICTCLAS.I3S.AC.ICTCLAS50;
  */
 public class WordSegmentation {
 
-	private static ICTCLAS50 ICTCLAS50 = null;
+	private static CLibrary ICTCLAS50 = null;
 	
 //	private static WordSegmentation instance = null;
 	
@@ -40,35 +40,21 @@ public class WordSegmentation {
 	
 	public WordSegmentation(){};
 	
-	/**
-	 * destroy the instance and release its memory.
-	 */
-//	public void destoryInstance(){
-//		instance = null;
-//	}
 	
 	/**
 	 * Initialize the ICTCLA for word segmentation.
 	 */
 	public void initialize(){
-//		if(ICTCLAS50 == null){
-			ICTCLAS50 = new ICTCLAS50();
-			String argu = ".";
-			//初始化
-			try {
-				if (ICTCLAS50.ICTCLAS_Init(argu.getBytes("GB2312")) == false)
-				{
-					System.err.println("Init Fail!");
-					throw new Exception();
-				}
-				//设置词性标注集(0 计算所二级标注集，1 计算所一级标注集，2 北大二级标注集，3 北大一级标注集)
-				ICTCLAS50.ICTCLAS_SetPOSmap(2);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-//		}
+		int charset_type = 1;  // UTF-8 ---- 1   CBK --- 0
+		ICTCLAS50 = CLibrary.Instance;
+		int init_flag = ICTCLAS50.NLPIR_Init(SystemConfiguration.rootPath, charset_type, "0");
+		String nativeBytes = null;
+		
+		if (0 == init_flag) {
+			nativeBytes = CLibrary.Instance.NLPIR_GetLastErrorMsg();
+			System.err.println("初始化失败！fail reason is "+nativeBytes);
+			System.exit(0);
+		}
 	}
 	
 	/**
@@ -77,20 +63,15 @@ public class WordSegmentation {
 	 * @param text
 	 */
 	public synchronized String segmentString(String text)
-	{
+	{	
 		String nativeStr = null;
-		try {
-			if(text != null){
-				//achieve result of segmentation
-				byte nativeBytes[] = ICTCLAS50.ICTCLAS_ParagraphProcess(text.getBytes("GB2312"), 0, 0);//分词处理
-				nativeStr = new String(nativeBytes, 0, nativeBytes.length, "GB2312");
-				//remove seperator
-				nativeStr = nativeStr.replaceAll(SystemConfiguration.seperatorRegx, " ");
-				//remove punctuation
-				nativeStr = PunctuationFilter.removePunctuation(nativeStr);
-			}
-		} catch (UnsupportedEncodingException e) {
-			return null;
+		if(text != null){
+			//achieve result of segmentation
+			nativeStr = ICTCLAS50.NLPIR_ParagraphProcess(text, 0);//分词处理
+			//remove seperator
+			nativeStr = nativeStr.replaceAll(SystemConfiguration.seperatorRegx, " ");
+			//remove punctuation
+			nativeStr = PunctuationFilter.removePunctuation(nativeStr);
 		}
 		return  nativeStr;
 	}
@@ -99,7 +80,8 @@ public class WordSegmentation {
 	 * release the resource occupied by the ICTLAS
 	 */
 	public void exitICTCLAS(){
-		ICTCLAS50.ICTCLAS_Exit();
+		ICTCLAS50.NLPIR_Exit();
+		ICTCLAS50=null;
 	}
 	
 	
@@ -108,14 +90,13 @@ public class WordSegmentation {
 //		doc.setFilePath("F:\\lucene-test\\信息检索\\SIGMOD2013-Efficient ad-hoc search for personalized PageRank.pdf");
 //		String text = doc.getContent();
 		
-		String text = "public File_Extractor gets_Files_Extracting(String fileSuffix){";
+		String text = "public File_Extractor gets_Files_Extracting(String fileSuffix)  中华人民共和国中央人民政府 我很爱你 ";
 		
 		WordSegmentation ws = new WordSegmentation();
 		ws.initialize();
 		//字符串分词   
 		for(int i=1; i<2; i++){
-			ws.segmentString(text);
-			System.out.println(i+"/"+1000);
+			System.out.println(ws.segmentString(text));
 		}
 		ws.exitICTCLAS();
 	}

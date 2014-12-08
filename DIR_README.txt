@@ -1,1 +1,0 @@
-dir Data contains the data of both ICTCLAS and Morphadorner

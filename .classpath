@@ -52,5 +52,6 @@
 	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10-beta1-20130628.jar"/>
 	<classpathentry kind="lib" path="lib/ballontip/balloontip-1.2.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/jna-4.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -39,7 +39,7 @@ public class MatrixWriter {
 	
 	private Map<Integer, TopicRelation> topicRelationGraph;
 	private Map<Integer, LocationRelation> locationRelationGraph;
-	private Map<Integer, TaskRelation> taskRelationGraph;
+//	private Map<Integer, TaskRelation> taskRelationGraph;
 	private Map<Integer, PageRankGraph> pageRankGraph = new TreeMap<Integer, PageRankGraph>();
 	private int pageRankCount = 0;
 	private int updateCount = 0;
@@ -48,7 +48,7 @@ public class MatrixWriter {
 	PageRankGraphAccessor pageRankGraphAccessor = AccessorFactory.getPageRankGraphAccessor(SystemConfiguration.database.getIndexStore());
 	TopicRelationAccessor topicRelationAccessor = AccessorFactory.getTopicAccessor(SystemConfiguration.database.getIndexStore());
 	LocationRelationAccessor locationRelationAccessor = AccessorFactory.getLocationAccessor(SystemConfiguration.database.getIndexStore());
-	TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
+//	TaskRelationAccessor taskRelationAccessor = AccessorFactory.getTaskAccessor(SystemConfiguration.database.getIndexStore());
 	DocumentAccessor documentAccessor = AccessorFactory.getDocumentAccessor(SystemConfiguration.database.getIndexStore());
 	
 	public MatrixWriter(){
@@ -63,7 +63,7 @@ public class MatrixWriter {
 //		this.writeLocationRelationMatrix();
 		
 		this.getTopicRelationMatrix();
-		this.getTaskRelationMatrix();
+//		this.getTaskRelationMatrix();
 		this.getLocationRelationMatrix();
 		this.getPageRankGraph();
 		this.updatePageRankGraph();
@@ -93,7 +93,7 @@ public class MatrixWriter {
 	
 	public void releaseSpace(){
 		this.topicRelationGraph = null;
-		this.taskRelationGraph = null;
+//		this.taskRelationGraph = null;
 		this.locationRelationGraph = null;
 	}
 	
@@ -200,7 +200,7 @@ public class MatrixWriter {
 		for(int docID : docIDSet){
 			TopicRelation topicRelation = this.topicRelationGraph.get(docID);
 			LocationRelation locationRelation = this.locationRelationGraph.get(docID);
-			TaskRelation taskRelation = this.taskRelationGraph.get(docID);
+			TaskRelation taskRelation = null; //this.taskRelationGraph.get(docID);
 			Set<Integer> relatedDocIDs = new HashSet<Integer>();
 			// get all related docs
 			if(topicRelation != null)
@@ -390,37 +390,37 @@ public class MatrixWriter {
 	}
 	
 	
-	private void getTaskRelationMatrix(){
-		log.info("generating the task relation graph...");
-		DefaultTaskMining dtm = new DefaultTaskMining();
-		dtm.generateTaskRelationGraph(this.userActivityLogFile);
-		taskRelationGraph = dtm.getTaskRelationGraph();
-	}
+//	private void getTaskRelationMatrix(){
+//		log.info("generating the task relation graph...");
+//		DefaultTaskMining dtm = new DefaultTaskMining();
+//		dtm.generateTaskRelationGraph(this.userActivityLogFile);
+//		taskRelationGraph = dtm.getTaskRelationGraph();
+//	}
 	
 	/**
 	 * write task location matrix into the Berkeley DB
 	 */
-	public void writeTaskRelationMatrix(){
-		this.deleteTaskRelationMatrix();
-		this.getTaskRelationMatrix();
-		log.info("saving...");
-		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
-			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
-		}
-		log.info("task relation graph DONE.");
-	}
+//	public void writeTaskRelationMatrix(){
+//		this.deleteTaskRelationMatrix();
+//		this.getTaskRelationMatrix();
+//		log.info("saving...");
+//		for(Entry<Integer, TaskRelation> taskRelation : taskRelationGraph.entrySet()){
+//			this.taskRelationAccessor.getPrimaryDocumentID().put(taskRelation.getValue());
+//		}
+//		log.info("task relation graph DONE.");
+//	}
 	
 	/**
 	 * remove the task relation matrix from Berkeley DB
 	 * @return
 	 */
-	private void deleteTaskRelationMatrix(){
-		log.info("removing the task relation graph...");
-		Set<Integer> keys = this.taskRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
-		if(keys != null)
-			for(int key : keys)
-				this.taskRelationAccessor.getPrimaryDocumentID().delete(key);
-	}
+//	private void deleteTaskRelationMatrix(){
+//		log.info("removing the task relation graph...");
+//		Set<Integer> keys = this.taskRelationAccessor.getPrimaryDocumentID().sortedMap().keySet();
+//		if(keys != null)
+//			for(int key : keys)
+//				this.taskRelationAccessor.getPrimaryDocumentID().delete(key);
+//	}
 	
 	
 	/**
